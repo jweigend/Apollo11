@@ -647,6 +647,11 @@ class AGC:
         self.cycles += 1
         self.scaler_counter += SCALER_DIVIDER
         self.dsky_timer += SCALER_DIVIDER
+        # The AGC WARNING input (channel 33 bit 14, active low) follows the warning
+        # filter every cycle, not only when the software writes channel 33 (yaAGC
+        # UpdateDSKY); the lamp test V35 charges the filter through channel 13 bit 10.
+        if self.warning_filter > WARNING_FILTER_THRESHOLD:
+            self.chan[0o33] &= 0o57777
 
         if self.extra_delay:
             self.extra_delay -= 1

@@ -3,11 +3,12 @@
 **The original Apollo 11 flight software flies a lunar landing again.**
 
 Luminary 099, the program that ran in the Lunar Module's computer on
-20 July 1969, is assembled from the 1969 listing, executed instruction by
-instruction in a Python emulator of the Apollo Guidance Computer (AGC), and
-connected to a six-degree-of-freedom simulation of the Lunar Module.  The
-result: the original software flies a complete automatic descent from the
-lunar orbit to a touchdown on Tranquility Base.
+20 July 1969, is assembled from the 1969 listing, executed cycle by cycle
+in a Python emulator of the Apollo Guidance Computer (AGC) that is checked
+against the reference emulator yaAGC, and connected to a six-degree-of-freedom
+simulation of the Lunar Module.  The result: the original software flies a
+complete automatic descent from the lunar orbit to a touchdown on
+Tranquility Base.
 
 Python provides what the hardware provided: the computer, the vehicle, the
 inertial platform, the landing radar, the DSKY keyboard and the pad load.
@@ -109,13 +110,14 @@ Three different claims, three different kinds of evidence.
 | Claim | Evidence |
 |-------|----------|
 | **The program is the original.** | Both programs assemble bit-exactly against the octal listings reconstructed from the original printouts (`Luminary099.binsource`, `Comanche055.binsource` from Virtual AGC): zero differing words in 36 × 1024, bank checksums included.  That comparison exposed transcription errors in the GitHub copy of the source that change the code (a `1.08-2` for `1.0 B-2`, two misspelled labels, a comment line without `#`, pseudo-labels `+2` after a tab).  They are documented in `agc/asm/fixups.py` and corrected on reading; Luminary needed no word-changing fix. |
-| **The emulator executes it correctly.** | The CPU is a cycle-level model written after yaAGC: instruction timings, interrupts, counters, timers and hardware alarms follow the same rules.  It is verified by behaviour: Luminary boots with the fresh-start alarm 1107 like the real cold start, runs without hardware alarms, answers `V35E` with the lamp test, shows the mission clock on `V16N36E`, switches to P00, and flies the descent.  `tools/` holds a cycle-by-cycle trace harness for a differential test against yaAGC; that comparison has not been run to completion, so cycle accuracy is the design and the behaviour is the evidence. |
+| **The emulator executes it correctly.** | The CPU is a cycle-level model written after yaAGC, and it is checked against yaAGC cycle by cycle: `tools/diff_trace.sh` runs both emulators through the same 126 s scenario (fresh start, the 90 s IMU turn-on sequence, the lamp test, the mission clock, a refused and an accepted `V37E00E`, alarm display, `RSET`) and compares the registers Z, A, L, Q, EB, FB, BB, the interrupt state and the extracode flag after every one of the 10.75 million memory cycles.  They are identical.  Not covered by that scenario: the counter inputs of the flight (CDU, PIPA, radar), which are verified by the landing itself. |
 | **The landing is plausible.** | Touchdown 9 m from the AGC's own target at 2.9 ft/s vertical, 11 min 58 s after ignition (Apollo 11: 12 min 35 s), 605 kg of descent propellant left; the AGC's navigation agrees with the simulated truth to 2 ft/s before radar acquisition.  The run is reproducible from the repository.  It shows that Luminary's guidance, navigation and control are internally consistent; it proves nothing about the real sensors, vehicle or terrain (see [Limitations](#limitations-and-ideas)). |
 
-`python3 -m pytest` runs 30 tests: assembler bit-exactness, CPU arithmetic,
-boot and DSKY, emulator state save/restore, fixed-point scaling, pad load
-integrity, gimbal maths, ballistic-impact detection and the viewer's port
-selection.
+`python3 -m pytest` runs 31 tests: assembler bit-exactness, CPU arithmetic,
+boot and DSKY, 600 000 cycles against yaAGC (skipped without `gcc` and the
+Virtual AGC sources), emulator state save/restore, fixed-point scaling, pad
+load integrity, gimbal maths, ballistic-impact detection and the viewer's
+port selection.
 
 ## Quick start
 
@@ -136,10 +138,12 @@ python3 -m agc.sim view landing.csv          # replay a recorded flight
 python3 -m agc run luminary099 --keys V16N36E   # boot the computer, show the mission clock
 python3 -m agc tui luminary099                  # interactive test UI
 python3 -m pytest
+tools/diff_trace.sh                             # the emulator against yaAGC, cycle by cycle (needs gcc and the clones below)
 ```
 
-All options, the physics and how to regenerate the Python modules from the
-listings are in [docs/TECHNICAL.md](docs/TECHNICAL.md#7-running-the-landing-simulation).
+All options, the physics, how to regenerate the Python modules from the
+listings and the clones the differential test needs are in
+[docs/TECHNICAL.md](docs/TECHNICAL.md#7-running-the-landing-simulation).
 
 ## The landing simulation
 

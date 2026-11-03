@@ -256,15 +256,30 @@ listed in `agc/asm/fixups.py`.
 
 The emulator is a cycle-level model written after yaAGC: every instruction
 takes its documented number of memory cycles, the timers, counters,
-interrupts and hardware alarms follow the same rules.  It is verified at the
-behaviour level: Luminary boots with the fresh-start alarm 1107 like the real
-cold start, runs without hardware alarms, answers the DSKY (`V35E` lamp
-test, `V16N36E` clock, `V37E00E` idle), and flies the landing.  `tools/`
-contains a cycle-by-cycle trace harness for differential testing against
-yaAGC (`ref_trace.c` wraps the Virtual AGC engine, `my_trace.py` prints the
-same trace, `diff` shows the first deviation).  That comparison has not been
-run to completion, so cycle accuracy is the design and the behaviour is the
-evidence.
+interrupts and hardware alarms follow the same rules.  It is tested against
+yaAGC itself: `tools/ref_trace.c` wraps the Virtual AGC engine and
+`tools/my_trace.py` drives `agc/cpu.py`; both print Z, A, L, Q, EB, FB, BB,
+the interrupt state and the extracode flag after every memory cycle, and
+`tools/diff_trace.sh` compares the two traces for a 126 s scenario: fresh
+start, IMU operate and ISS turn-on request on channel 30 (the 90 s turn-on
+sequence), `V35E`, `V16N36E`, a `V37E00E` that is refused with alarm 1520
+while the turn-on runs, the request dropped, a `V37E00E` that is accepted,
+`V05N09E`, `RSET`, `V16N65E`.  The 10.75 million lines are identical.
+`tests/test_trace.py` runs the first 600 000 cycles of it under pytest when
+`gcc` and the Virtual AGC sources are available.
+
+Two things the comparison found.  yaAGC's own `NullAPI.c`, the stub
+peripheral interface that a stand-alone build links, drops every channel
+write including channel 7 (SUPERBNK), so a reference built with it never
+selects the superbanks 40-43 and leaves the real AGC at the first
+`SUPDXCHZ`; `ref_trace.c` therefore carries its own interface that latches
+channel 7 as `SocketAPI.c` does.  And `agc/cpu.py` had updated the AGC
+WARNING bit of channel 33 only when the software wrote that channel, while
+the hardware (and yaAGC) drive it from the warning filter every cycle; the
+lamp test `V35E` charges that filter and T4RUPT reads channel 33 a few
+milliseconds later.  Not covered by the scenario are the counter inputs of
+the flight (CDU, PIPA, radar, the unprogrammed increments); those are
+exercised by the landing.
 
 The landing itself is a third, weaker kind of evidence: it shows that the
 guidance, navigation and control of Luminary are internally consistent and
@@ -361,13 +376,14 @@ cycles, the vehicle moves, and the CDU and PIPA counters are pulsed.
 | `agc/programs/` | the generated flight software |
 | `agc/sim/` | the landing simulation and the viewer |
 | `agc/tester/tui.py` | the test UI |
-| `tools/` | trace harness for the differential test against yaAGC |
+| `tools/` | differential test against yaAGC: `diff_trace.sh`, `ref_trace.c`, `my_trace.py` |
 | `tests/` | pytest suite |
 | `docs/` | this page, the architecture diagram, screenshots |
 
 The generated Python modules of both programs are in the repository.  To
-regenerate them from the original source, fetch the listings and run the
-converter (about 25 s per program):
+regenerate them from the original source, or to run the differential test
+against yaAGC (`tools/diff_trace.sh`, needs `gcc`), fetch the listings and
+the Virtual AGC sources; the converter takes about 25 s per program:
 
 ```bash
 git clone --depth 1 https://github.com/chrislgarry/Apollo-11.git external/Apollo-11
