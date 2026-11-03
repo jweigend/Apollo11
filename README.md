@@ -31,6 +31,7 @@ vehicle is at rest.
 - [The landing simulation](#the-landing-simulation)
 - [The 3D viewer](#the-3d-viewer)
 - [How the AGC runs in Python](#how-the-agc-runs-in-python)
+- [Technical details](docs/TECHNICAL.md): a module of the original listing next to its Python form, the interpretive language, the emulator and the hardware interface
 - [Verification](#verification)
 - [Test UI](#test-ui)
 - [Project layout](#project-layout)
@@ -220,6 +221,8 @@ IDE reports and open the URL it offers; the viewer must keep running while
 the page is open.
 
 ## How the AGC runs in Python
+
+A worked example with real excerpts of the 1969 listing, the generated Python module, the interpretive guidance language and the emulator is in [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
 ```
    external/Apollo-11/*.agc         original source, 1969
