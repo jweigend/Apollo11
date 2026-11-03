@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+# upstream clones (re-create with: git clone https://github.com/chrislgarry/Apollo-11 external/Apollo-11)
+external/
+.venv/
+landing_probe.json
+landing.csv
+# saved chat transcripts / local run artefacts
+2026-*.txt
+landing.events.csv
+/docs/*.csv

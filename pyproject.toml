@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apollo11-agc"
+version = "0.1.0"
+description = "Apollo 11 guidance computer software (Luminary 099 / Comanche 055) converted to Python, with an AGC emulator and a DSKY test UI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPL-2.0-or-later"}
+dependencies = []
+
+[project.optional-dependencies]
+sim = ["numpy>=1.24"]
+test = ["pytest", "numpy>=1.24"]
+
+[project.urls]
+Homepage = "https://github.com/jweigend/Apollo11"
+
+[project.scripts]
+agc = "agc.__main__:main"
+agc2py = "agc.asm.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["agc*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

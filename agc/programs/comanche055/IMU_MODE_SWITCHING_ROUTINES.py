@@ -1,0 +1,1088 @@
+"""IMU_MODE_SWITCHING_ROUTINES.agc -- Comanche (build 055), Apollo 11 Command Module guidance computer
+
+Converted from external/Apollo-11/Comanche055/IMU_MODE_SWITCHING_ROUTINES.agc by agc2py (the Apollo 11 AGC -> Python converter).
+Pages 1420-1448 of the original program listing.
+
+Every ``W(address, word, label, operator, operand, comment)`` line is one
+15-bit word of the AGC rope memory; ``S(name, kind, value)`` defines a symbol.
+Original comments are preserved as Python comments.
+"""
+
+from agc.program import Module
+
+MODULE = Module('IMU_MODE_SWITCHING_ROUTINES', 'IMU_MODE_SWITCHING_ROUTINES.agc', 'Comanche055', pages='1420-1448')
+W = MODULE.W
+S = MODULE.S
+
+# Copyright:    Public domain.
+# Filename:     IMU_MODE_SWITCHING_ROUTINES.agc
+# Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
+# It is part of the source code for the Command Module's (CM)
+# Apollo Guidance Computer (AGC), for Apollo 11.
+# Assembler:    yaYUL
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo.
+# Pages:        1420-1448
+# Mod history:  2009-05-10 SN   (Sergio Navarro).  Started adapting from
+# the Colossus249/ file of the same name,
+# using Comanche055 page images.
+#
+# This source code has been transcribed or otherwise adapted from digitized
+# images of a hardcopy from the MIT Museum.  The digitization was performed
+# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+# thanks to both.  The images (with suitable reduction in storage size and
+# consequent reduction in image quality as well) are available online at
+# www.ibiblio.org/apollo.  If for some reason you find that the images are
+# illegible, contact me at info@sandroid.org about getting access to the
+# (much) higher-quality images which Paul actually created.
+#
+# Notations on the hardcopy document read, in part:
+#
+# Assemble revision 055 of AGC program Comanche by NASA
+# 2021113-051.  10:28 APR. 1, 1969
+#
+# This AGC program shall also be referred to as
+# Colossus 2A
+
+# Page 1420
+#   BLOCK 02
+#   SETLOC FFTAG3
+#   BANK
+
+#   EBANK= COMMAND
+
+# FIXED-FIXED ROUTINES.
+
+#   COUNT 02/IMODE
+
+W('5521', 0o35021, 'ZEROICDU', 'CAF', 'ZERO', 'ZERO ICDU COUNTERS.', line=42)
+W('5522', 0o54032, '', 'TS', 'CDUX', line=43)
+W('5523', 0o54033, '', 'TS', 'CDUY', line=44)
+W('5524', 0o54034, '', 'TS', 'CDUZ', line=45)
+W('5525', 0o00002, '', 'TC', 'Q', line=46)
+
+S('SPSCODE', 'equals', 0o5007, line=48)
+
+# Page 1421
+# IMU ZEROING ROUTINE.
+
+#   BANK 11
+#   SETLOC MODESW
+#   BANK
+
+#   COUNT 07/IMODE
+
+W('07,2577', 0o00004, 'IMUZERO', 'INHINT', '', 'ROUTINE TO ZERO ICDUS.', line=59)
+W('07,2600', 0o41036, '', 'CS', 'DSPTAB +11D', 'DONT ZERO CDUS IS IMU IN GIMBAL LOCK AND', line=60)
+W('07,2601', 0o75033, '', 'MASK', 'BITS4&6', 'COARSE ALIGN (GIMBAL RUNAWAY PROTECTION)', line=61)
+W('07,2602', 0o10000, '', 'CCS', 'A', line=62)
+W('07,2603', 0o12607, '', 'TCF', 'IMUZEROA', line=63)
+
+W('07,2604', 0o05650, '', 'TC', 'ALARM', 'IF SO.', line=65)
+W('07,2605', 0o00206, '', 'OCT', '00206', kind='data', line=66)
+
+W('07,2606', 0o13542, '', 'TCF', 'CAGETSTJ +4', 'IMMEDIATE FAILURE.', line=68)
+
+W('07,2607', 0o03536, 'IMUZEROA', 'TC', 'CAGETSTJ', line=70)
+# DO ALL THE WORK.
+W('07,2610', 0o41321, '', 'CS', 'IMODES33', 'DISABLE DAP AUTO AND HOLD MODES', line=72)
+W('07,2611', 0o75035, '', 'MASK', 'SUPER011', '      BIT5 FOR GROUND', line=73)
+W('07,2612', 0o27321, '', 'ADS', 'IMODES33', line=74)
+
+W('07,2613', 0o41320, '', 'CS', 'IMODES30', 'INHIBIT ICDUFAIL AND IMUFAIL (IN CASE WE', line=76)
+W('07,2614', 0o75771, '', 'MASK', 'BITS3&4', 'JUST CAME OUT OF COARSE ALIGN).', line=77)
+W('07,2615', 0o27320, '', 'ADS', 'IMODES30', line=78)
+
+W('07,2616', 0o45033, '', 'CS', 'BITS4&6', 'SEND ZERO ENCODE WITH COARSE AND ERROR', line=80)
+W('07,2617', 0o00006, '', 'EXTEND', '', 'COUNTER DISABLED.', line=81)
+W('07,2620', 0o03012, '', 'WAND', 'CHAN12', line=82)
+
+W('07,2621', 0o03151, '', 'TC', 'NOATTOFF', 'TURN OFF NO ATT LAMP.', line=84)
+
+W('07,2622', 0o35013, '', 'CAF', 'BIT5', line=86)
+W('07,2623', 0o00006, '', 'EXTEND', line=87)
+W('07,2624', 0o05012, '', 'WOR', 'CHAN12', line=88)
+
+W('07,2625', 0o05521, '', 'TC', 'ZEROICDU', line=90)
+W('07,2626', 0o35012, '', 'CAF', 'BIT6', 'WAIT 320 MS TO GIVE AGS ADEQUATE TIME TO', line=91)
+W('07,2627', 0o05245, '', 'TC', 'WAITLIST', 'RECEIVE ITS PULSE TRAIN.', line=92)
+#   EBANK= CDUIND
+W('07,2630', 0o02642, '', '2CADR', 'IMUZERO2', kind='data', line=94)
+W('07,2631', 0o16063, kind='data', line=94)
+
+W('07,2632', 0o41320, '', 'CS', 'IMODES30', 'SEE IF IMU OPERATING AND ALARM IF NOT.', line=96)
+W('07,2633', 0o75007, '', 'MASK', 'BIT9', line=97)
+W('07,2634', 0o10000, '', 'CCS', 'A', line=98)
+W('07,2635', 0o12640, '', 'TCF', 'MODEEXIT', line=99)
+# Page 1422
+W('07,2636', 0o05650, '', 'TC', 'ALARM', line=101)
+W('07,2637', 0o00210, '', 'OCT', '210', kind='data', line=102)
+
+W('07,2640', 0o00003, 'MODEEXIT', 'RELINT', '', 'GENERAL MODE-SWITCHING EXIT.', line=104)
+W('07,2641', 0o14675, '', 'TCF', 'SWRETURN', line=105)
+
+W('07,2642', 0o03524, 'IMUZERO2', 'TC', 'CAGETEST', line=107)
+W('07,2643', 0o05521, '', 'TC', 'ZEROICDU', 'ZERO CDUX, CDUY, CDUZ', line=108)
+
+W('07,2644', 0o45013, '', 'CS', 'BIT5', 'REMOVE ZERO DISCRETE.', line=110)
+W('07,2645', 0o00006, '', 'EXTEND', line=111)
+W('07,2646', 0o03012, '', 'WAND', 'CHAN12', line=112)
+
+W('07,2647', 0o35005, '', 'CAF', 'BIT11', 'WAIT 10 SECS FOR CTRS TO FIND GIMBALS', line=114)
+W('07,2650', 0o05272, '', 'TC', 'VARDELAY', line=115)
+
+W('07,2651', 0o03524, 'IMUZERO3', 'TC', 'CAGETEST', line=117)
+W('07,2652', 0o45771, '', 'CS', 'BITS3&4', 'REMOVE IMUFAIL AND ICDUFAIL INHIBIT.', line=118)
+W('07,2653', 0o71320, '', 'MASK', 'IMODES30', line=119)
+W('07,2654', 0o55320, '', 'TS', 'IMODES30', line=120)
+
+W('07,2655', 0o45035, '', 'CS', 'SUPER011', 'ENABLE DAP AUTO AND HOLD MODES', line=122)
+W('07,2656', 0o71321, '', 'MASK', 'IMODES33', '      BIT5 FOR GROUND', line=123)
+W('07,2657', 0o55321, '', 'TS', 'IMODES33', line=124)
+
+W('07,2660', 0o04740, '', 'TC', 'IBNKCALL', 'SET ISS WARNING IF EITHER OF ABOVE ARE', line=126)
+W('07,2661', 0o14665, '', 'CADR', 'SETISSW', 'PRESENT.', kind='data', line=127)
+
+W('07,2662', 0o13514, '', 'TCF', 'ENDIMU', line=129)
+
+# Page 1423
+# IMU COARSE ALIGN MODE.
+
+W('07,2663', 0o00004, 'IMUCOARS', 'INHINT', line=134)
+W('07,2664', 0o03536, '', 'TC', 'CAGETSTJ', line=135)
+W('07,2665', 0o03027, '', 'TC', 'SETCOARS', line=136)
+
+W('07,2666', 0o36211, '', 'CAF', 'SIX', line=138)
+W('07,2667', 0o05245, '', 'TC', 'WAITLIST', line=139)
+#   EBANK= CDUIND
+W('07,2670', 0o02673, '', '2CADR', 'COARS', kind='data', line=141)
+W('07,2671', 0o16063, kind='data', line=141)
+
+W('07,2672', 0o12640, '', 'TCF', 'MODEEXIT', line=143)
+
+W('07,2673', 0o03524, 'COARS', 'TC', 'CAGETEST', line=145)
+W('07,2674', 0o35012, '', 'CAF', 'BIT6', 'ENABLE ALL THREE ISS CDU ERROR COUNTERS', line=146)
+W('07,2675', 0o00006, '', 'EXTEND', line=147)
+W('07,2676', 0o05012, '', 'WOR', 'CHAN12', line=148)
+
+W('07,2677', 0o35016, '', 'CAF', 'TWO', 'SET CDU INDICATOR', line=150)
+W('07,2700', 0o55474, 'COARS1', 'TS', 'CDUIND', line=151)
+
+W('07,2701', 0o51474, '', 'INDEX', 'CDUIND', 'COMPUTE THETAD - THETAA IN 1:S', line=153)
+W('07,2702', 0o31155, '', 'CA', 'THETAD', '      COMPLEMENT FORM', line=154)
+W('07,2703', 0o00006, '', 'EXTEND', line=155)
+W('07,2704', 0o51474, '', 'INDEX', 'CDUIND', line=156)
+W('07,2705', 0o20032, '', 'MSU', 'CDUX', line=157)
+W('07,2706', 0o00006, '', 'EXTEND', line=158)
+W('07,2707', 0o75003, '', 'MP', 'BIT13', 'SHIFT RIGHT 2', line=159)
+W('07,2710', 0o56001, '', 'XCH', 'L', 'ROUND', line=160)
+W('07,2711', 0o60000, '', 'DOUBLE', line=161)
+W('07,2712', 0o54061, '', 'TS', 'ITEMP1', line=162)
+W('07,2713', 0o12715, '', 'TCF', '+2', line=163)
+W('07,2714', 0o26001, '', 'ADS', 'L', line=164)
+
+W('07,2715', 0o51474, '', 'INDEX', 'CDUIND', 'DIFFERENCE TO BE COMPUTED', line=166)
+W('07,2716', 0o23471, '', 'LXCH', 'COMMAND', line=167)
+W('07,2717', 0o11474, '', 'CCS', 'CDUIND', line=168)
+W('07,2720', 0o02700, '', 'TC', 'COARS1', line=169)
+
+W('07,2721', 0o35016, '', 'CAF', 'TWO', 'MINIMUM OF 4 MS WAIT', line=171)
+W('07,2722', 0o05272, '', 'TC', 'VARDELAY', line=172)
+
+# Page 1424
+W('07,2723', 0o03524, 'COARS2', 'TC', 'CAGETEST', 'DONT CONTINUE IF CAGED.', line=175)
+W('07,2724', 0o54061, '', 'TS', 'ITEMP1', 'SET TO +0.', line=176)
+W('07,2725', 0o35016, '', 'CAF', 'TWO', 'SET CDU INDICATOR', line=177)
+W('07,2726', 0o55474, '', 'TS', 'CDUIND', line=178)
+
+W('07,2727', 0o51474, '', 'INDEX', 'CDUIND', line=180)
+W('07,2730', 0o11471, '', 'CCS', 'COMMAND', 'NUMBER OF PULSES REQUIRED', line=181)
+W('07,2731', 0o02735, '', 'TC', 'COMPOS', 'GREATER THAN MAX ALLOWED', line=182)
+W('07,2732', 0o02744, '', 'TC', 'NEXTCDU +1', line=183)
+W('07,2733', 0o03002, '', 'TC', 'COMNEG', line=184)
+W('07,2734', 0o02744, '', 'TC', 'NEXTCDU +1', line=185)
+
+W('07,2735', 0o63624, 'COMPOS', 'AD', '-COMMAX', 'COMMAX = MAX NUMBER OF PULSES ALLOWED', line=187)
+W('07,2736', 0o00006, '', 'EXTEND', '', '      MINUS ONE', line=188)
+W('07,2737', 0o63012, '', 'BZMF', 'COMZERO', line=189)
+W('07,2740', 0o51474, '', 'INDEX', 'CDUIND', line=190)
+W('07,2741', 0o55471, '', 'TS', 'COMMAND', 'REDUCE COMMAND BY MAX NUMBER OF PULSES', line=191)
+W('07,2742', 0o43625, '', 'CS', '-COMMAX-', '      ALLOWED', line=192)
+
+W('07,2743', 0o24061, 'NEXTCDU', 'INCR', 'ITEMP1', line=194)
+W('07,2744', 0o65020, '', 'AD', 'NEG0', line=195)
+W('07,2745', 0o51474, '', 'INDEX', 'CDUIND', line=196)
+W('07,2746', 0o54050, '', 'TS', 'CDUXCMD', 'SET UP COMMAND REGISTER.', line=197)
+
+W('07,2747', 0o11474, '', 'CCS', 'CDUIND', line=199)
+W('07,2750', 0o02726, '', 'TC', 'COARS2 +3', line=200)
+
+W('07,2751', 0o10061, '', 'CCS', 'ITEMP1', 'SEE IF ANY PULSES TO GO OUT.', line=202)
+W('07,2752', 0o13016, '', 'TCF', 'SENDPULS', line=203)
+
+W('07,2753', 0o05267, '', 'TC', 'FIXDELAY', 'WAIT FOR GIMBALS TO SETTLE.', line=205)
+W('07,2754', 0o00226, '', 'DEC', '150', kind='data', line=206)
+
+W('07,2755', 0o35016, '', 'CAF', 'TWO', 'AT END OF COMMAND, CHECK TO SEE THAT', line=209)
+W('07,2756', 0o54061, 'CHKCORS', 'TS', 'ITEMP1', 'GIMBALS ARE WITHIN 2 DEGREES OF THETAD.', line=210)
+W('07,2757', 0o50000, '', 'INDEX', 'A', line=211)
+W('07,2760', 0o30032, '', 'CA', 'CDUX', line=212)
+W('07,2761', 0o00006, '', 'EXTEND', line=213)
+W('07,2762', 0o50061, '', 'INDEX', 'ITEMP1', line=214)
+W('07,2763', 0o21155, '', 'MSU', 'THETAD', line=215)
+W('07,2764', 0o10000, '', 'CCS', 'A', line=216)
+W('07,2765', 0o12773, '', 'TCF', 'COARSERR', line=217)
+W('07,2766', 0o12770, '', 'TCF', 'CORSCHK2', line=218)
+W('07,2767', 0o12773, '', 'TCF', 'COARSERR', line=219)
+
+# Page 1425
+W('07,2770', 0o10061, 'CORSCHK2', 'CCS', 'ITEMP1', line=222)
+W('07,2771', 0o12756, '', 'TCF', 'CHKCORS', line=223)
+W('07,2772', 0o13514, '', 'TCF', 'ENDIMU', 'END OF COARSE ALIGNMENT.', line=224)
+
+W('07,2773', 0o63001, 'COARSERR', 'AD', 'COARSTOL', '2 DEGREES.', line=226)
+W('07,2774', 0o00006, '', 'EXTEND', line=227)
+W('07,2775', 0o62770, '', 'BZMF', 'CORSCHK2', line=228)
+
+W('07,2776', 0o05650, '', 'TC', 'ALARM', 'COARSE ALIGN ERROR.', line=230)
+W('07,2777', 0o00211, '', 'OCT', '211', kind='data', line=231)
+
+W('07,3000', 0o13522, '', 'TCF', 'IMUBAD', line=233)
+
+W('07,3001', 0o77511, 'COARSTOL', 'DEC', '-.01111', '2 DEGREES SCALED AT HALF-REVOLUTIONS', kind='data', line=235)
+
+W('07,3002', 0o63624, 'COMNEG', 'AD', '-COMMAX', line=238)
+W('07,3003', 0o00006, '', 'EXTEND', line=239)
+W('07,3004', 0o63012, '', 'BZMF', 'COMZERO', line=240)
+W('07,3005', 0o40000, '', 'COM', line=241)
+W('07,3006', 0o51474, '', 'INDEX', 'CDUIND', line=242)
+W('07,3007', 0o55471, '', 'TS', 'COMMAND', line=243)
+W('07,3010', 0o33625, '', 'CA', '-COMMAX-', line=244)
+W('07,3011', 0o02743, '', 'TC', 'NEXTCDU', line=245)
+
+W('07,3012', 0o35021, 'COMZERO', 'CAF', 'ZERO', line=247)
+W('07,3013', 0o51474, '', 'INDEX', 'CDUIND', line=248)
+W('07,3014', 0o57471, '', 'XCH', 'COMMAND', line=249)
+W('07,3015', 0o02743, '', 'TC', 'NEXTCDU', line=250)
+
+W('07,3016', 0o37707, 'SENDPULS', 'CAF', '13,14,15', line=252)
+W('07,3017', 0o00006, '', 'EXTEND', line=253)
+W('07,3020', 0o05014, '', 'WOR', 'CHAN14', line=254)
+W('07,3021', 0o33626, '', 'CAF', '600MS', line=255)
+W('07,3022', 0o12722, '', 'TCF', 'COARS2 -1', 'THEN TO VARDELAY', line=256)
+
+W('07,3023', 0o35012, 'CA+ECE', 'CAF', 'BIT6', 'ENABLE ALL THREE ISS CDU ERROR COUNTERS', line=259)
+W('07,3024', 0o00006, '', 'EXTEND', line=260)
+W('07,3025', 0o05012, '', 'WOR', 'CHAN12', line=261)
+W('07,3026', 0o05324, '', 'TC', 'TASKOVER', line=262)
+
+# Page 1426
+W('07,3027', 0o35014, 'SETCOARS', 'CAF', 'BIT4', 'BYPASS IF ALREADY IN COARSE ALIGN', line=265)
+W('07,3030', 0o00006, '', 'EXTEND', line=266)
+W('07,3031', 0o02012, '', 'RAND', 'CHAN12', line=267)
+W('07,3032', 0o10000, '', 'CCS', 'A', line=268)
+W('07,3033', 0o00002, '', 'TC', 'Q', line=269)
+
+W('07,3034', 0o45012, '', 'CS', 'BIT6', 'CLEAR ISS ERROR COUNTERS', line=271)
+W('07,3035', 0o00006, '', 'EXTEND', line=272)
+W('07,3036', 0o03012, '', 'WAND', 'CHAN12', line=273)
+
+W('07,3037', 0o45006, '', 'CS', 'BIT10', 'KNOCK DOWN GYRO ACTIVITY', line=275)
+W('07,3040', 0o00006, '', 'EXTEND', line=276)
+W('07,3041', 0o03014, '', 'WAND', 'CHAN14', line=277)
+W('07,3042', 0o45021, '', 'CS', 'ZERO', line=278)
+W('07,3043', 0o54047, '', 'TS', 'GYROCMD', line=279)
+
+W('07,3044', 0o35014, '', 'CAF', 'BIT4', 'PUT ISS IN COARSE ALIGN', line=281)
+W('07,3045', 0o00006, '', 'EXTEND', line=282)
+W('07,3046', 0o05012, '', 'WOR', 'CHAN12', line=283)
+
+W('07,3047', 0o41036, '', 'CS', 'DSPTAB +11D', 'TURN ON NO ATT LAMP', line=285)
+W('07,3050', 0o73072, '', 'MASK', 'OCT40010', line=286)
+W('07,3051', 0o27036, '', 'ADS', 'DSPTAB +11D', line=287)
+
+W('07,3052', 0o41321, '', 'CS', 'IMODES33', 'DISABLE DAP AUTO AND HOLD MODES', line=289)
+W('07,3053', 0o75012, '', 'MASK', 'BIT6', line=290)
+W('07,3054', 0o27321, '', 'ADS', 'IMODES33', line=291)
+
+W('07,3055', 0o41320, '', 'CS', 'IMODES30', 'DISABLE IMUFAIL', line=293)
+W('07,3056', 0o75014, '', 'MASK', 'BIT4', line=294)
+W('07,3057', 0o27320, '', 'ADS', 'IMODES30', line=295)
+
+W('07,3060', 0o45013, 'RNDREFDR', 'CS', 'BIT5', 'KNOCK DOWN TRACK FLAG', line=297)
+W('07,3061', 0o70075, '', 'MASK', 'FLAGWRD1', line=298)
+W('07,3062', 0o54075, '', 'TS', 'FLAGWRD1', line=299)
+
+W('07,3063', 0o45001, '', 'CS', 'BIT15', 'KNOCK DOWN DRIFT FLAG', line=301)
+W('07,3064', 0o70076, '', 'MASK', 'FLAGWRD2', line=302)
+W('07,3065', 0o54076, '', 'TS', 'FLAGWRD2', line=303)
+
+W('07,3066', 0o45003, '', 'CS', 'BIT13', 'KNOCK DOWN REFSMMAT FLAG', line=305)
+W('07,3067', 0o70077, '', 'MASK', 'FLAGWRD3', line=306)
+W('07,3070', 0o54077, '', 'TS', 'FLAGWRD3', line=307)
+
+W('07,3071', 0o00002, '', 'TC', 'Q', line=309)
+
+W('07,3072', 0o40010, 'OCT40010', 'OCT', '40010', kind='data', line=311)
+
+# Page 1427
+# IMU FINE ALIGN MODE SWITCH.
+
+W('07,3073', 0o00004, 'IMUFINE', 'INHINT', line=316)
+W('07,3074', 0o03536, '', 'TC', 'CAGETSTJ', 'SEE IF IMU BEING CAGED.', line=317)
+
+W('07,3075', 0o45027, '', 'CS', 'BITS4-5', 'RESET ZERO AND COARSE', line=319)
+W('07,3076', 0o00006, '', 'EXTEND', line=320)
+W('07,3077', 0o03012, '', 'WAND', 'CHAN12', line=321)
+
+W('07,3100', 0o45012, '', 'CS', 'BIT6', 'INSURE DAP AUTO AND HOLD MODES ENABLED', line=323)
+W('07,3101', 0o71321, '', 'MASK', 'IMODES33', line=324)
+W('07,3102', 0o55321, '', 'TS', 'IMODES33', line=325)
+
+W('07,3103', 0o03151, '', 'TC', 'NOATTOFF', line=327)
+
+W('07,3104', 0o35006, '', 'CAF', 'BIT10', 'IMU FAIL WAS INHIBITED DURING THE', line=329)
+W('07,3105', 0o05245, '', 'TC', 'WAITLIST', 'PRESUMABLY PRECEDING COARSE ALIGN.  LEAVE', line=330)
+#   EBANK= CDUIND
+W('07,3106', 0o03117, '', '2CADR', 'IFAILOK', 'IT ON FOR THE FIRST 5 SECS OF FINE ALIGN', kind='data', line=332)
+W('07,3107', 0o16063, kind='data', line=332)
+
+W('07,3110', 0o35042, '', 'CAF', '2SECS', line=334)
+W('07,3111', 0o05245, '', 'TC', 'WAITLIST', line=335)
+#   EBANK= CDUIND
+W('07,3112', 0o03115, '', '2CADR', 'IMUFINED', kind='data', line=337)
+W('07,3113', 0o16063, kind='data', line=337)
+
+W('07,3114', 0o12640, '', 'TCF', 'MODEEXIT', line=339)
+
+W('07,3115', 0o03524, 'IMUFINED', 'TC', 'CAGETEST', 'SEE THAT NO ONE HAS CAGED THE IMU.', line=341)
+W('07,3116', 0o13514, '', 'TCF', 'ENDIMU', line=342)
+
+# Page 1428
+W('07,3117', 0o03531, 'IFAILOK', 'TC', 'CAGETSTQ', 'ENABLE IMU FIAL UNLESS IMU BEING CAGED.', line=345)
+W('07,3120', 0o15324, '', 'TCF', 'TASKOVER', 'IT IS.', line=346)
+
+W('07,3121', 0o35014, '', 'CAF', 'BIT4', 'DONT RESET IMU FAIL INHIBIT IF SOMEONE', line=348)
+W('07,3122', 0o00006, '', 'EXTEND', '', 'HAS GONE INTO COARSE ALIGN.', line=349)
+W('07,3123', 0o02012, '', 'RAND', 'CHAN12', line=350)
+W('07,3124', 0o10000, '', 'CCS', 'A', line=351)
+W('07,3125', 0o15324, '', 'TCF', 'TASKOVER', line=352)
+
+W('07,3126', 0o41320, '', 'CS', 'IMODES30', 'RESET IMUFAIL.', line=354)
+W('07,3127', 0o75003, '', 'MASK', 'BIT13', line=355)
+W('07,3130', 0o27320, '', 'ADS', 'IMODES30', line=356)
+W('07,3131', 0o45014, '', 'CS', 'BIT4', line=357)
+W('07,3132', 0o71320, 'PFAILOK2', 'MASK', 'IMODES30', line=358)
+W('07,3133', 0o55320, '', 'TS', 'IMODES30', line=359)
+W('07,3134', 0o04740, '', 'TC', 'IBNKCALL', 'THE ISS WARNING LIGHT MAY COME ON NOW', line=360)
+W('07,3135', 0o14665, '', 'CADR', 'SETISSW', 'THAT THE INHIBIT WAS BEEN REMOVED.', kind='data', line=361)
+W('07,3136', 0o15324, '', 'TCF', 'TASKOVER', line=362)
+
+W('07,3137', 0o03531, 'PFAILOK', 'TC', 'CAGETSTQ', 'ENABLE PIP FAIL PROG ALARM.', line=364)
+W('07,3140', 0o15324, '', 'TCF', 'TASKOVER', line=365)
+
+W('07,3141', 0o41320, '', 'CS', 'IMODES30', 'RESET IMU AND PIPA FAIL BITS.', line=367)
+W('07,3142', 0o75006, '', 'MASK', 'BIT10', line=368)
+W('07,3143', 0o27320, '', 'ADS', 'IMODES30', line=369)
+
+W('07,3144', 0o41321, '', 'CS', 'IMODES33', line=371)
+W('07,3145', 0o75003, '', 'MASK', 'BIT13', line=372)
+W('07,3146', 0o27321, '', 'ADS', 'IMODES33', line=373)
+
+W('07,3147', 0o45013, '', 'CS', 'BIT5', line=375)
+W('07,3150', 0o13132, '', 'TCF', 'PFAILOK2', line=376)
+
+W('07,3151', 0o43072, 'NOATTOFF', 'CS', 'OCT40010', 'SUBROUTINE TO TURN OFF NO ATT LAMP.', line=378)
+W('07,3152', 0o71036, '', 'MASK', 'DSPTAB +11D', line=379)
+W('07,3153', 0o65001, '', 'AD', 'BIT15', line=380)
+W('07,3154', 0o55036, '', 'TS', 'DSPTAB +11D', line=381)
+W('07,3155', 0o00002, '', 'TC', 'Q', line=382)
+
+# Page 1429
+# ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+
+W('07,3156', 0o45021, 'PIPUSE', 'CS', 'ZERO', line=387)
+W('07,3157', 0o54037, '', 'TS', 'PIPAX', line=388)
+W('07,3160', 0o54040, '', 'TS', 'PIPAY', line=389)
+W('07,3161', 0o54041, '', 'TS', 'PIPAZ', line=390)
+
+W('07,3162', 0o03531, 'PIPUSE1', 'TC', 'CAGETSTQ', 'DO NOT ENABLE PIPA FAIL IF IMU IS CAGED', line=392)
+W('07,3163', 0o14675, '', 'TCF', 'SWRETURN', line=393)
+
+W('07,3164', 0o00004, '', 'INHINT', line=395)
+W('07,3165', 0o45017, '', 'CS', 'BIT1', 'IF PIPA FAILS FROM NOW ON (UNTIL', line=396)
+W('07,3166', 0o71320, '', 'MASK', 'IMODES30', 'PIPFREE), LIGHT ISS WARNING.', line=397)
+W('07,3167', 0o55320, '', 'TS', 'IMODES30', line=398)
+
+W('07,3170', 0o04740, 'PIPFREE2', 'TC', 'IBNKCALL', 'ISS WARNING MIGHT COME ON NOW.', line=400)
+W('07,3171', 0o14665, '', 'CADR', 'SETISSW', '(OR GO OFF ON PIPFREE).', kind='data', line=401)
+
+W('07,3172', 0o12640, '', 'TCF', 'MODEEXIT', line=403)
+
+W('07,3173', 0o00004, 'PIPFREE', 'INHINT', '', 'PROGRAM DONE WITH PIPAS.  DONT LIGHT', line=405)
+W('07,3174', 0o41320, '', 'CS', 'IMODES30', 'ISS WARNING.', line=406)
+W('07,3175', 0o75017, '', 'MASK', 'BIT1', line=407)
+W('07,3176', 0o27320, '', 'ADS', 'IMODES30', line=408)
+
+W('07,3177', 0o75006, '', 'MASK', 'BIT10', 'IF PIP FAIL ON, DO PROG ALSRM AND RESET', line=410)
+W('07,3200', 0o10000, '', 'CCS', 'A', 'ISS WARNING.', line=411)
+W('07,3201', 0o12640, '', 'TCF', 'MODEEXIT', line=412)
+
+W('07,3202', 0o05650, '', 'TC', 'ALARM', line=414)
+W('07,3203', 0o00212, '', 'OCT', '212', kind='data', line=415)
+
+W('07,3204', 0o00004, '', 'INHINT', line=417)
+
+W('07,3205', 0o13170, '', 'TCF', 'PIPFREE2', line=419)
+
+# Page 1430
+# THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
+# BEGINNING AT THE ECADR ARRIVING IN A.  THE MINIMUM SIZE OF ANY PULSE TRAIN IS 16 PULSES (.25 CDU COUNTS).  THE
+# UNSENT PORTION OF THE COMMAND IS LEFT INTACT IN THE INPUT COMMAND REGISTERS.
+
+#   EBANK= 1400  # VARIABLE, ACTUALLY.
+
+W('07,3206', 0o54161, 'IMUPULSE', 'TS', 'MPAC +5', 'SAVE ARRIVING ECADR.', line=428)
+W('07,3207', 0o03536, '', 'TC', 'CAGETSTJ', 'DONT PROCEED IF IMU BEING CAGED.', line=429)
+
+W('07,3210', 0o11304, '', 'CCS', 'LGYRO', 'SEE IF GYROS BUSY.', line=431)
+W('07,3211', 0o03252, '', 'TC', 'GYROBUSY', 'SLEEP.', line=432)
+
+W('07,3212', 0o54156, '', 'TS', 'MPAC +2', line=434)
+W('07,3213', 0o35012, '', 'CAF', 'BIT6', 'ENABLE THE POWER SUPPLY.', line=435)
+W('07,3214', 0o00006, '', 'EXTEND', line=436)
+W('07,3215', 0o05014, '', 'WOR', 'CHAN14', line=437)
+
+W('07,3216', 0o35015, '', 'CAF', 'FOUR', line=439)
+W('07,3217', 0o05245, 'GWAKE2', 'TC', 'WAITLIST', '(IF A JOB WAS PUT TO SLEEP, THE POWER', line=440)
+#   EBANK= CDUIND  # SUPPLY IS LEFT ON BY THE WAKING JOB).
+W('07,3220', 0o03270, '', '2CADR', 'STRTGYRO', kind='data', line=442)
+W('07,3221', 0o16063, kind='data', line=442)
+
+W('07,3222', 0o30161, '', 'CA', 'MPAC +5', "SET UP EBANK, SAVING CALLER'S EBANK FOR", line=444)
+W('07,3223', 0o56003, '', 'XCH', 'EBANK', 'RESTORATION ON RETURN.', line=445)
+W('07,3224', 0o56161, '', 'XCH', 'MPAC +5', line=446)
+W('07,3225', 0o55304, '', 'TS', 'LGYRO', 'RESERVES GYROS.', line=447)
+W('07,3226', 0o74373, '', 'MASK', 'LOW8', line=448)
+W('07,3227', 0o54061, '', 'TS', 'ITEMP1', line=449)
+
+W('07,3230', 0o35016, '', 'CAF', 'TWO', 'FORCE SIGN AGREEMENT ON INPUTS.', line=451)
+W('07,3231', 0o54157, 'GYROAGRE', 'TS', 'MPAC +3', line=452)
+W('07,3232', 0o60000, '', 'DOUBLE', line=453)
+W('07,3233', 0o60061, '', 'AD', 'ITEMP1', line=454)
+W('07,3234', 0o54160, '', 'TS', 'MPAC +4', line=455)
+W('07,3235', 0o00006, '', 'EXTEND', line=456)
+W('07,3236', 0o50000, '', 'INDEX', 'A', line=457)
+W('07,3237', 0o31401, '', 'DCA', '1400', line=458)
+W('07,3240', 0o52155, '', 'DXCH', 'MPAC', line=459)
+W('07,3241', 0o07226, '', 'TC', 'TPAGREE', line=460)
+W('07,3242', 0o52155, '', 'DXCH', 'MPAC', line=461)
+W('07,3243', 0o50160, '', 'INDEX', 'MPAC +4', line=462)
+W('07,3244', 0o53401, '', 'DXCH', '1400', line=463)
+
+W('07,3245', 0o10157, '', 'CCS', 'MPAC +3', line=465)
+W('07,3246', 0o13231, '', 'TCF', 'GYROAGRE', line=466)
+
+W('07,3247', 0o30161, '', 'CA', 'MPAC +5', "RESTORE CALLER'S EBANK.", line=468)
+W('07,3250', 0o54003, '', 'TS', 'EBANK', line=469)
+W('07,3251', 0o12640, '', 'TCF', 'MODEEXIT', line=470)
+
+# Page 1431
+# ROUTINES TO ALLOW TORQUING BY ONLY ONE JOB AT A TIME.
+
+W('07,3252', 0o00006, 'GYROBUSY', 'EXTEND', '', 'SAVE RETURN 2FCADR.', line=475)
+W('07,3253', 0o30134, '', 'DCA', 'BUF2', line=476)
+W('07,3254', 0o52155, '', 'DXCH', 'MPAC', line=477)
+W('07,3255', 0o33267, 'REGSLEEP', 'CAF', 'LGWAKE', line=478)
+W('07,3256', 0o15175, '', 'TCF', 'JOBSLEEP', line=479)
+
+W('07,3257', 0o11304, 'GWAKE', 'CCS', 'LGYRO', 'WHEN AWAKENED, SEE IF GYROS STILL BUSY.', line=481)
+W('07,3260', 0o13255, '', 'TCF', 'REGSLEEP', 'IF SO, SLEEP SOME MORE.', line=482)
+
+W('07,3261', 0o54156, '', 'TS', 'MPAC +2', line=484)
+W('07,3262', 0o00006, '', 'EXTEND', line=485)
+W('07,3263', 0o30155, '', 'DCA', 'MPAC', line=486)
+W('07,3264', 0o52134, '', 'DXCH', 'BUF2', 'RESTORE SWRETURN INFO.', line=487)
+W('07,3265', 0o35017, '', 'CAF', 'ONE', line=488)
+W('07,3266', 0o13217, '', 'TCF', 'GWAKE2', line=489)
+
+W('07,3267', 0o17257, 'LGWAKE', 'CADR', 'GWAKE', kind='data', line=491)
+
+# Page 1432
+# GYRO-TORQUING WAITLIST TASKS.
+
+W('07,3270', 0o43511, 'STRTGYRO', 'CS', 'GDESELCT', 'DE-SELECT LAST GYRO.', line=496)
+W('07,3271', 0o00006, '', 'EXTEND', line=497)
+W('07,3272', 0o03014, '', 'WAND', 'CHAN14', line=498)
+
+W('07,3273', 0o03524, '', 'TC', 'CAGETEST', line=500)
+
+W('07,3274', 0o31304, 'STRTGYR2', 'CA', 'LGYRO', 'JUMP ON PHASE COUNTER IN BITS 13-14.', line=502)
+W('07,3275', 0o00006, '', 'EXTEND', line=503)
+W('07,3276', 0o75014, '', 'MP', 'BIT4', line=504)
+W('07,3277', 0o50000, '', 'INDEX', 'A', line=505)
+W('07,3300', 0o13301, '', 'TCF', '+1', line=506)
+W('07,3301', 0o03316, '', 'TC', 'GSELECT', '=0.  DO Y GYRO.', line=507)
+W('07,3302', 0o00202, '', 'OCT', '00202', kind='data', line=508)
+
+W('07,3303', 0o03316, '', 'TC', 'GSELECT', '=1.  DO Z GYRO.', line=510)
+W('07,3304', 0o00302, '', 'OCT', '00302', kind='data', line=511)
+
+W('07,3305', 0o03314, '', 'TC', 'GSELECT -2', '=2.  DO X GYRO.', line=513)
+W('07,3306', 0o00100, '', 'OCT', '00100', kind='data', line=514)
+
+W('07,3307', 0o35021, '', 'CAF', 'ZERO', '=3.  DONE', line=516)
+W('07,3310', 0o55304, '', 'TS', 'LGYRO', line=517)
+W('07,3311', 0o33267, '', 'CAF', 'LGWAKE', 'WAKE A POSSIBLE SLEEPING JOB.', line=518)
+W('07,3312', 0o05201, '', 'TC', 'JOBWAKE', line=519)
+
+W('07,3313', 0o13115, 'NORESET', 'TCF', 'IMUFINED', 'DO NOT RESET POWER SUPPLY', line=521)
+# Page 1433
+W('07,3314', 0o45015, '', 'CS', 'FOUR', 'SPECIAL ENTRY TO REGRESS LGYRO FOR X.', line=523)
+W('07,3315', 0o27304, '', 'ADS', 'LGYRO', line=524)
+
+W('07,3316', 0o50002, 'GSELECT', 'INDEX', 'Q', 'SELECT GYRO.', line=526)
+W('07,3317', 0o30000, '', 'CAF', '0', 'PACKED WORD CONTAINS GYRO SELECT BITS', line=527)
+W('07,3320', 0o54064, '', 'TS', 'ITEMP4', 'AND INCREMENT TO LGYRO.', line=528)
+W('07,3321', 0o75023, '', 'MASK', 'SEVEN', line=529)
+W('07,3322', 0o65003, '', 'AD', 'BIT13', line=530)
+W('07,3323', 0o27304, '', 'ADS', 'LGYRO', line=531)
+W('07,3324', 0o54003, '', 'TS', 'EBANK', line=532)
+W('07,3325', 0o74373, '', 'MASK', 'LOW8', line=533)
+W('07,3326', 0o54061, '', 'TS', 'ITEMP1', line=534)
+
+W('07,3327', 0o45023, '', 'CS', 'SEVEN', line=536)
+W('07,3330', 0o70064, '', 'MASK', 'ITEMP4', line=537)
+W('07,3331', 0o54064, '', 'TS', 'ITEMP4', line=538)
+
+W('07,3332', 0o00006, '', 'EXTEND', '', 'MOVE DP COMMAND TO RUPTREGS FOR TESTING.', line=540)
+W('07,3333', 0o50061, '', 'INDEX', 'ITEMP1', line=541)
+W('07,3334', 0o31401, '', 'DCA', '1400', line=542)
+W('07,3335', 0o52071, '', 'DXCH', 'RUPTREG1', line=543)
+
+W('07,3336', 0o10070, '', 'CCS', 'RUPTREG1', line=545)
+W('07,3337', 0o13352, '', 'TCF', 'MAJ+', line=546)
+W('07,3340', 0o13342, '', 'TCF', '+2', line=547)
+W('07,3341', 0o13472, '', 'TCF', 'MAJ-', line=548)
+
+W('07,3342', 0o10071, '', 'CCS', 'RUPTREG2', line=550)
+W('07,3343', 0o13347, '', 'TCF', 'MIN+', line=551)
+W('07,3344', 0o13274, '', 'TCF', 'STRTGYR2', line=552)
+W('07,3345', 0o13467, '', 'TCF', 'MIN-', line=553)
+W('07,3346', 0o13274, '', 'TCF', 'STRTGYR2', line=554)
+
+# Page 1434
+W('07,3347', 0o63403, 'MIN+', 'AD', '-GYROMIN', 'SMALL POSITIVE COMMAND.  SEE IF AT LEAST', line=557)
+W('07,3350', 0o00006, '', 'EXTEND', '', '16 GYRO PULSES.', line=558)
+W('07,3351', 0o63274, '', 'BZMF', 'STRTGYR2', line=559)
+
+W('07,3352', 0o00006, 'MAJ+', 'EXTEND', '', 'DEFINITE POSITIVE OUTPUT.', line=561)
+W('07,3353', 0o33513, '', 'DCA', 'GYROFRAC', line=562)
+W('07,3354', 0o20071, '', 'DAS', 'RUPTREG1', line=563)
+
+W('07,3355', 0o30064, '', 'CA', 'ITEMP4', 'SELECT POSITIVE TORQUING FOR THIS GYRO.', line=565)
+W('07,3356', 0o00006, '', 'EXTEND', line=566)
+W('07,3357', 0o05014, '', 'WOR', 'CHAN14', line=567)
+
+W('07,3360', 0o36043, '', 'CAF', 'LOW7', 'LEAVE NUMBER OF POSSIBLE 8192 AUGMENTS', line=569)
+W('07,3361', 0o70071, '', 'MASK', 'RUPTREG2', 'TO INITIAL COMMAND IN MAJOR PART OF LONG', line=570)
+W('07,3362', 0o56071, '', 'XCH', 'RUPTREG2', 'TERM STORAGE AND TRUNCATED FRACTION', line=571)
+W('07,3363', 0o00006, 'GMERGE', 'EXTEND', '', 'IN MINOR PART.  THE MAJOR PART WILL BE', line=572)
+W('07,3364', 0o75010, '', 'MP', 'BIT8', 'COUNTED DOWN TO ZERO IN THE COURSE OF', line=573)
+W('07,3365', 0o54062, '', 'TS', 'ITEMP2', 'PUTTING OUT THE ENTIRE COMMAND.', line=574)
+W('07,3366', 0o30070, '', 'CA', 'RUPTREG1', line=575)
+W('07,3367', 0o00006, '', 'EXTEND', line=576)
+W('07,3370', 0o75007, '', 'MP', 'BIT9', line=577)
+W('07,3371', 0o54070, '', 'TS', 'RUPTREG1', line=578)
+W('07,3372', 0o30001, '', 'CA', 'L', line=579)
+W('07,3373', 0o00006, '', 'EXTEND', line=580)
+W('07,3374', 0o75002, '', 'MP', 'BIT14', line=581)
+W('07,3375', 0o26062, '', 'ADS', 'ITEMP2', 'INITIAL COMMAND.', line=582)
+
+W('07,3376', 0o00006, '', 'EXTEND', '', 'SEE IF MORE THAN ONE PULSE TRAIN NEEDED', line=584)
+W('07,3377', 0o30071, '', 'DCA', 'RUPTREG1', '(MORE THAN 16383 PULSES).', line=585)
+W('07,3400', 0o67716, '', 'AD', 'MINUS1', line=586)
+W('07,3401', 0o10000, '', 'CCS', 'A', line=587)
+W('07,3402', 0o13426, '', 'TCF', 'LONGGYRO', line=588)
+W('07,3403', 0o77601, '-GYROMIN', 'OCT', '-176', 'MAY BE ADJUSTED TO SPECIFY MINIMUM CMD', kind='data', line=589)
+W('07,3404', 0o13410, '', 'TCF', '+4', line=590)
+
+W('07,3405', 0o35002, '', 'CAF', 'BIT14', line=592)
+W('07,3406', 0o26062, '', 'ADS', 'ITEMP2', line=593)
+W('07,3407', 0o35021, '', 'CAF', 'ZERO', line=594)
+
+W('07,3410', 0o50061, '', 'INDEX', 'ITEMP1', line=596)
+W('07,3411', 0o53401, '', 'DXCH', '1400', line=597)
+# Page 1435
+W('07,3412', 0o30062, '', 'CA', 'ITEMP2', 'ENTIRE COMMAND.', line=599)
+W('07,3413', 0o54047, 'LASTSEG', 'TS', 'GYROCMD', line=600)
+W('07,3414', 0o00006, '', 'EXTEND', line=601)
+W('07,3415', 0o75006, '', 'MP', 'BIT10', 'WAITLIST DT', line=602)
+W('07,3416', 0o66214, '', 'AD', 'THREE', 'TRUNCATION AND PHASE UNCERTAINTIES.', line=603)
+W('07,3417', 0o05245, '', 'TC', 'WAITLIST', line=604)
+#   EBANK= CDUIND
+W('07,3420', 0o03270, '', '2CADR', 'STRTGYRO', kind='data', line=606)
+W('07,3421', 0o16063, kind='data', line=606)
+
+W('07,3422', 0o35006, 'GYROEXIT', 'CAF', 'BIT10', line=608)
+W('07,3423', 0o00006, '', 'EXTEND', line=609)
+W('07,3424', 0o05014, '', 'WOR', 'CHAN14', line=610)
+W('07,3425', 0o15324, '', 'TCF', 'TASKOVER', line=611)
+
+W('07,3426', 0o50061, 'LONGGYRO', 'INDEX', 'ITEMP1', line=613)
+W('07,3427', 0o53401, '', 'DXCH', '1400', 'INITIAL COMMAND OUT PLUS N AUGMENTS OF', line=614)
+W('07,3430', 0o35002, '', 'CAF', 'BIT14', '8192.  INITIAL COMMAND IS AT LEAST 8192.', line=615)
+W('07,3431', 0o60062, '', 'AD', 'ITEMP2', line=616)
+W('07,3432', 0o54047, '', 'TS', 'GYROCMD', line=617)
+
+W('07,3433', 0o00006, 'AUG3', 'EXTEND', '', 'GET WAITLIST DT TO TIME WHEN TRAIN IS', line=619)
+W('07,3434', 0o75006, '', 'MP', 'BIT10', 'ALMOST OUT.', line=620)
+W('07,3435', 0o67714, '', 'AD', 'NEG3', line=621)
+W('07,3436', 0o05245, '', 'TC', 'WAITLIST', line=622)
+#   EBANK= CDUIND
+W('07,3437', 0o03442, '', '2CADR', '8192AUG', kind='data', line=624)
+W('07,3440', 0o16063, kind='data', line=624)
+
+W('07,3441', 0o13422, '', 'TCF', 'GYROEXIT', line=626)
+
+W('07,3442', 0o03524, '8192AUG', 'TC', 'CAGETEST', line=628)
+
+W('07,3443', 0o35014, '', 'CAF', 'BIT4', line=630)
+W('07,3444', 0o00006, '', 'EXTEND', line=631)
+W('07,3445', 0o02012, '', 'RAND', 'CHAN12', line=632)
+W('07,3446', 0o10000, '', 'CCS', 'A', line=633)
+W('07,3447', 0o13522, '', 'TCF', 'IMUBAD', line=634)
+W('07,3450', 0o31304, '', 'CA', 'LGYRO', 'ADD 8192 PULSES TO GYROCMD', line=635)
+W('07,3451', 0o54003, '', 'TS', 'EBANK', line=636)
+W('07,3452', 0o74373, '', 'MASK', 'LOW8', line=637)
+W('07,3453', 0o54061, '', 'TS', 'ITEMP1', line=638)
+
+W('07,3454', 0o50061, '', 'INDEX', 'ITEMP1', 'SEE IF THIS IS THE LAST AUG.', line=640)
+W('07,3455', 0o11400, '', 'CCS', '1400', line=641)
+W('07,3456', 0o13462, '', 'TCF', 'AUG2', 'MORE TO COME.', line=642)
+
+W('07,3457', 0o35002, '', 'CAF', 'BIT14', line=644)
+W('07,3460', 0o26047, '', 'ADS', 'GYROCMD', line=645)
+W('07,3461', 0o13414, '', 'TCF', 'LASTSEG +1', line=646)
+
+# Page 1436
+W('07,3462', 0o50061, 'AUG2', 'INDEX', 'ITEMP1', line=649)
+W('07,3463', 0o55400, '', 'TS', '1400', line=650)
+W('07,3464', 0o35002, '', 'CAF', 'BIT14', line=651)
+W('07,3465', 0o26047, '', 'ADS', 'GYROCMD', line=652)
+W('07,3466', 0o13433, '', 'TCF', 'AUG3', 'COMPUTE DT.', line=653)
+
+# Page 1437
+W('07,3467', 0o63403, 'MIN-', 'AD', '-GYROMIN', 'POSSIBLE NEGATIVE OUTPUT.', line=656)
+W('07,3470', 0o00006, '', 'EXTEND', line=657)
+W('07,3471', 0o63274, '', 'BZMF', 'STRTGYR2', line=658)
+
+W('07,3472', 0o00006, 'MAJ-', 'EXTEND', '', 'DEFINITE NEGATIVE OUTPUT.', line=660)
+W('07,3473', 0o43513, '', 'DCS', 'GYROFRAC', line=661)
+W('07,3474', 0o20071, '', 'DAS', 'RUPTREG1', line=662)
+
+W('07,3475', 0o30064, '', 'CA', 'ITEMP4', 'SELECT NEGATIVE TORQUING FOR THIS GYRO.', line=664)
+W('07,3476', 0o65007, '', 'AD', 'BIT9', line=665)
+W('07,3477', 0o00006, '', 'EXTEND', line=666)
+W('07,3500', 0o05014, '', 'WOR', 'CHAN14', line=667)
+
+W('07,3501', 0o40070, '', 'CS', 'RUPTREG1', 'SET UP RUPTREGS TO FALL INTO GMERGE.', line=669)
+W('07,3502', 0o54070, '', 'TS', 'RUPTREG1', 'ALL NUMBERS PUT INTO GYROCMD ARE', line=670)
+W('07,3503', 0o40071, '', 'CS', 'RUPTREG2', 'POSITIVE - BIT9 OF CHAN 14 DETERMINES', line=671)
+W('07,3504', 0o76043, '', 'MASK', 'LOW7', 'THE SIGN OF THE COMMAND.', line=672)
+W('07,3505', 0o40000, '', 'COM', line=673)
+W('07,3506', 0o56071, '', 'XCH', 'RUPTREG2', line=674)
+W('07,3507', 0o40000, '', 'COM', line=675)
+W('07,3510', 0o13363, '', 'TCF', 'GMERGE', line=676)
+
+W('07,3511', 0o01700, 'GDESELCT', 'OCT', '1700', 'TURN OFF SELECT AND ACTIVITY BITS.', kind='data', line=678)
+
+W('07,3512', 0o00000, 'GYROFRAC', '2DEC', '.215 B-21', kind='data', line=680)
+W('07,3513', 0o00034, kind='data', line=680)
+
+# Page 1438
+# IMU MODE SWITCHING ROUTINES COME HERE WHEN ACTION COMPLETE.
+
+W('07,3514', 0o00006, 'ENDIMU', 'EXTEND', '', 'MODE IS BAD IF CAGE HAS OCCURRED OR IF', line=685)
+W('07,3515', 0o00011, '', 'READ', 'DSALMOUT', 'ISS WARNING IS ON.', line=686)
+W('07,3516', 0o75017, '', 'MASK', 'BIT1', line=687)
+W('07,3517', 0o10000, '', 'CCS', 'A', line=688)
+W('07,3520', 0o13522, '', 'TCF', 'IMUBAD', line=689)
+
+W('07,3521', 0o13550, 'IMUGOOD', 'TCF', 'GOODEND', 'WITH C(A) = 0.', line=691)
+
+W('07,3522', 0o35021, 'IMUBAD', 'CAF', 'ZERO', line=693)
+W('07,3523', 0o13545, '', 'TCF', 'BADEND', line=694)
+
+W('07,3524', 0o35012, 'CAGETEST', 'CAF', 'BIT6', 'SUBROUTINE TO TERMINATE IMU MODE', line=696)
+W('07,3525', 0o71320, '', 'MASK', 'IMODES30', 'SWITCH IF IMU HAS BEEN CAGED.', line=697)
+W('07,3526', 0o10000, '', 'CCS', 'A', line=698)
+W('07,3527', 0o13522, '', 'TCF', 'IMUBAD', 'DIRECTLY.', line=699)
+W('07,3530', 0o00002, '', 'TC', 'Q', 'WITH C(A) = +0.', line=700)
+
+W('07,3531', 0o41320, 'CAGETSTQ', 'CS', 'IMODES30', 'SKIP IF IMU NOT BEING CAGED.', line=702)
+W('07,3532', 0o75012, '', 'MASK', 'BIT6', line=703)
+W('07,3533', 0o10000, '', 'CCS', 'A', line=704)
+W('07,3534', 0o24002, '', 'INCR', 'Q', line=705)
+W('07,3535', 0o00002, '', 'TC', 'Q', line=706)
+
+W('07,3536', 0o41320, 'CAGETSTJ', 'CS', 'IMODES30', 'IF DURING MODE SWITCH INITIALIZATION.', line=708)
+W('07,3537', 0o75012, '', 'MASK', 'BIT6', 'IT IS FOUND THAT THE IMU IS BEING CAGED.', line=709)
+W('07,3540', 0o10000, '', 'CCS', 'A', 'SET IMUCADR TO -0 TO INDICATE OPERATION', line=710)
+W('07,3541', 0o00002, '', 'TC', 'Q', 'COMPLETE BUT FAILED.  RETURN IMMEDIATELY', line=711)
+
+W('07,3542', 0o45021, '', 'CS', 'ZERO', 'TO SWRETURN.', line=713)
+W('07,3543', 0o55322, '', 'TS', 'IMUCADR', line=714)
+W('07,3544', 0o12640, '', 'TCF', 'MODEEXIT', line=715)
+
+# Page 1439
+# GENERALIZED MODE SWITCHING TERMINATION.  ENTER AT GOODEND FOR SUCCESSFUL COMPLETION OF AN I/O OPERATION
+# OR AT BADEND FOR AN UNSUCCESSFUL ONE.  C(A) OR ARRIVAL =0 FOR IMU, 1 FOR OPTICS.
+
+W('07,3545', 0o54071, 'BADEND', 'TS', 'RUPTREG2', 'DEVICE INDEX.', line=721)
+W('07,3546', 0o45021, '', 'CS', 'ZERO', 'FOR FAILURE.', line=722)
+W('07,3547', 0o13552, '', 'TCF', 'GOODEND +2', line=723)
+
+W('07,3550', 0o54071, 'GOODEND', 'TS', 'RUPTREG2', line=725)
+W('07,3551', 0o45017, '', 'CS', 'ONE', 'FOR SUCCESS.', line=726)
+
+W('07,3552', 0o54072, '', 'TS', 'RUPTREG3', line=728)
+W('07,3553', 0o50071, '', 'INDEX', 'RUPTREG2', 'SEE IF USING PROGRAM ASLEEP.', line=729)
+W('07,3554', 0o11322, '', 'CCS', 'MODECADR', line=730)
+W('07,3555', 0o13557, '', 'TCF', '+2', 'YES - WAKE IT UP.', line=731)
+W('07,3556', 0o13567, '', 'TCF', 'ENDMODE', 'IF 0, PROGRAM NOT IN YET.', line=732)
+
+W('07,3557', 0o35021, '', 'CAF', 'ZERO', 'WAKE SLEEPING PROGRAM.', line=734)
+W('07,3560', 0o50071, '', 'INDEX', 'RUPTREG2', line=735)
+W('07,3561', 0o57322, '', 'XCH', 'MODECADR', line=736)
+W('07,3562', 0o05201, '', 'TC', 'JOBWAKE', line=737)
+
+W('07,3563', 0o40072, '', 'CS', 'RUPTREG3', 'ADVANCE LOC IF SUCCESSFUL.', line=739)
+W('07,3564', 0o50064, '', 'INDEX', 'LOCCTR', line=740)
+W('07,3565', 0o26164, '', 'ADS', 'LOC', line=741)
+
+W('07,3566', 0o15324, '', 'TCF', 'TASKOVER', line=743)
+
+W('07,3567', 0o30072, 'ENDMODE', 'CA', 'RUPTREG3', '-0 INDICATES OPERATION COMPLETE BUT', line=745)
+W('07,3570', 0o50071, '', 'INDEX', 'RUPTREG2', 'UNSUCCESSFUL - -1 INDICATES COMPLETE AND', line=746)
+W('07,3571', 0o55322, '', 'TS', 'MODECADR', 'SUCCESSFUL.', line=747)
+W('07,3572', 0o15324, '', 'TCF', 'TASKOVER', line=748)
+
+# Page 1440
+# GENERAL STALLING ROUTINE.  USING PROGRAMS COME HERE TO WAIT FOR I/O COMPLETION.
+
+# PROGRAM DESCRIPTION                                   DATE- 21 FEB 1967
+# LOG SECTION IMU MODE SWITCHING
+# MOD BY- R.MELANSON TO ADD DOCUMENTATION               ASSEMBLY SUNDISK REV. 82
+
+# FUNCTIONAL DESCRIPTION-
+# TO DELAY FURTHER EXECUTION OF THE CALLING ROUTINE UNTIL ITS SELECTED
+# I/O FUNCTION IS COMPLETE.  THE FOLLOWING CHECKS ON THE CALLING ROUTINES
+# MODECADR ARE MADE AND ACTED UPON.
+# 1) +0 INDICATES INCOMPLETE I/O OPERATION.CALLING ROUTINE IS PUT TO
+# SLEEP.
+# 2) -1 INDICATES COMPLETED I/O OPERATION.  STALL BYPASSES JOBSLEEP
+# CALL AND RETURNS TO CALLING ROUTINE AT L+3
+# 3) -0 INDICATES COMPLETED I/O WITH FAILURE.  STALL CLEARS MODECADR
+# AND RETURNS TO CALLING ROUTINE AT L+2.
+# 4) VALUE GREATER THAN 0 INDICATES TWO ROUTINES CALLING FOR USE OF
+# SAME DEVICE.  STALL EXITS TO ABORT WHICH EXECUTES A PROGRAM
+# RESTART WHICH IN TURN CLEARS ALL MODECADR REGISTERS.
+
+# CALLING SEQUENCE-
+# L     TC      BANKCALL
+# L+1   CADR    (ONE OF 5 STALL ADDRESSES I.E. IMUSTALL,OPTSTALL,RADSTALL,
+# AOTSTALL,OR ATTSTALL)
+
+# NORMAL-EXIT MODE-
+# TCF   JOBSLEEP OR TCF MODEXIT
+
+# ALARM OR ABORT EXIT MODE-
+# TC    ABORT
+
+# OUTPUT-
+# MODECADR= CADR  IF JOBSLEEP
+# MODECADR=+0     IF I/O COMPLETE
+# BUF2=L+3        IF I/O COMPLETE AND GOOD.
+# BUF2=L+2 IF I/O COMPLETE BUT FAILED.
+
+# ERASABLE INITIALIZATION-
+# BUF2 CONTAINS RETURN ADDRESS PLUS 1,(L+2)
+# BUF2+1 CONTAINS FBANK VALUE OF CALLING ROUTINE.
+# MODECADR OF CALLING ROUTINE CONTAINS +0,-1,-0 OR CADR RETURN ADDRESS.
+#
+# DEBRIS-
+# RUPTREG2 AND CALLING ROUTINE MODECADR.
+
+W('07,3573', 0o35017, 'AOTSTALL', 'CAF', 'ONE', 'AOT.', line=796)
+W('07,3574', 0o03600, '', 'TC', 'STALL', line=797)
+
+W('07,3575', 0o35016, 'RADSTALL', 'CAF', 'TWO', line=799)
+W('07,3576', 0o13600, '', 'TCF', 'STALL', line=800)
+
+# Page 1441
+S('OPTSTALL', 'equals', 0o27573, line=803)
+
+W('07,3577', 0o35021, 'IMUSTALL', 'CAF', 'ZERO', 'IMU.', line=805)
+
+W('07,3600', 0o00004, 'STALL', 'INHINT', line=807)
+W('07,3601', 0o54071, '', 'TS', 'RUPTREG2', 'SAVE DEVICE INDEX.', line=808)
+W('07,3602', 0o50000, '', 'INDEX', 'A', 'SEE IF OPERATION COMPLETE.', line=809)
+W('07,3603', 0o11322, '', 'CCS', 'MODECADR', line=810)
+W('07,3604', 0o13622, '', 'TCF', 'MODABORT', 'ALLOWABLE STATES ARE +0, -1, AND -0.', line=811)
+W('07,3605', 0o13616, '', 'TCF', 'MODESLP', 'OPERATION INCOMPLETE.', line=812)
+W('07,3606', 0o13612, '', 'TCF', 'MODEGOOD', 'COMPLETE AND GOOD IF = -1.', line=813)
+
+W('07,3607', 0o50071, 'MG2', 'INDEX', 'RUPTREG2', 'COMPLETE FAILED IF -0.  RESET TO +0.', line=815)
+W('07,3610', 0o55322, '', 'TS', 'MODECADR', 'RETURN TO CALLER.', line=816)
+W('07,3611', 0o12640, '', 'TCF', 'MODEEXIT', line=817)
+
+W('07,3612', 0o10000, 'MODEGOOD', 'CCS', 'A', 'MAKE SURE INITIAL STATE -1.', line=819)
+W('07,3613', 0o13622, '', 'TCF', 'MODABORT', line=820)
+
+W('07,3614', 0o24133, '', 'INCR', 'BUF2', 'IF SO, INCREMENT RETURN ADDRESS AND', line=822)
+W('07,3615', 0o13607, '', 'TCF', 'MG2', 'RETURN IMMEDIATELY, SETTIN CADR = +0.', line=823)
+
+W('07,3616', 0o04711, 'MODESLP', 'TC', 'MAKECADR', 'CALL FROM SWITCHABLE FIXED ONLY.', line=825)
+W('07,3617', 0o50071, '', 'INDEX', 'RUPTREG2', line=826)
+W('07,3620', 0o55322, '', 'TS', 'MODECADR', line=827)
+W('07,3621', 0o15175, '', 'TCF', 'JOBSLEEP', line=828)
+
+W('07,3622', 0o05721, 'MODABORT', 'TC', 'POODOO', 'TWO PROGRAMS USING THE SAME DEVICE.', line=830)
+W('07,3623', 0o01210, '', 'OCT', '1210', kind='data', line=831)
+
+# Page 1442
+# CONSTANTS FOR MODE SWITCHING ROUTINES
+
+S('BITS3&4', 'equals', 0o5771, line=836)
+S('BITS4&6', 'equals', 0o5033, line=837)
+S('BITS4-5', 'equals', 0o5027, line=838)
+S('IMUSEFLG', 'equals', 0o5010, line=839)  # INTERPRETER SWITCH 7.
+W('07,3624', 0o77500, '-COMMAX', 'DEC', '-191', kind='data', line=840)
+W('07,3625', 0o77477, '-COMMAX-', 'DEC', '-192', kind='data', line=841)
+W('07,3626', 0o00074, '600MS', 'DEC', '60', kind='data', line=842)
+S('IMUFIN20', 'equals', 0o27073, line=843)
+W('07,3627', 0o31325, 'GOMANUR', 'CA', 'ATTCADR', 'IS KALCMANU FREE', line=844)
+W('07,3630', 0o00006, '', 'EXTEND', line=845)
+W('07,3631', 0o13634, '', 'BZF', '+3', line=846)
+W('07,3632', 0o05721, '', 'TC', 'POODOO', 'NO', line=847)
+W('07,3633', 0o01210, '', 'OCT', '1210', '2 TRYING TO USE SAME DEVICE', kind='data', line=848)
+
+W('07,3634', 0o00006, '', 'EXTEND', line=850)
+W('07,3635', 0o30134, '', 'DCA', 'BUF2', line=851)
+W('07,3636', 0o53326, '', 'DXCH', 'ATTCADR', 'SAVE FINAL RETURN FOR KALCMAN3', line=852)
+
+W('07,3637', 0o30006, '', 'CA', 'BBANK', line=854)
+W('07,3640', 0o75023, '', 'MASK', 'SEVEN', line=855)
+W('07,3641', 0o27326, '', 'ADS', 'ATTCADR +1', line=856)
+
+W('07,3642', 0o30167, '', 'CA', 'PRIORITY', line=858)
+W('07,3643', 0o77674, '', 'MASK', 'PRIO37', line=859)
+W('07,3644', 0o55327, '', 'TS', 'ATTPRIO', 'SAVE USERS PRIO', line=860)
+
+W('07,3645', 0o33651, '', 'CAF', 'KALEBCON', 'SET EBANK FOR KALCMAN3', line=862)
+W('07,3646', 0o54003, '', 'TS', 'EBANK', line=863)
+W('07,3647', 0o04701, '', 'TC', 'POSTJUMP', line=864)
+W('07,3650', 0o44000, '', 'CADR', 'KALCMAN3', kind='data', line=865)
+W('07,3651', 0o03261, 'KALEBCON', 'ECADR', 'BCDU', kind='data', line=866)
+
+# Page 1443
+# PROGRAM DESCRIPTION
+# IMU STATUS CHECK ROUTINE R02 (SUBROUTINE UTILITY)
+# MOD NO - 1
+# MOD BY - N.BRODEUR
+# FUNCTIONAL DESCRIPTION
+#
+# TO CHECK WHETHER IMU IS ON AND IF ON WHETHER IT IS ALIGNED TO AN
+# ORIENTATION KNOWN BY THE CMC.  TO REQUEST SELECTION OF THE APPROPRIATE
+# PROGRAM IF THE IMU IS OFF OR NOT ALIGNED TO AN ORIENTATION KNOWN BY THE
+# CMC.  CALLED THROUGH BANKCALL
+# CALLING SEQUENCE-
+#
+# L     TC      BANKCALL
+# L+1   CADR    R02BOTH
+# SUBROUTINES CALLED
+#
+# VARALARM
+# FLAGUP
+# NORMAL EXIT MODES
+#
+# AT L+2 OF CALLING SEQUENCE
+# ALARM OR ABORT EXIT MODES
+# GOTOPOOH, WITH ALARM
+# ERASABLE INITIALIZATION REQUIRED
+#
+# NONE
+# DEBRIS
+#
+# CENTRALS-A,Q,L
+
+#   BANK 34
+#   SETLOC R02
+#   BANK
+#   COUNT 04/R02  # COUNT*
+
+W('07,3652', 0o00063, 'DEC51', 'DEC', '51', kind='data', line=904)
+W('07,3653', 0o35003, 'R02BOTH', 'CAF', 'BIT13', line=905)
+W('07,3654', 0o70077, '', 'MASK', 'STATE +3', 'REFSMFLG', line=906)
+W('07,3655', 0o10000, '', 'CCS', 'A', line=907)
+W('07,3656', 0o03667, '', 'TC', 'R02ZERO', 'ZERO IMUS', line=908)
+
+W('07,3657', 0o31320, '', 'CA', 'IMODES30', line=910)
+W('07,3660', 0o75007, '', 'MASK', 'BIT9', 'IS ISS INITIALIZED', line=911)
+W('07,3661', 0o00006, '', 'EXTEND', line=912)
+W('07,3662', 0o13664, '', 'BZF', '+2', line=913)
+W('07,3663', 0o45014, '', 'CS', 'BIT4', 'SEND IMU ALARM CODE 210', line=914)
+W('07,3664', 0o63672, '', 'AD', 'OCT220', 'SEND REFSMM ALARM', line=915)
+W('07,3665', 0o05764, '', 'TC', 'VARALARM', line=916)
+
+W('07,3666', 0o04106, '', 'TC', 'GOTOPOOH', line=918)
+
+# Page 1444
+W('07,3667', 0o05546, 'R02ZERO', 'TC', 'UPFLAG', line=921)
+W('07,3670', 0o00007, '', 'ADRES', 'IMUSE', kind='data', line=922)
+W('07,3671', 0o14675, '', 'TCF', 'SWRETURN', line=923)
+W('07,3672', 0o00220, 'OCT220', 'OCT', '220', kind='data', line=924)
+
+# Page 1445
+# PROGRAM DESCRIPTION   P06     10FEB67
+
+# TRANSFER THE ISS/CMC FROM THE OPERATE TO THE STANDBY CONDITION.
+
+# THE NORMAL CONDITION OF READINESS OF THE GNCS WHEN NOT IN USE IS STANDBY.  IN THIS CONDITION THE IMU
+# HEATER POWER IS ON.  THE IMU OPERATE POWER IS OFF.  THE COMPUTER POWER IS ON.  THE OPTICS POWER IS OFF.  THE
+# CMC STANDBY ON THE MAIN AND LEB DISKYS IS ON.
+
+# CALLING SEQUENCE:
+# ASTRONAUT REQUEST THROUGH DSKY  V37E 06E.
+
+# SUBROUTINES CALLED:
+# GOPERF1
+# BANKCALL
+# FLAGDOWN
+
+# Page 1446
+# PRESTAND PREPARES FOR STANDBY BY SNAPSHOTTING THE SCALER AND TIME1 TIME2
+# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATABILITY
+# BETWEEN THE SCALER READING AND THE TIME1 TIME2 READING.
+
+#   SETLOC P05P06
+#   BANK
+
+#   EBANK= TIME2SAV
+#   COUNT* $$/P06
+
+W('26,3660', 0o05546, 'P06', 'TC', 'UPFLAG', 'SET NODOV37 BIT', line=954)
+W('26,3661', 0o00054, '', 'ADRES', 'NODOFLAG', kind='data', line=955)
+
+W('26,3662', 0o00004, 'PRESTAND', 'INHINT', line=957)
+W('26,3663', 0o00006, '', 'EXTEND', line=958)
+W('26,3664', 0o30025, '', 'DCA', 'TIME2', 'SNAPSHOT TIME1TIME2', line=959)
+W('26,3665', 0o53151, '', 'DXCH', 'TIME2SAV', line=960)
+W('26,3666', 0o03717, '', 'TC', 'SCALPREP', line=961)
+W('26,3667', 0o03662, '', 'TC', 'PRESTAND', 'T1,T2,SCALER NOT COMPATIBLE', line=962)
+W('26,3670', 0o52155, '', 'DXCH', 'MPAC', 'T1,T2 AND SCALER OK', line=963)
+W('26,3671', 0o53153, '', 'DXCH', 'SCALSAVE', 'STORE SCALER', line=964)
+W('26,3672', 0o00004, '', 'INHINT', line=965)
+W('26,3673', 0o04662, '', 'TC', 'BANKCALL', line=966)
+W('26,3674', 0o17060, '', 'CADR', 'RNDREFDR', 'REFSMM, DRIFT, TRACK FLAGS DOWN', kind='data', line=967)
+
+W('26,3675', 0o05560, '', 'TC', 'DOWNFLAG', line=969)
+W('26,3676', 0o00007, '', 'ADRES', 'IMUSE', 'IMUSE DOWN', kind='data', line=970)
+W('26,3677', 0o05560, '', 'TC', 'DOWNFLAG', line=971)
+W('26,3700', 0o00010, '', 'ADRES', 'RNDVZFLG', 'RNDVZFLG DOWN', kind='data', line=972)
+
+W('26,3701', 0o35005, '', 'CAF', 'BIT11', line=974)
+W('26,3702', 0o00006, '', 'EXTEND', line=975)
+W('26,3703', 0o05013, '', 'WOR', 'CHAN13', 'SET STANDBY ENABLE BIT', line=976)
+
+W('26,3704', 0o05412, '', 'TC', 'PHASCHNG', 'SET RESTART TO POSTAND WHEN STANDBY', line=978)
+W('26,3705', 0o07024, '', 'OCT', '07024', '      RECOVERS', kind='data', line=979)
+W('26,3706', 0o20000, '', 'OCT', '20000', kind='data', line=980)
+#   EBANK= SCALSAVE
+W('26,3707', 0o03737, '', '2CADR', 'POSTAND', kind='data', line=982)
+W('26,3710', 0o54062, kind='data', line=982)
+
+W('26,3711', 0o35036, '', 'CAF', 'OCT62', line=984)
+W('26,3712', 0o04662, '', 'TC', 'BANKCALL', line=985)
+W('26,3713', 0o21045, '', 'CADR', 'GOPERF1', kind='data', line=986)
+W('26,3714', 0o13711, '', 'TCF', '-3', line=987)
+W('26,3715', 0o13711, '', 'TCF', '-4', line=988)
+W('26,3716', 0o13711, '', 'TCF', '-5', line=989)
+
+S('OCT62', 'equals', 0o5036, line=991)  # DEC 50 = OCT 62
+
+# THE LOW 5 BITS OF THE SCALER READS 10000 FOR THE FIRST INTERVAL AFTER A
+# Page 1447.
+# T1 INCREMENT.  IF SCALPREP DETECTS THIS INTERVAL THE T1,T2 AND SCALER
+# DATA ARE NOT COMPATABLE AND RETURN IS TO L+1 FOR ANOTHER READING OF THE
+# DATA.  OTHERWISE, THE RETURN IS TO L+2 TO PROCEED.  ROUTINE ALSO PREPARES
+# THE SCALER READING FOR COMPUTATION OF THE INCREMENT TO UPDATE T1T2.  (THE
+# 10 MS BIT (BIT 6) OF THE SCALER IS INCREMENTED 5 MS OUT OF PHASE FROM
+# T1.) ADDITION OF 5 MS (BIT 5) TO THE SCALER READING HAS THE EFFECT OF
+# ADJUSTING BIT 6 IN THE SCALER TO BE IN PHASE WITH BIT 1 OF T1.  THE LOW 5
+# BITS OF THE SCALER READING ARE THEN SET TO ZERO, TO TRUNCATE THE SCALER
+# DATA TO 10 MS.  RESULTS ARE STORED IN MPAC, +1.
+
+W('26,3717', 0o00006, 'SCALPREP', 'EXTEND', line=1005)
+W('26,3720', 0o22156, '', 'QXCH', 'MPAC +2', line=1006)
+W('26,3721', 0o04554, '', 'TC', 'FINETIME +1', line=1007)
+W('26,3722', 0o00003, '', 'RELINT', line=1008)
+W('26,3723', 0o52155, '', 'DXCH', 'MPAC', line=1009)
+W('26,3724', 0o35013, '', 'CA', 'BIT5', 'ADD 5 MS TO THE SCALER READING.', line=1010)
+W('26,3725', 0o54001, '', 'TS', 'L', line=1011)
+W('26,3726', 0o35021, '', 'CA', 'ZERO', line=1012)
+W('26,3727', 0o20155, '', 'DAS', 'MPAC', line=1013)
+W('26,3730', 0o44362, '', 'CS', 'LOW5', 'SET LOW 5 BITS OF (SCALER+5MS) TO ZERO', line=1014)
+W('26,3731', 0o70155, '', 'MASK', 'MPAC +1', 'AND STORE RESULTS IN MPAC,+1.', line=1015)
+W('26,3732', 0o56155, '', 'XCH', 'MPAC +1', line=1016)
+W('26,3733', 0o74362, '', 'MASK', 'LOW5', 'TEST LOW 5 BITS OF SCALER FOR THE FIRST', line=1017)
+# INTERVAL AFTER THE T1 INCREMENT
+# (NOW = 00000, SINCE BIT 5 ADDED).
+W('26,3734', 0o10000, '', 'CCS', 'A', 'IS IT 1ST INTERVAL AFTER T1 INCREMENT', line=1020)
+W('26,3735', 0o24156, '', 'INCR', 'MPAC +2', 'NO', line=1021)
+W('26,3736', 0o00156, '', 'TC', 'MPAC +2', 'YES', line=1022)
+
+# POSTAND RECOVERS TIME AFTER STANDBY.THE SCALER IS SNAPSHOTTED AND THE
+# TIME1 TIME2 COUNTER IS SET TO ZERO.  THE LOW 5 BITS OF THE SCALER ARE
+# INSPECTED TO INSURE COMPATABILITY BETWEEN THE SCALER READING AND THE
+# CLEARING OF THE TIME COUNTER.  IT THEN COMPUTES THE DIFFERENCE IN SCALER
+# VALUES (IN DP) AND ADDS THIS TO THE PREVIOUSLY SNAPSHOTTED VALUES OF
+# TIME1 TIME2 AND PLACES THIS NEW TIME INTO THE TIME1 TIME2 COUNTER.
+
+#   COUNT* $$/P05
+
+W('26,3737', 0o45005, 'POSTAND', 'CS', 'BIT11', 'RECOVER TIME AFTER STANDBY.', line=1033)
+W('26,3740', 0o00006, '', 'EXTEND', line=1034)
+W('26,3741', 0o03013, '', 'WAND', 'CHAN13', 'CLEAR STANDBY ENABLE BIT', line=1035)
+W('26,3742', 0o00004, '', 'INHINT', line=1036)
+W('26,3743', 0o35021, '', 'CA', 'ZERO', line=1037)
+W('26,3744', 0o54001, '', 'TS', 'L', line=1038)
+W('26,3745', 0o52025, '', 'DXCH', 'TIME2', 'CLEAR TIME1 TIME2', line=1039)
+W('26,3746', 0o03717, '', 'TC', 'SCALPREP', 'STORE SCALER IN MPAC, MPAC+1', line=1040)
+W('26,3747', 0o03742, '', 'TC', 'POSTAND +3', 'T1,T2,SCALER NOT COMPATIBLE', line=1041)
+W('26,3750', 0o00006, '', 'EXTEND', '', 'T1,T2 AND SCALER OK', line=1042)
+W('26,3751', 0o41153, '', 'DCS', 'SCALSAVE', line=1043)
+W('26,3752', 0o20155, '', 'DAS', 'MPAC', 'FORM DP DIFFERENCE OF POSTSTANDBY SCALER', line=1044)
+# Page 1448
+W('26,3753', 0o35006, '', 'CAF', 'BIT10', 'MINUS PRESTANDBY SCALER AND SHIFT RIGHT', line=1046)
+W('26,3754', 0o07256, '', 'TC', 'SHORTMP', '5 TO ALIGN BITS WITH TIME1TIME2.', line=1047)
+W('26,3755', 0o35021, '', 'CAF', 'ZERO', line=1048)
+W('26,3756', 0o54156, '', 'TS', 'MPAC +2', 'NEEDED FOR TP AGREE', line=1049)
+W('26,3757', 0o07226, '', 'TC', 'TPAGREE', 'MAKE DP DIFF AGREE', line=1050)
+W('26,3760', 0o10154, '', 'CCS', 'MPAC', line=1051)
+W('26,3761', 0o03766, '', 'TC', 'POSTCOM', 'IF DP DIFF NET +, NO SCALER OVERFLOW', line=1052)
+W('26,3762', 0o03766, '', 'TC', 'POSTCOM', 'BETWEEN PRE AND POST STANDBY.', line=1053)
+W('26,3763', 0o03764, '', 'TC', '+1', 'IF DP DIFF NET -, SCALER OVERFLOWED.  ADD', line=1054)
+W('26,3764', 0o35006, '', 'CAF', 'BIT10', 'BIT 10 TO HIGH DIFF TO CORRECT.', line=1055)
+W('26,3765', 0o26154, '', 'ADS', 'MPAC', line=1056)
+W('26,3766', 0o00006, 'POSTCOM', 'EXTEND', '', 'C(MPAC,+1) IS MAGNITUDE OF DELTA SCALER.', line=1057)
+W('26,3767', 0o31151, '', 'DCA', 'TIME2SAV', 'PRE-STANDBY TIME1TIME2', line=1058)
+W('26,3770', 0o20155, '', 'DAS', 'MPAC', line=1059)
+W('26,3771', 0o07226, '', 'TC', 'TPAGREE', 'FORCE SIGN AGREEMENT', line=1060)
+W('26,3772', 0o52155, '', 'DXCH', 'MPAC', 'UPDATED VALUE FOR T1,T2.', line=1061)
+W('26,3773', 0o20025, '', 'DAS', 'TIME2', 'LOAD UPDATED VALUE INTO T1,T2, WITH', line=1062)
+W('26,3774', 0o05560, '', 'TC', 'DOWNFLAG', 'CLEAR NODOFLAG', line=1063)
+W('26,3775', 0o00054, '', 'ADRES', 'NODOFLAG', kind='data', line=1064)
+
+W('26,3776', 0o04106, '', 'TC', 'GOTOPOOH', line=1066)

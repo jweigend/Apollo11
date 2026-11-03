@@ -1,0 +1,527 @@
+"""AGC_BLOCK_TWO_SELF_CHECK.agc -- Luminary 1A (build 099), Apollo 11 Lunar Module guidance computer
+
+Converted from external/Apollo-11/Luminary099/AGC_BLOCK_TWO_SELF_CHECK.agc by agc2py (the Apollo 11 AGC -> Python converter).
+Pages 1284-1293 of the original program listing.
+
+Every ``W(address, word, label, operator, operand, comment)`` line is one
+15-bit word of the AGC rope memory; ``S(name, kind, value)`` defines a symbol.
+Original comments are preserved as Python comments.
+"""
+
+from agc.program import Module
+
+MODULE = Module('AGC_BLOCK_TWO_SELF_CHECK', 'AGC_BLOCK_TWO_SELF_CHECK.agc', 'Luminary099', pages='1284-1293')
+W = MODULE.W
+S = MODULE.S
+
+# Copyright:    Public domain.
+# Filename:     AGC_BLOCK_TWO_SELF_CHECK.agc
+# Purpose:      Part of the source code for Luminary 1A build 099.
+# It is part of the source code for the Lunar Module's (LM)
+# Apollo Guidance Computer (AGC), for Apollo 11.
+# Assembler:    yaYUL
+# Contact:      Onno Hommes <ohommes@cmu.edu>.
+# Website:      www.ibiblio.org/apollo.
+# Pages:        1284-1293
+# Mod history:  2009-05-27 OH   Transcribed from page images.
+#
+# This source code has been transcribed or otherwise adapted from
+# digitized images of a hardcopy from the MIT Museum.  The digitization
+# was performed by Paul Fjeld, and arranged for by Deborah Douglas of
+# the Museum.  Many thanks to both.  The images (with suitable reduction
+# in storage size and consequent reduction in image quality as well) are
+# available online at www.ibiblio.org/apollo.  If for some reason you
+# find that the images are illegible, contact me at info@sandroid.org
+# about getting access to the (much) higher-quality images which Paul
+# actually created.
+#
+# Notations on the hardcopy document read, in part:
+#
+# Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
+# 16:27 JULY 14, 1969
+
+# Page 1284
+# PROGRAM DESCRIPTION                           DATE:  20 DECEMBER 1967
+# PROGRAM NAME -- SELF-CHECK                    LOG SECTION:  AGC BLOCK TWO SELF-CHECK
+# MOD NO -- 1                                   ASSEMBLY SUBROUTINE UTILITYM REV 25
+# MOD BY -- GAUNTT
+#
+#
+# FUNCTIONAL DESCRIPTION
+#
+# PROGRAM HAS TWO MAIN PARTS.  THE FIRST IS SELF-CHECK WHICH RUNS AS A ZERO PRIORITY JOB WITH NO CORE SET, AS
+# PART OF THE BACK-UP IDLE LOOP.  THE SECOND IS SHOW-BANKSUM WHICH RUNS AS A REGULAR EXECUTIVE JOB WITH ITS OWN
+# STARTING VERB.
+# THE PURPOSE OF SELF-CHECK IS TO CHECK OUT VARIOUS PARTS OF THE COMPUTER AS OUTLINED BELOW IN THE OPTIONS.
+# THE PURPOSE OF SHOW-BANKSUM IS TO DISPLAY THE SUM OF EACH BANK, ONE AT A TIME.
+# IN ALL THERE ARE 7 POSSIBLE OPTIONS IN THIS BLOCK II VERSION OF SELF-CHECK.  MORE DETAIL DESCRIPTION MAY BE
+# FOUND IN E-2065 BLOCK II AGC SELF-CHECK AND SHOW BANKSUM BY EDWIN D. SMALLY DECEMBER 1966, AND ADDENDA 2 AND 3.
+# THE DIFFERENT OPTIONS ARE CONTROLLED BY PUTTING DIFFERENT NUMBERS IN THE SMODE REGISTER (NOUN 27).  BELOW IS
+# A DESCRIPTION OF WHAT PARTS OF THE COMPUTER THAT ARE CHECKED BY THE OPTIONS, AND THE CORRESPONDING NUMBER, IN
+# OCTAL, TO LOAD INTO SMODE.
+# +-4             ERASABLE MEMORY
+# +-5             FIXED MEMORY
+# +-1,2,3,6,7,10  EVERYTHING IN OPTIONS 4 AND 5.
+# -0              SAME AS +-10 UNTIL AN ERROR IS DETECTED.
+# +0              NO CHECK, PUTS COMPUTER INTO THE BACKUP IDLE LOOP.
+#
+#
+# WARNINGS
+#
+# USE OF E MEMORY RESERVED FOR SELF-CHECK (EVEN IN IDLE LOOP) AS TEMP STORAGE BY OTHER PROGRAMS IS DANGEROUS.
+# SMODE SET GREATER THAN OCT 10 PUTS COMPUTER INTO BACKUP IDLE LOOP.
+#
+#
+# CALLING SEQUENCE
+#
+# TO CALL SELF-CHECK KEY IN
+# V 21 N 27 E     OPTION NUMBER E
+# TO CALL SHOW-BANKSUM KEY IN
+# V 91 E          DISPLAYS FIRST BANK
+# V 33 E          PROCEED, DISPLAYS NEXT BANK
+#
+#
+# EXIT MODES, NORMAL AND ALARM
+# SELF-CHECK NORMALLY CONTINUES INDEFINITELY UNLESS THERE IS AN ERROR DETECTED.  IF SO + OPTION NUMBERS PUT
+# COMPUTER INTO BACKUP IDLE LOOP, - OPTION NUMBERS RESTART THE OPTION.
+#
+# THE -0 OPTION PROCEEDS FROM THE LINE FOLLOWING THE LINE WHERE THE ERROR WAS DETECTED.
+# SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E).  THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP.
+#
+#
+# OUTPUT
+# Page 1285
+# SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND
+# TURNS ON THE ALARM LIGHT.  THE OPERATOR MAY THEN DISPLAY THE THREE FAILREGS BY KEYING IN V 05 N 09 E.  FOR FURTHER
+# INFORMATION HE MAY KEY IN V 05 N 08 E, THE DSKY DISPLAY IN R1 WILL BE ADDRESS+1 OF WHERE THE ERROR WAS DETECTED,
+# IN R2 THE BBCON OF SELF-CHECK, AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST MAN
+# INITIATED FRESH START (SLAP1).
+# SHOW-BANKSUM STARTING WITH BANK 0 DISPLAYS IN R1 THE BANK SUM (A +-NUMBER EQUAL TO THE BANK NUMBER), IN R2
+# THE BANK NUMBER, AND IN R3 THE BUGGER WORD.
+#
+#
+# ERASABLE INITIALIZATION REQUIRED
+#
+# ACCOMPLISHED BY FRESH START
+# SMODE SET TO +0
+#
+#
+# DEBRIS
+#
+# ALL EXITS FROM THE CHECK OF ERASABLE (ERASCHK) RESTORE ORIGINAL CONTENTS TO REGISTERS UNDER CHECK.
+# EXCEPTION IS A RESTART.  RESTART THAT OCCURS DURING ERASCHK RESTORES ERASABLE, UNLESS THERE IS EVIDENCE TO DOUBT
+# E MEMORY, IN WHICH CASE PROGRAM THEN DOES A FRESH START (DOFSTART).
+
+#   BANK 25
+#   SETLOC SELFCHEC
+#   BANK
+
+#   COUNT* $$/SELF
+S('SBIT1', 'equals', 0o4753, line=105)
+S('SBIT2', 'equals', 0o4752, line=106)
+S('SBIT3', 'equals', 0o4751, line=107)
+S('SBIT4', 'equals', 0o4750, line=108)
+S('SBIT5', 'equals', 0o4747, line=109)
+S('SBIT6', 'equals', 0o4746, line=110)
+S('SBIT7', 'equals', 0o4745, line=111)
+S('SBIT8', 'equals', 0o4744, line=112)
+S('SBIT9', 'equals', 0o4743, line=113)
+S('SBIT10', 'equals', 0o4742, line=114)
+S('SBIT11', 'equals', 0o4741, line=115)
+S('SBIT12', 'equals', 0o4740, line=116)
+S('SBIT13', 'equals', 0o4737, line=117)
+S('SBIT14', 'equals', 0o4736, line=118)
+S('SBIT15', 'equals', 0o4735, line=119)
+
+S('S+ZERO', 'equals', 0o4755, line=121)
+S('S+1', 'equals', 0o4753, line=122)
+S('S+2', 'equals', 0o4752, line=123)
+S('S+3', 'equals', 0o6245, line=124)
+S('S+4', 'equals', 0o4751, line=125)
+S('S+5', 'equals', 0o4756, line=126)
+S('S+6', 'equals', 0o6242, line=127)
+# Page 1286
+S('S+7', 'equals', 0o4757, line=129)
+S('S8BITS', 'equals', 0o4357, line=130)  # 00377
+S('CNTRCON', 'equals', 0o4771, line=131)  # USED IN CNTRCHK
+W('43,3232', 0o00061, 'ERASCON1', 'OCTAL', '00061', 'USED IN ERASCHK', kind='data', line=132)
+W('43,3233', 0o01373, 'ERASCON2', 'OCTAL', '01373', 'USED IN ERASCHK', kind='data', line=133)
+S('ERASCON6', 'equals', 0o5007, line=134)  # USED IN ERASCHK
+W('43,3234', 0o01461, 'ERASCON3', 'OCTAL', '01461', 'USED IN ERASCHK', kind='data', line=135)
+W('43,3235', 0o01773, 'ERASCON4', 'OCTAL', '01773', 'USED IN ERASCHK', kind='data', line=136)
+S('S10BITS', 'equals', 0o5012, line=137)  # 01777, USED IN ERASCHK
+S('SBNK03', 'equals', 0o5020, line=138)  # 06000, USED IN ROPECHK
+S('-MAXADRS', 'equals', 0o4350, line=139)  # FOR ROPECHK
+W('43,3236', 0o00060, 'SIXTY', 'OCTAL', '00060', kind='data', line=140)
+W('43,3237', 0o60017, 'SUPRCON', 'OCTAL', '60017', 'USED IN ROPECHK', kind='data', line=141)
+W('43,3240', 0o17777, 'S13BITS', 'OCTAL', '17777', kind='data', line=142)
+W('43,3241', 0o25252, 'CONC+S1', 'OCTAL', '25252', 'USED IN CYCLSHFT', kind='data', line=143)
+W('43,3242', 0o52400, 'CONC+S2', 'OCTAL', '52400', 'USED IN CYCLSHFT', kind='data', line=144)
+W('43,3243', 0o76777, 'ERASCON5', 'OCTAL', '76777', kind='data', line=145)
+S('S-7', 'equals', 0o5660, line=146)
+S('S-4', 'equals', 0o6112, line=147)
+S('S-3', 'equals', 0o7745, line=148)
+S('S-2', 'equals', 0o7746, line=149)
+S('S-1', 'equals', 0o7747, line=150)
+S('S-ZERO', 'equals', 0o4754, line=151)
+
+#   EBANK= LST1
+W('43,3244', 0o01371, 'ADRS1', 'ADRES', 'SKEEP1', kind='data', line=154)
+W('43,3245', 0o03336, 'SELFADRS', 'ADRES', 'SELFCHK', 'SELFCHK RETURN ADDRESS.  SHOULD BE PUT', kind='data', line=155)
+# IN SELFRET WHEN GOING FROM SELFCHK TO
+# SHOWSUM AND PUT IN SKEEP1 WHEN GOING
+# FROM SHOWSUM TO SELF-CHECK.
+
+W('43,3246', 0o31360, 'PRERRORS', 'CA', 'ERESTORE', 'IS IT NECESSARY TO RESTORE ERASABLE', line=160)
+W('43,3247', 0o00006, '', 'EXTEND', line=161)
+W('43,3250', 0o13257, '', 'BZF', 'ERRORS', 'NO', line=162)
+W('43,3251', 0o00006, '', 'EXTEND', line=163)
+W('43,3252', 0o31376, '', 'DCA', 'SKEEP5', line=164)
+W('43,3253', 0o51377, '', 'INDEX', 'SKEEP7', line=165)
+W('43,3254', 0o52001, '', 'DXCH', '0000', 'RESTORE THE TWO ERASABLE REGISTERS', line=166)
+W('43,3255', 0o34755, '', 'CA', 'S+ZERO', line=167)
+W('43,3256', 0o55360, '', 'TS', 'ERESTORE', line=168)
+W('43,3257', 0o00004, 'ERRORS', 'INHINT', line=169)
+W('43,3260', 0o30002, '', 'CA', 'Q', line=170)
+W('43,3261', 0o55357, '', 'TS', 'SFAIL', 'SAVE Q FOR FAILURE LOCATION', line=171)
+W('43,3262', 0o55363, '', 'TS', 'ALMCADR', 'FOR DISPLAY WITH BBANK AND ERCOUNT', line=172)
+W('43,3263', 0o25365, '', 'INCR', 'ERCOUNT', 'KEEP TRACK OF NUMBER OF MALFUNCTIONS.', line=173)
+W('43,3264', 0o05571, 'TCALARM2', 'TC', 'ALARM2', line=174)
+W('43,3265', 0o01102, '', 'OCT', '01102', 'SELF-CHECK MALFUNCTION INDICATOR', kind='data', line=175)
+W('43,3266', 0o11362, '', 'CCS', 'SMODE', line=176)
+W('43,3267', 0o34755, 'SIDLOOP', 'CA', 'S+ZERO', line=177)
+W('43,3270', 0o55362, '', 'TS', 'SMODE', line=178)
+# Page 1287
+W('43,3271', 0o03336, '', 'TC', 'SELFCHK', 'GO TO IDLE LOOP', line=180)
+W('43,3272', 0o01357, '', 'TC', 'SFAIL', 'CONTINUE WITH SELF-CHECK', line=181)
+
+W('43,3273', 0o10000, '-1CHK', 'CCS', 'A', line=183)
+W('43,3274', 0o13246, '', 'TCF', 'PRERRORS', line=184)
+W('43,3275', 0o13246, '', 'TCF', 'PRERRORS', line=185)
+W('43,3276', 0o10000, '', 'CCS', 'A', line=186)
+W('43,3277', 0o13246, '', 'TCF', 'PRERRORS', line=187)
+W('43,3300', 0o00002, '', 'TC', 'Q', line=188)
+
+W('43,3301', 0o00006, 'SMODECHK', 'EXTEND', line=190)
+W('43,3302', 0o23371, '', 'QXCH', 'SKEEP1', line=191)
+W('43,3303', 0o03332, '', 'TC', 'CHECKNJ', 'CHECK FOR NEW JOB', line=192)
+W('43,3304', 0o11362, '', 'CCS', 'SMODE', line=193)
+W('43,3305', 0o03312, '', 'TC', 'SOPTIONS', line=194)
+W('43,3306', 0o03303, '', 'TC', 'SMODECHK +2', 'TO BACKUP IDLE LOOP', line=195)
+W('43,3307', 0o03312, '', 'TC', 'SOPTIONS', line=196)
+W('43,3310', 0o25366, '', 'INCR', 'SCOUNT', line=197)
+W('43,3311', 0o01371, '', 'TC', 'SKEEP1', 'CONTINUE WITH SELF-CHECK', line=198)
+
+W('43,3312', 0o65660, 'SOPTIONS', 'AD', 'S-7', line=200)
+W('43,3313', 0o00006, '', 'EXTEND', line=201)
+W('43,3314', 0o63316, '', 'BZMF', '+2', 'FOR OPTIONS BELOW NINE.', line=202)
+W('43,3315', 0o03267, 'BNKOPTN', 'TC', 'SIDLOOP', 'ILLEGAL OPTION.  GO TO IDLE LOOP.', line=203)
+W('43,3316', 0o25366, '', 'INCR', 'SCOUNT', 'FOR OPTIONS BELOW NINE.', line=204)
+W('43,3317', 0o64757, '', 'AD', 'S+7', line=205)
+
+W('43,3320', 0o50000, '', 'INDEX', 'A', line=207)
+W('43,3321', 0o03322, '', 'TC', 'SOPTION1', line=208)
+W('43,3322', 0o01371, 'SOPTION1', 'TC', 'SKEEP1', 'WAS TC+TCF', line=209)
+W('43,3323', 0o01371, 'SOPTION2', 'TC', 'SKEEP1', 'WAS IN:OUT1', line=210)
+W('43,3324', 0o01371, 'SOPTION3', 'TC', 'SKEEP1', 'WAS COUNTCHK', line=211)
+W('43,3325', 0o03337, 'SOPTION4', 'TC', 'ERASCHK', line=212)
+W('43,3326', 0o03520, 'SOPTION5', 'TC', 'ROPECHK', line=213)
+W('43,3327', 0o01371, 'SOPTION6', 'TC', 'SKEEP1', line=214)
+W('43,3330', 0o01371, 'SOPTION7', 'TC', 'SKEEP1', line=215)
+W('43,3331', 0o01371, 'SOPTON10', 'TC', 'SKEEP1', 'CONTINUE WITH SELF-CHECK', line=216)
+
+W('43,3332', 0o00006, 'CHECKNJ', 'EXTEND', line=218)
+W('43,3333', 0o23361, '', 'QXCH', 'SELFRET', 'SAVE RETURN ADDRESS WHILE TESTING NEWJOB', line=219)
+W('43,3334', 0o04635, '', 'TC', 'POSTJUMP', 'TO SEE IF ANY JOBS HAVE BECOME ACTIVE.', line=220)
+W('43,3335', 0o03214, '', 'CADR', 'ADVAN', kind='data', line=221)
+
+W('43,3336', 0o03301, 'SELFCHK', 'TC', 'SMODECHK', '** CHARLEY, COME IN HERE', line=223)
+
+# SKEEP7 HOLDS LOWEST OF TWO ADDRESSES BEING CHECKED.
+# SKEEP6 HOLDS B(X+1).
+# SKEEP5 HOLDS B(X).
+# SKEEP4 HOLDS C(EBANK) DURING ERASLOOP AND CHECKNJ.
+# SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).
+# Page 1288
+# SKEEP2 CONTROLS CHECKING OF NON-SWITCHABLE ERASABLE MEMORY WITH BANK NUMBERS IN EB.
+# ERASCHK TAKES APPROXMATELY 7 SECONDS
+W('43,3337', 0o34753, 'ERASCHK', 'CA', 'S+1', line=233)
+W('43,3340', 0o55372, '', 'TS', 'SKEEP2', line=234)
+W('43,3341', 0o34755, '0EBANK', 'CA', 'S+ZERO', line=235)
+W('43,3342', 0o54003, '', 'TS', 'EBANK', line=236)
+W('43,3343', 0o33234, '', 'CA', 'ERASCON3', '01461', line=237)
+W('43,3344', 0o55377, '', 'TS', 'SKEEP7', 'STARTING ADDRESS', line=238)
+W('43,3345', 0o35012, '', 'CA', 'S10BITS', '01777', line=239)
+W('43,3346', 0o55373, '', 'TS', 'SKEEP3', 'LAST ADDRESS CHECKED', line=240)
+W('43,3347', 0o03367, '', 'TC', 'ERASLOOP', line=241)
+
+W('43,3350', 0o35007, 'E134567B', 'CA', 'ERASCON6', '01400', line=243)
+W('43,3351', 0o55377, '', 'TS', 'SKEEP7', 'STARTING ADDRESS', line=244)
+W('43,3352', 0o35012, '', 'CA', 'S10BITS', '01777', line=245)
+W('43,3353', 0o55373, '', 'TS', 'SKEEP3', 'LAST ADDRESS CHECKED', line=246)
+W('43,3354', 0o03367, '', 'TC', 'ERASLOOP', line=247)
+
+W('43,3355', 0o35007, '2EBANK', 'CA', 'ERASCON6', '01400', line=249)
+W('43,3356', 0o55377, '', 'TS', 'SKEEP7', 'STARTING ADDRESS', line=250)
+W('43,3357', 0o33235, '', 'CA', 'ERASCON4', '01773', line=251)
+W('43,3360', 0o55373, '', 'TS', 'SKEEP3', 'LAST ADDRESS CHECKED', line=252)
+W('43,3361', 0o03367, '', 'TC', 'ERASLOOP', line=253)
+
+W('43,3362', 0o55372, 'NOEBANK', 'TS', 'SKEEP2', '+0', line=255)
+W('43,3363', 0o33232, '', 'CA', 'ERASCON1', '00061', line=256)
+W('43,3364', 0o55377, '', 'TS', 'SKEEP7', 'STARTING ADDRESS', line=257)
+W('43,3365', 0o33233, '', 'CA', 'ERASCON2', '01373', line=258)
+W('43,3366', 0o55373, '', 'TS', 'SKEEP3', 'LAST ADDRESS CHECKED', line=259)
+
+W('43,3367', 0o00004, 'ERASLOOP', 'INHINT', line=261)
+W('43,3370', 0o30003, '', 'CA', 'EBANK', 'STORES C(EBANK)', line=262)
+W('43,3371', 0o55374, '', 'TS', 'SKEEP4', line=263)
+W('43,3372', 0o00006, '', 'EXTEND', line=264)
+W('43,3373', 0o51377, '', 'NDX', 'SKEEP7', line=265)
+W('43,3374', 0o30001, '', 'DCA', '0000', line=266)
+W('43,3375', 0o53376, '', 'DXCH', 'SKEEP5', 'STORES C(X) AND C(X+1) IN SKEEP6 AND 5.', line=267)
+W('43,3376', 0o31377, '', 'CA', 'SKEEP7', line=268)
+W('43,3377', 0o55360, '', 'TS', 'ERESTORE', 'IF RESTART, RESTORE C(X) AND C(X+1)', line=269)
+W('43,3400', 0o54001, '', 'TS', 'L', line=270)
+W('43,3401', 0o24001, '', 'INCR', 'L', line=271)
+W('43,3402', 0o50000, '', 'NDX', 'A', line=272)
+W('43,3403', 0o52001, '', 'DXCH', '0000', 'PUTS OWN ADDRESS IN X AND X +1', line=273)
+W('43,3404', 0o51377, '', 'NDX', 'SKEEP7', line=274)
+W('43,3405', 0o40001, '', 'CS', '0001', 'CS X+1', line=275)
+W('43,3406', 0o51377, '', 'NDX', 'SKEEP7', line=276)
+W('43,3407', 0o60000, '', 'AD', '0000', 'AD X', line=277)
+W('43,3410', 0o03273, '', 'TC', '-1CHK', line=278)
+W('43,3411', 0o31360, '', 'CA', 'ERESTORE', 'HAS ERASABLE BEEN RESTORED', line=279)
+W('43,3412', 0o00006, '', 'EXTEND', line=280)
+# Page 1289
+W('43,3413', 0o13437, '', 'BZF', 'ELOOPFIN', 'YES, EXIT ERASLOOP.', line=282)
+W('43,3414', 0o00006, '', 'EXTEND', line=283)
+W('43,3415', 0o51377, '', 'NDX', 'SKEEP7', line=284)
+W('43,3416', 0o40001, '', 'DCS', '0000', 'COMPLEMENT OF ADDRESS OF X AND X+1', line=285)
+W('43,3417', 0o51377, '', 'NDX', 'SKEEP7', line=286)
+W('43,3420', 0o52001, '', 'DXCH', '0000', 'PUT COMPLEMENT OF ADDRESS OF X AND X+1', line=287)
+W('43,3421', 0o51377, '', 'NDX', 'SKEEP7', line=288)
+W('43,3422', 0o40000, '', 'CS', '0000', 'CS X', line=289)
+W('43,3423', 0o51377, '', 'NDX', 'SKEEP7', line=290)
+W('43,3424', 0o60001, '', 'AD', '0001', 'AD X+1', line=291)
+W('43,3425', 0o03273, '', 'TC', '-1CHK', line=292)
+W('43,3426', 0o31360, '', 'CA', 'ERESTORE', 'HAS ERASABLE BEEN RESTORED', line=293)
+W('43,3427', 0o00006, '', 'EXTEND', line=294)
+W('43,3430', 0o13437, '', 'BZF', 'ELOOPFIN', 'YES, EXIT ERASLOOP.', line=295)
+W('43,3431', 0o00006, '', 'EXTEND', line=296)
+W('43,3432', 0o31376, '', 'DCA', 'SKEEP5', line=297)
+W('43,3433', 0o51377, '', 'NDX', 'SKEEP7', line=298)
+W('43,3434', 0o52001, '', 'DXCH', '0000', 'PUT B(X) AND B(X+1) BACK INTO X AND X+1', line=299)
+W('43,3435', 0o34755, '', 'CA', 'S+ZERO', line=300)
+W('43,3436', 0o55360, '', 'TS', 'ERESTORE', 'IF RESTART, DO NOT RESTORE C(X), C(X+1)', line=301)
+W('43,3437', 0o00003, 'ELOOPFIN', 'RELINT', line=302)
+W('43,3440', 0o03332, '', 'TC', 'CHECKNJ', 'CHECK FOR NEW JOB', line=303)
+W('43,3441', 0o31374, '', 'CA', 'SKEEP4', 'REPLACES B(EBANK)', line=304)
+W('43,3442', 0o54003, '', 'TS', 'EBANK', line=305)
+W('43,3443', 0o25377, '', 'INCR', 'SKEEP7', line=306)
+W('43,3444', 0o41377, '', 'CS', 'SKEEP7', line=307)
+W('43,3445', 0o61373, '', 'AD', 'SKEEP3', line=308)
+W('43,3446', 0o00006, '', 'EXTEND', line=309)
+W('43,3447', 0o13451, '', 'BZF', '+2', line=310)
+W('43,3450', 0o03367, '', 'TC', 'ERASLOOP', 'GO TO NEXT ADDRESS IN SAME BANK', line=311)
+W('43,3451', 0o11372, '', 'CCS', 'SKEEP2', line=312)
+W('43,3452', 0o03362, '', 'TC', 'NOEBANK', line=313)
+W('43,3453', 0o25372, '', 'INCR', 'SKEEP2', 'PUT +1 IN SKEEP2.', line=314)
+W('43,3454', 0o30003, '', 'CA', 'EBANK', line=315)
+W('43,3455', 0o64743, '', 'AD', 'SBIT9', line=316)
+W('43,3456', 0o54003, '', 'TS', 'EBANK', line=317)
+W('43,3457', 0o63243, '', 'AD', 'ERASCON5', '76777, CHECK FOR BANK E2', line=318)
+W('43,3460', 0o00006, '', 'EXTEND', line=319)
+W('43,3461', 0o13355, '', 'BZF', '2EBANK', line=320)
+W('43,3462', 0o10003, '', 'CCS', 'EBANK', line=321)
+W('43,3463', 0o03350, '', 'TC', 'E134567B', 'GO TO EBANKS 1,3,4,5,6, AND 7', line=322)
+W('43,3464', 0o35007, '', 'CA', 'ERASCON6', 'END OF ERASCHK', line=323)
+W('43,3465', 0o54003, '', 'TS', 'EBANK', line=324)
+# CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 60 THROUGH OCT. 10.
+# INCLUDED ARE ALL COUNTERS, T6-1, CYCLE AND SHIFT, AND ALL RUPT REGISTERS
+W('43,3466', 0o34771, 'CNTRCHK', 'CA', 'CNTRCON', '00050', line=327)
+W('43,3467', 0o55372, 'CNTRLOOP', 'TS', 'SKEEP2', line=328)
+W('43,3470', 0o64750, '', 'AD', 'SBIT4', '+10 OCTAL', line=329)
+W('43,3471', 0o50000, '', 'INDEX', 'A', line=330)
+W('43,3472', 0o40000, '', 'CS', '0000', line=331)
+# Page 1290
+W('43,3473', 0o11372, '', 'CCS', 'SKEEP2', line=333)
+W('43,3474', 0o03467, '', 'TC', 'CNTRLOOP', line=334)
+
+# CYCLSHFT CHECKS THE CYCLE AND SHIFT REGISTERS
+W('43,3475', 0o33241, 'CYCLSHFT', 'CA', 'CONC+S1', '25252', line=337)
+W('43,3476', 0o54020, '', 'TS', 'CYR', 'C(CYR) = 12525', line=338)
+W('43,3477', 0o54022, '', 'TS', 'CYL', 'C(CYL) = 52524', line=339)
+W('43,3500', 0o54021, '', 'TS', 'SR', 'C(SR) = 12525', line=340)
+W('43,3501', 0o54023, '', 'TS', 'EDOP', 'C(EDOP) = 00125', line=341)
+W('43,3502', 0o60020, '', 'AD', 'CYR', '37777         C(CYR) = 45252', line=342)
+W('43,3503', 0o60022, '', 'AD', 'CYL', '00-12524      C(CYL) = 25251', line=343)
+W('43,3504', 0o60021, '', 'AD', 'SR', '00-25251      C(SR) = 05252', line=344)
+W('43,3505', 0o60023, '', 'AD', 'EDOP', '00-25376      C(EDOP) = +0', line=345)
+W('43,3506', 0o63242, '', 'AD', 'CONC+S2', 'C(CONC+S2) = 52400', line=346)
+W('43,3507', 0o03273, '', 'TC', '-1CHK', line=347)
+W('43,3510', 0o60020, '', 'AD', 'CYR', '45252', line=348)
+W('43,3511', 0o60022, '', 'AD', 'CYL', '72523', line=349)
+W('43,3512', 0o60021, '', 'AD', 'SR', '77775', line=350)
+W('43,3513', 0o60023, '', 'AD', 'EDOP', '77775', line=351)
+W('43,3514', 0o64753, '', 'AD', 'S+1', '77776', line=352)
+W('43,3515', 0o03273, '', 'TC', '-1CHK', line=353)
+
+W('43,3516', 0o25367, '', 'INCR', 'SCOUNT +1', line=355)
+W('43,3517', 0o03301, '', 'TC', 'SMODECHK', line=356)
+
+# SKEEP1 HOLDS SUM
+# SKEEP2 HOLDS PRESENT CONTENTS OF ADDRESS IN ROPECHK AND SHOWSUM ROUTINES
+# SKEEP2 HOLDS BANK NUMBER IN LOW ORDER BITS DURING SHOWSUM DISPLAY
+# SKEEP3 HOLDS PRESENT ADDRESS (00000 TO 01777 IN COMMON FIXED BANKS)
+# (04000 TO 07777 IN FXFX BANKS)
+# SKEEP3 HOLDS BUGGER WORD DURING SHOWSUM DISPLAY
+# SKEEP4 HOLDS BANK NUMBER AND SUPER BANK NUMBER
+# SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS
+# SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION
+# SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS
+
+W('43,3520', 0o34754, 'ROPECHK', 'CA', 'S-ZERO', '*', line=369)
+W('43,3521', 0o55376, '', 'TS', 'SKEEP6', '* -0 FOR ROPECHK.', line=370)
+W('43,3522', 0o34755, 'STSHOSUM', 'CA', 'S+ZERO', '* SHOULD BE ROPECHK', line=371)
+
+W('43,3523', 0o55374, '', 'TS', 'SKEEP4', 'BANK NUMBER', line=373)
+W('43,3524', 0o34753, '', 'CA', 'S+1', line=374)
+W('43,3525', 0o55377, 'COMMFX', 'TS', 'SKEEP7', line=375)
+W('43,3526', 0o34755, '', 'CA', 'S+ZERO', line=376)
+W('43,3527', 0o55371, '', 'TS', 'SKEEP1', line=377)
+W('43,3530', 0o55373, '', 'TS', 'SKEEP3', line=378)
+W('43,3531', 0o34753, '', 'CA', 'S+1', line=379)
+W('43,3532', 0o55375, '', 'TS', 'SKEEP5', 'COUNTS DOWN 2 TC SELF WORDS', line=380)
+W('43,3533', 0o31374, 'COMADRS', 'CA', 'SKEEP4', line=381)
+W('43,3534', 0o54001, '', 'TS', 'L', 'TO SET SUPER BANK', line=382)
+W('43,3535', 0o74350, '', 'MASK', 'HI5', line=383)
+# Page 1291
+W('43,3536', 0o61373, '', 'AD', 'SKEEP3', line=385)
+W('43,3537', 0o04651, '', 'TC', 'SUPDACAL', 'SUPER DATA CALL', line=386)
+W('43,3540', 0o03563, '', 'TC', 'ADSUM', line=387)
+W('43,3541', 0o64741, '', 'AD', 'SBIT11', '02000', line=388)
+W('43,3542', 0o03574, '', 'TC', 'ADRSCHK', line=389)
+
+W('43,3543', 0o40000, 'FXFX', 'CS', 'A', line=391)
+W('43,3544', 0o55377, '', 'TS', 'SKEEP7', line=392)
+W('43,3545', 0o00006, '', 'EXTEND', line=393)
+W('43,3546', 0o13551, '', 'BZF', '+3', line=394)
+W('43,3547', 0o34740, '', 'CA', 'SBIT12', '04000, STARTING ADDRESS OF BANK 02', line=395)
+W('43,3550', 0o03552, '', 'TC', '+2', line=396)
+W('43,3551', 0o35020, '', 'CA', 'SBNK03', '06000, STARTING ADDRESS OF BANK 03', line=397)
+W('43,3552', 0o55373, '', 'TS', 'SKEEP3', line=398)
+W('43,3553', 0o34755, '', 'CA', 'S+ZERO', line=399)
+W('43,3554', 0o55371, '', 'TS', 'SKEEP1', line=400)
+W('43,3555', 0o34753, '', 'CA', 'S+1', line=401)
+W('43,3556', 0o55375, '', 'TS', 'SKEEP5', 'COUNTS DOWN 2 TC SELF WORDS', line=402)
+W('43,3557', 0o51373, 'FXADRS', 'INDEX', 'SKEEP3', line=403)
+W('43,3560', 0o30000, '', 'CA', '0000', line=404)
+W('43,3561', 0o03563, '', 'TC', 'ADSUM', line=405)
+W('43,3562', 0o03574, '', 'TC', 'ADRSCHK', line=406)
+
+W('43,3563', 0o55372, 'ADSUM', 'TS', 'SKEEP2', line=408)
+W('43,3564', 0o61371, '', 'AD', 'SKEEP1', line=409)
+W('43,3565', 0o55371, '', 'TS', 'SKEEP1', line=410)
+W('43,3566', 0o34755, '', 'CAF', 'S+ZERO', line=411)
+W('43,3567', 0o61371, '', 'AD', 'SKEEP1', line=412)
+W('43,3570', 0o55371, '', 'TS', 'SKEEP1', line=413)
+W('43,3571', 0o41372, '', 'CS', 'SKEEP2', line=414)
+W('43,3572', 0o61373, '', 'AD', 'SKEEP3', line=415)
+W('43,3573', 0o00002, '', 'TC', 'Q', line=416)
+
+W('43,3574', 0o22000, 'ADRSCHK', 'LXCH', 'A', line=418)
+W('43,3575', 0o31373, '', 'CA', 'SKEEP3', line=419)
+W('43,3576', 0o75012, '', 'MASK', 'LOW10', 'RELATIVE ADDRESS', line=420)
+W('43,3577', 0o64350, '', 'AD', '-MAXADRS', 'SUBTRACT MAX RELATIVE ADDRESS = 1777.', line=421)
+W('43,3600', 0o00006, '', 'EXTEND', line=422)
+W('43,3601', 0o13670, '', 'BZF', 'SOPTION', 'CHECKSUM FINISHED IF LAST ADDRESS.', line=423)
+W('43,3602', 0o11375, '', 'CCS', 'SKEEP5', 'IS CHECKSUM FINISHED', line=424)
+W('43,3603', 0o03606, '', 'TC', '+3', 'NO', line=425)
+W('43,3604', 0o03606, '', 'TC', '+2', 'NO', line=426)
+W('43,3605', 0o03670, '', 'TC', 'SOPTION', 'GO TO ROPECHK SHOWSUM OPTION', line=427)
+W('43,3606', 0o10001, '', 'CCS', 'L', '-0 MEANS A TC SELF WORD.', line=428)
+W('43,3607', 0o03616, '', 'TC', 'CONTINU', line=429)
+W('43,3610', 0o03616, '', 'TC', 'CONTINU', line=430)
+W('43,3611', 0o03616, '', 'TC', 'CONTINU', line=431)
+W('43,3612', 0o11375, '', 'CCS', 'SKEEP5', line=432)
+W('43,3613', 0o03617, '', 'TC', 'CONTINU +1', line=433)
+W('43,3614', 0o37747, '', 'CA', 'S-1', line=434)
+# Page 1292
+W('43,3615', 0o03617, '', 'TC', 'CONTINU +1', 'AD IN THE BUGGER WORD', line=436)
+W('43,3616', 0o34753, 'CONTINU', 'CA', 'S+1', 'MAKE SURE TWO CONSECUTIVE TC SELF WORDS', line=437)
+W('43,3617', 0o55375, '', 'TS', 'SKEEP5', line=438)
+W('43,3620', 0o11376, '', 'CCS', 'SKEEP6', '*', line=439)
+W('43,3621', 0o10067, '', 'CCS', 'NEWJOB', '* +1, SHOWSUM', line=440)
+W('43,3622', 0o05122, '', 'TC', 'CHANG1', '*', line=441)
+W('43,3623', 0o03625, '', 'TC', '+2', '*', line=442)
+W('43,3624', 0o03332, '', 'TC', 'CHECKNJ', '-0 IN SKEEP6 FOR ROPECHK', line=443)
+
+W('43,3625', 0o25373, 'ADRS+1', 'INCR', 'SKEEP3', line=445)
+W('43,3626', 0o11377, '', 'CCS', 'SKEEP7', line=446)
+W('43,3627', 0o03533, '', 'TC', 'COMADRS', line=447)
+W('43,3630', 0o03533, '', 'TC', 'COMADRS', line=448)
+W('43,3631', 0o03557, '', 'TC', 'FXADRS', line=449)
+W('43,3632', 0o03557, '', 'TC', 'FXADRS', line=450)
+
+W('43,3633', 0o41374, 'NXTBNK', 'CS', 'SKEEP4', line=452)
+W('43,3634', 0o63723, '', 'AD', 'LSTBNKCH', 'LAST BANK TO BE CHECKED', line=453)
+W('43,3635', 0o00006, '', 'EXTEND', line=454)
+W('43,3636', 0o13131, '', 'BZF', 'ENDSUMS', 'END OF SUMMING OF BANKS.', line=455)
+W('43,3637', 0o31374, '', 'CA', 'SKEEP4', line=456)
+W('43,3640', 0o64741, '', 'AD', 'SBIT11', line=457)
+W('43,3641', 0o55374, '', 'TS', 'SKEEP4', '37 TO 40 INCRMTS SKEEP4 BY END RND CARRY', line=458)
+W('43,3642', 0o03646, '', 'TC', 'CHKSUPR', line=459)
+W('43,3643', 0o34735, '17TO20', 'CA', 'SBIT15', line=460)
+W('43,3644', 0o27374, '', 'ADS', 'SKEEP4', 'SET FOR BANK 20', line=461)
+W('43,3645', 0o03662, '', 'TC', 'GONXTBNK', line=462)
+W('43,3646', 0o74350, 'CHKSUPR', 'MASK', 'HI5', line=463)
+W('43,3647', 0o00006, '', 'EXTEND', line=464)
+W('43,3650', 0o13660, '', 'BZF', 'NXTSUPR', 'INCREMENT SUPER BANK', line=465)
+W('43,3651', 0o63240, '27TO30', 'AD', 'S13BITS', line=466)
+W('43,3652', 0o00006, '', 'EXTEND', line=467)
+W('43,3653', 0o13655, '', 'BZF', '+2', 'BANK SET FOR 30', line=468)
+W('43,3654', 0o03662, '', 'TC', 'GONXTBNK', line=469)
+W('43,3655', 0o33236, '', 'CA', 'SIXTY', 'FIRST SUPER BANK', line=470)
+W('43,3656', 0o27374, '', 'ADS', 'SKEEP4', line=471)
+W('43,3657', 0o03662, '', 'TC', 'GONXTBNK', line=472)
+W('43,3660', 0o63237, 'NXTSUPR', 'AD', 'SUPRCON', 'SET BNK 30 + INCR SUPR BNK AND CANCEL', line=473)
+W('43,3661', 0o27374, '', 'ADS', 'SKEEP4', 'ERC BIT OF THE 37 TO 40 ADVANCE.', line=474)
+W('43,3662', 0o11377, 'GONXTBNK', 'CCS', 'SKEEP7', line=475)
+W('43,3663', 0o03525, '', 'TC', 'COMMFX', line=476)
+W('43,3664', 0o34753, '', 'CA', 'S+1', line=477)
+W('43,3665', 0o03543, '', 'TC', 'FXFX', line=478)
+W('43,3666', 0o34745, '', 'CA', 'SBIT7', 'HAS TO BE LARGER THAN NO OF FXSW BANKS.', line=479)
+W('43,3667', 0o03525, '', 'TC', 'COMMFX', line=480)
+
+W('43,3670', 0o31374, 'SOPTION', 'CA', 'SKEEP4', line=482)
+W('43,3671', 0o74350, '', 'MASK', 'HI5', '= BANK BITS', line=483)
+W('43,3672', 0o04331, '', 'TC', 'LEFT5', line=484)
+W('43,3673', 0o54001, '', 'TS', 'L', 'BANK NUMBER BEFORE SUPER BANK', line=485)
+# Page 1293
+W('43,3674', 0o31374, '', 'CA', 'SKEEP4', line=487)
+W('43,3675', 0o74357, '', 'MASK', 'S8BITS', '= SUPER BANK BITS', line=488)
+W('43,3676', 0o00006, '', 'EXTEND', line=489)
+W('43,3677', 0o13705, '', 'BZF', 'SOPT', 'BEFORE SUPER BANK', line=490)
+W('43,3700', 0o54021, '', 'TS', 'SR', 'SUPER BANK NECESSARY', line=491)
+W('43,3701', 0o30001, '', 'CA', 'L', line=492)
+W('43,3702', 0o74757, '', 'MASK', 'SEVEN', line=493)
+W('43,3703', 0o60021, '', 'AD', 'SR', line=494)
+W('43,3704', 0o54001, '', 'TS', 'L', 'BANK NUMBER WITH SUPER BANK', line=495)
+W('43,3705', 0o31376, 'SOPT', 'CA', 'SKEEP6', '*', line=496)
+W('43,3706', 0o00006, '', 'EXTEND', '', '*', line=497)
+W('43,3707', 0o13711, '', 'BZF', '+2', '* ON -0 CONTINUE WITH ROPE CHECK.', line=498)
+W('43,3710', 0o03113, '', 'TC', 'SDISPLAY', '* ON +1 GO TO DISPLAY OF SUM.', line=499)
+W('43,3711', 0o11371, '', 'CCS', 'SKEEP1', 'FORCE SUM TO ABSOLUTE VALUE.', line=500)
+W('43,3712', 0o03714, '', 'TC', '+2', line=501)
+W('43,3713', 0o03715, '', 'TC', '+2', line=502)
+W('43,3714', 0o64753, '', 'AD', 'S+1', line=503)
+W('43,3715', 0o55371, '', 'TS', 'SKEEP1', line=504)
+W('43,3716', 0o40001, 'BNKCHK', 'CS', 'L', '= - BANK NUMBER', line=505)
+W('43,3717', 0o61371, '', 'AD', 'SKEEP1', line=506)
+W('43,3720', 0o67747, '', 'AD', 'S-1', line=507)
+W('43,3721', 0o03273, '', 'TC', '-1CHK', 'CHECK SUM', line=508)
+W('43,3722', 0o03633, '', 'TC', 'NXTBNK', line=509)
+
+#   EBANK= NEWJOB
+W('43,3723', 0o66100, 'LSTBNKCH', 'BBCON*', '', '* CONSTANT, LAST BANK.', kind='data', line=512)

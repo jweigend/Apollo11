@@ -1,0 +1,1092 @@
+"""AOSTASK_AND_AOSJOB.agc -- Luminary 1A (build 099), Apollo 11 Lunar Module guidance computer
+
+Converted from external/Apollo-11/Luminary099/AOSTASK_AND_AOSJOB.agc by agc2py (the Apollo 11 AGC -> Python converter).
+Pages 1485-1506 of the original program listing.
+
+Every ``W(address, word, label, operator, operand, comment)`` line is one
+15-bit word of the AGC rope memory; ``S(name, kind, value)`` defines a symbol.
+Original comments are preserved as Python comments.
+"""
+
+from agc.program import Module
+
+MODULE = Module('AOSTASK_AND_AOSJOB', 'AOSTASK_AND_AOSJOB.agc', 'Luminary099', pages='1485-1506')
+W = MODULE.W
+S = MODULE.S
+
+# Copyright:    Public domain.
+# Filename:     AOSTASK_AND_AOSJOB.agc
+# Purpose:      Part of the source code for Luminary 1A build 099.
+# It is part of the source code for the Lunar Module's (LM)
+# Apollo Guidance Computer (AGC), for Apollo 11.
+# Assembler:    yaYUL
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo.
+# Pages:        1485-1506
+# Mod history:  2009-05-27 RSB  Adapted from the corresponding
+# Luminary131 file, using page
+# images from Luminary 1A.
+# 2009-06-05 RSB  Corrected a memory-bank error type.
+# 2009-06-07 RSB  Corrected a typo.
+#
+# This source code has been transcribed or otherwise adapted from
+# digitized images of a hardcopy from the MIT Museum.  The digitization
+# was performed by Paul Fjeld, and arranged for by Deborah Douglas of
+# the Museum.  Many thanks to both.  The images (with suitable reduction
+# in storage size and consequent reduction in image quality as well) are
+# available online at www.ibiblio.org/apollo.  If for some reason you
+# find that the images are illegible, contact me at info@sandroid.org
+# about getting access to the (much) higher-quality images which Paul
+# actually created.
+#
+# Notations on the hardcopy document read, in part:
+#
+# Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
+# 16:27 JULY 14, 1969
+
+# Page 1485
+# PROGRAM NAME:         1/ACCS
+# PROGRAM WRITTEN BY:   BOB COVELLI AND MIKE HOUSTON
+# LAST MODIFICATION:    FEB. 14, 1969 BY G. KALAN
+#
+# PROGRAM DESCRIPTION:
+# 1/ACCS PROVIDES THE INTERFACE BETWEEN THE GUIDANCE PROGRAMS AND THE DIGITAL AUTOPILOT.  WHENEVER THERE IS A
+# CHANGE IN THE MASS OF THE VEHICLE, IN THE DEADBAND SELECTED, IN THE VEHICLE CONFIGURATION (ASCENT-DESCENT-
+# DOCKED), AND DURING A FRESH START OR A RESTART, 1/ACCS IS CALLED TO COMMUNICATE THE DATA CHANGES TO THE DAP.
+#
+# THE INPUTS TO 1/ACCS ARE MASS, ACCELERATION (ABDELV), DEADBAND (DB), OFFSET ACCELERATIONS (AOSQ AND AOSR),
+# STAGE VERIFY BIT (CHAN30, BIT2), DOCKED BIT (DAPBOOLS, BIT13), DRIFT BIT (DAPBOOLS, BIT8), USEQRJTS (DAPBOOLS,
+# BIT14), AND SURFACE FLAG (FLAGWRDB, BIT8), AND CH5MASK.
+#
+# 1/ACCS COMPUTES THE JET ACCELERATIONS (1JACC, 1JACCQ, 1JACCR) AS FUNCTIONS OF MASS.  1JACCU AND 1JACCV ARE
+# FORMED BY RESOLVING 1JACCQ AND 1JACCR.  IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L, PVT-CG) IS ALSO
+# COMPUTED AS A FUNCTION OF MASS.  THE RATE OF CHANGE OF ACCELERATION DUE TO ROTATION OF THE GIMBAL (ACCDOTQ,
+# ACCDOTR) IS ALSO COMPUTED IN THE DESCENT CASE.
+#
+# AFTER THE ABOVE COMPUTATIONS, THE PROGRAM 1/ACCONT COMPUTES THE RECIPROCAL NET ACCELERATIONS ABOUT THE P, U,
+# AND V AXES (2 JETS FOR P-AXIS, BOTH 1 AND 2 JETS FOR U AND V AXES), AND THE RECIPROCAL COAST ACCELERATIONS ABOUT
+# THE P, U, AND V AXES.  THE ACCELERATION FUNCTIONS (ACCFCTZ1 AND ACCFCTZ5) ARE ALSO COMPUTED FOR THESE AXES.  THE
+# FIRE AND COAST DEADBANDS AND AXISDIST ARE COMPUTED FOR EACH AXIS.  FLAT AND ZONE3LIM, THE WIDTH AND HEIGHT OF THE
+# MINIMUM IMPULSE ZONE, ARE COMPUTED.  1/ACCONT ALSO SETS ACCSWU AND ACCSWV, WHICH INDICATE WHEN 1 JET ACCELERATION
+# IS NOT SUFFICIENT TO PRODUCE MINIMUM ACCELERATION.  AT THE COMPLETION OF 1/ACCS, THE ACCSOKAY BIT IS SET.
+#
+# SUBROUTINES CALLED:
+# TIMEGMBL
+# MAKECADR
+# ROT45DEG
+#
+# CALLING SEQUENCE:
+# TC      BANKCALL        # (1/ACCS MUST BE CALLED BY BANKCALL)
+# CADR    1/ACCS
+#
+# NORMAL EXIT:  VIA BANKJUMP
+#
+# ALARM AND EXIT MODES:  NONE
+#
+# INPUT/OUTPUT:  SEE PROGRAM DESCRIPTION.
+#
+# DEBRIS:
+# ALL OF THE EXECUTIVE TEMPORARY REGISTERS, EXCEPT FIXLOC AND OVFIND, AND THE CORE SET AREA FROM MPAC TO BANKSET.
+#
+# RESTRICTIONS:
+# 1/ACCS MUST BE CALLED BY BANKCALL
+# EBANK IS SET TO 6, BUT NOT RESTORED.
+# Page 1486
+
+#   BANK 20
+#   SETLOC DAPS3
+#   BANK
+
+#   COUNT* $$/DAPAO
+
+#   EBANK= AOSQ
+
+# ENTRY IS THROUGH 1/ACCJOB OR 1/ACCSET WHEN 1/ACCS IS TO BE DONE AS A SEPARATE NOVAC JOB.
+# IT IS POSSIBLE FOR MORE THAN ONE OF THESE JOBS TO BE SET UP CONCURRENTLY.  HOWEVER, SINCE THERE IS NO CHECK OF
+# NEWJOB, A SECOND MANIFESTATION CANNOT BE STARTED UNTIL THE FIRST IS COMPLETED.
+
+W('20,2447', 0o34755, '1/ACCSET', 'CAF', 'ZERO', 'ENTRY FROM FRESH START/RESTART CODING.', line=92)
+W('20,2450', 0o55537, '', 'TS', 'AOSQ', '      NULL THE OFFSET ESTIMATES FOR 1/ACCS.', line=93)
+W('20,2451', 0o55541, '', 'TS', 'AOSR', line=94)
+W('20,2452', 0o55424, '', 'TS', 'ALPHAQ', '      NULL THE OFFSET ESTIMATES FOR DOWNLIST', line=95)
+W('20,2453', 0o55425, '', 'TS', 'ALPHAR', line=96)
+
+W('20,2454', 0o04616, '1/ACCJOB', 'TC', 'BANKCALL', '1/ACCS ASSUMES ENTRY VIA BANKCALL.', line=98)
+W('20,2455', 0o40461, '', 'CADR', '1/ACCS +2', 'SKIP EBANK SETTING.', kind='data', line=99)
+
+W('20,2456', 0o05155, '', 'TC', 'ENDOFJOB', line=101)
+
+W('20,2457', 0o35015, '1/ACCS', 'CA', 'EBANK6', '***** EBANK SET BUT NOT RESTORED *****', line=103)
+W('20,2460', 0o54003, '', 'TS', 'EBANK', line=104)
+
+W('20,2461', 0o04645, '', 'TC', 'MAKECADR', 'SAVE RETURN SO THAT BUF2 MAY BE USED', line=106)
+W('20,2462', 0o54117, '', 'TS', 'ACCRETRN', line=107)
+
+# DETERMINE MASS OF THE LEM.
+
+W('20,2463', 0o30111, '', 'CA', 'DAPBOOLS', 'IS THE CSM DOCKED', line=111)
+W('20,2464', 0o74737, '', 'MASK', 'CSMDOCKD', line=112)
+W('20,2465', 0o54157, '', 'TS', 'DOCKTEMP', 'STORE RECORD OF STATE IN TEMP (MPAC +3).', line=113)
+W('20,2466', 0o10000, '', 'CCS', 'A', line=114)
+W('20,2467', 0o41332, '', 'CS', 'CSMMASS', '      DOCKED:  LEMMAS = MASS - CSMMASS', line=115)
+W('20,2470', 0o61244, '', 'AD', 'MASS', '      LEM ALONE:  LEMMASS = MASS', line=116)
+W('20,2471', 0o55331, '', 'TS', 'LEMMASS', line=117)
+
+# ON THE BASIS OF APSFLAG:
+# SET THE P-AXIS RATE COMMAND LIMIT FOR 2-JET/2-JET CONTROL
+# SET MPAC, WHICH INDICATES THE PROPER SET OF COEFFICIENTS FOR THE LEM-ALONE F(MASS) CALCULATIONS
+# ENSURE THAT THE LEM MASS VALUE IS WITHIN THE ACCEPTABLE RANGE
+
+W('20,2472', 0o00004, '', 'INHINT', line=124)
+W('20,2473', 0o30106, '', 'CAE', 'FLGWRD10', 'DETERMINE WHETHER STAGED.', line=125)
+W('20,2474', 0o74737, '', 'MASK', 'APSFLBIT', line=126)
+W('20,2475', 0o00006, '', 'EXTEND', line=127)
+W('20,2476', 0o12522, '', 'BZF', 'DPSFLITE', line=128)
+# Page 1487
+W('20,2477', 0o44733, '', 'CS', 'POSMAX', 'ASCENT (OR ON LUNAR SURFACE)', line=130)
+W('20,2500', 0o55475, '', 'TS', '-2JETLIM', 'ALWAYS 2 JETS FOR P-AXIS RATE COMMAND', line=131)
+W('20,2501', 0o35751, '', 'CAF', 'OCT14', 'INITIALIZE INDEX AT 12.', line=132)
+W('20,2502', 0o54154, '', 'TS', 'MPAC', line=133)
+W('20,2503', 0o41331, '', 'CS', 'LEMMASS', 'CHECK IF MASS TOO HIGH.  CATCH STAGING.', line=134)
+W('20,2504', 0o61400, '', 'AD', 'HIASCENT', line=135)
+W('20,2505', 0o00006, '', 'EXTEND', line=136)
+W('20,2506', 0o62513, '', 'BZMF', 'MASSFIX', line=137)
+W('20,2507', 0o41331, '', 'CS', 'LEMMASS', 'CHECK IF MASS TOO LOW.  THIS LIMITS THE', line=138)
+W('20,2510', 0o62001, '', 'AD', 'LOASCENT', '      DECREMENTING BY MASSMON.', line=139)
+W('20,2511', 0o00006, '', 'EXTEND', line=140)
+W('20,2512', 0o62540, '', 'BZMF', 'F(MASS)', line=141)
+
+W('20,2513', 0o27331, 'MASSFIX', 'ADS', 'LEMMASS', 'STORE THE VIOLATED LIMIT AS LEMMASS.', line=143)
+W('20,2514', 0o22007, '', 'ZL', '', '      ALSO CORRECT TOTAL MASS, ZEROING THE', line=144)
+W('20,2515', 0o10157, '', 'CCS', 'DOCKTEMP', '      LOW-ORDER WORD.', line=145)
+W('20,2516', 0o31332, '', 'CAE', 'CSMMASS', '              DOCKED:  MASS = LEMMASS + CSMMASS', line=146)
+W('20,2517', 0o61331, '', 'AD', 'LEMMASS', '              LEM ALONE:  MASS = LEMMASS', line=147)
+W('20,2520', 0o53245, '', 'DXCH', 'MASS', line=148)
+W('20,2521', 0o12540, '', 'TCF', 'F(MASS)', line=149)
+
+W('20,2522', 0o44742, 'DPSFLITE', 'CS', 'BIT10', 'FOUR JETS FOR P-AXIS RATE COMMAND ERRORS', line=151)
+W('20,2523', 0o55475, '', 'TS', '-2JETLIM', '      EXCEEDING 1.4 DEG/SEC (SCALED AT 45)', line=152)
+W('20,2524', 0o36242, '', 'CAF', 'SIX', 'INITIALIZE INDEX AT 6.', line=153)
+W('20,2525', 0o54154, '', 'TS', 'MPAC', line=154)
+W('20,2526', 0o41331, '', 'CS', 'LEMMASS', 'CHECK IF MASS TOO HIGH.  SHOULD NEVER', line=155)
+W('20,2527', 0o62002, '', 'AD', 'HIDESCNT', '      OCCUR EXCEPT PERHAPS BEFORE THE PAD', line=156)
+W('20,2530', 0o00006, '', 'EXTEND', '', '      LOAD IS DONE.', line=157)
+W('20,2531', 0o62513, '', 'BZMF', 'MASSFIX', line=158)
+W('20,2532', 0o41331, '', 'CS', 'LEMMASS', 'CHECK IF MASS TOO LOW.  THIS LIMITS THE', line=159)
+W('20,2533', 0o62003, '', 'AD', 'LODESCNT', '      DECREMENTING BY MASSMON.', line=160)
+W('20,2534', 0o61400, '', 'AD', 'HIASCENT', line=161)
+W('20,2535', 0o00006, '', 'EXTEND', line=162)
+W('20,2536', 0o62540, '', 'BZMF', 'F(MASS)', line=163)
+W('20,2537', 0o12513, '', 'TCF', 'MASSFIX', line=164)
+
+# COMPUTATION OF FUNCTIONS OF MASS
+
+W('20,2540', 0o00003, 'F(MASS)', 'RELINT', line=168)
+W('20,2541', 0o10157, '', 'CCS', 'DOCKTEMP', line=169)
+W('20,2542', 0o13105, '', 'TCF', 'DOCKED', 'DOCKED:  USE SEPARATE COMPUTATION.', line=170)
+W('20,2543', 0o34752, '', 'CA', 'TWO', line=171)
+W('20,2544', 0o54155, 'STCTR', 'TS', 'MPAC +1', 'J=2,1,0 FOR 1JACCR,1JACCQ,1JACC', line=172)
+
+W('20,2545', 0o44752, '', 'CS', 'TWO', line=174)
+W('20,2546', 0o26154, '', 'ADS', 'MPAC', 'JX=10,8,6 OR 4,2,0 TO INDEX COEFS.', line=175)
+
+W('20,2547', 0o31331, 'STCTR1', 'CAE', 'LEMMASS', line=177)
+W('20,2550', 0o50154, '', 'INDEX', 'MPAC', line=178)
+W('20,2551', 0o63060, '', 'AD', 'INERCONC', line=179)
+W('20,2552', 0o54156, '', 'TS', 'MPAC +2', 'MASS + C', line=180)
+# Page 1488
+W('20,2553', 0o00006, '', 'EXTEND', line=182)
+W('20,2554', 0o50154, '', 'INDEX', 'MPAC', line=183)
+W('20,2555', 0o33042, '', 'DCA', 'INERCONA', line=184)
+W('20,2556', 0o00006, '', 'EXTEND', line=185)
+W('20,2557', 0o10156, '', 'DV', 'MPAC +2', line=186)
+W('20,2560', 0o50154, '', 'INDEX', 'MPAC', line=187)
+W('20,2561', 0o63057, '', 'AD', 'INERCONB', line=188)
+W('20,2562', 0o50155, '', 'INDEX', 'MPAC +1', '1JACC(J)=A(JX)/(MASS+C(JX) + B(JX)', line=189)
+W('20,2563', 0o55530, '', 'TS', '1JACC', '1JACC(-1)=L,PVT-CG  SCALED AT 8 FEET', line=190)
+
+W('20,2564', 0o10155, '', 'CCS', 'MPAC +1', line=192)
+W('20,2565', 0o12544, '', 'TCF', 'STCTR', line=193)
+W('20,2566', 0o12570, '', 'TCF', 'COMMEQS', line=194)
+W('20,2567', 0o12667, '', 'TCF', 'LRESC', line=195)
+
+# COEFFQ AND COEFFR ARE COMPUTED IN THIS SECTION.  THEY ARE USED TO RESOLVE Q-R COMPONENTS INTO NON-ORTHOGONAL
+# U AND V COMPONENTS (SEE ROT-TOUV SECTION).
+
+W('20,2570', 0o41532, 'COMMEQS', 'CS', '1JACCR', line=200)
+W('20,2571', 0o61531, '', 'AD', '1JACCQ', line=201)
+W('20,2572', 0o00006, '', 'EXTEND', line=202)
+W('20,2573', 0o62617, '', 'BZMF', 'BIGIQ', line=203)
+W('20,2574', 0o00006, '', 'EXTEND', '', 'EPSILON IS A MEASURE OF COUPLING AND IS', line=204)
+W('20,2575', 0o11531, '', 'DV', '1JACCQ', 'DEFINED=1-IQ/IR FOR IR GREATER THAN IQ.', line=205)
+W('20,2576', 0o54155, '', 'TS', 'EPSILON', 'THE COMPUTED EXPRESSION IS EQUIVALENT', line=206)
+W('20,2577', 0o63104, '', 'AD', '-EPSMAX', line=207)
+W('20,2600', 0o00006, '', 'EXTEND', line=208)
+W('20,2601', 0o62604, '', 'BZMF', 'GOODEPS1', line=209)
+W('20,2602', 0o43104, '', 'CS', '-EPSMAX', line=210)
+W('20,2603', 0o54155, '', 'TS', 'EPSILON', 'EPSILON IS LIMITED TO A MAX. OF .42265', line=211)
+W('20,2604', 0o30155, 'GOODEPS1', 'CA', 'EPSILON', line=212)
+W('20,2605', 0o00006, '', 'EXTEND', line=213)
+W('20,2606', 0o73100, '', 'MP', '0.35356', line=214)
+W('20,2607', 0o63102, '', 'AD', '.7071', line=215)
+W('20,2610', 0o55630, '', 'TS', 'COEFFR', 'IN THIS CASE WHERE IR IS GREATER THAN', line=216)
+W('20,2611', 0o44733, '', 'CS', 'POSMAX', 'IQ, COEFFQ=-.707(1+.5EPSILON)(1-EPSILON)', line=217)
+W('20,2612', 0o60155, '', 'AD', 'EPSILON', 'AND COEFFR=.707(1+.5EPSILON)', line=218)
+W('20,2613', 0o00006, '', 'EXTEND', line=219)
+W('20,2614', 0o71630, '', 'MP', 'COEFFR', line=220)
+W('20,2615', 0o55627, '', 'TS', 'COEFFQ', line=221)
+W('20,2616', 0o12642, '', 'TCF', 'JACCUV', line=222)
+W('20,2617', 0o00006, 'BIGIQ', 'EXTEND', '', 'EPSILON IS DEFINED AS 1-IR/IQ FOR IQ', line=223)
+W('20,2620', 0o11532, '', 'DV', '1JACCR', 'GREATER THAN IR.  -EPSILON IS COMPUTED', line=224)
+W('20,2621', 0o54155, '', 'TS', '-EPSILON', 'RATHER THAN EPSILON FOR CONVENIENCE', line=225)
+W('20,2622', 0o40155, '', 'CS', '-EPSILON', line=226)
+W('20,2623', 0o63104, '', 'AD', '-EPSMAX', line=227)
+W('20,2624', 0o00006, '', 'EXTEND', line=228)
+W('20,2625', 0o62630, '', 'BZMF', 'GOODEPS2', line=229)
+W('20,2626', 0o33104, '', 'CA', '-EPSMAX', line=230)
+W('20,2627', 0o54155, '', 'TS', '-EPSILON', 'EPSILON IS LIMITED TO A MAX. OF .42265', line=231)
+# Page 1489
+W('20,2630', 0o30155, 'GOODEPS2', 'CA', '-EPSILON', line=233)
+W('20,2631', 0o00006, '', 'EXTEND', line=234)
+W('20,2632', 0o73100, '', 'MP', '0.35356', line=235)
+W('20,2633', 0o63103, '', 'AD', '-.7071', line=236)
+W('20,2634', 0o55627, '', 'TS', 'COEFFQ', 'IN THIS CASE WHERE IQ IS GREATER THAN', line=237)
+W('20,2635', 0o40155, '', 'CS', '-EPSILON', 'IR, COEFFQ=-.707(1+.5EPSILON) AND', line=238)
+W('20,2636', 0o64735, '', 'AD', 'NEGMAX', 'COEFFR=.707(1+.5EPSILON)(1-EPSILON)', line=239)
+W('20,2637', 0o00006, '', 'EXTEND', line=240)
+W('20,2640', 0o71627, '', 'MP', 'COEFFQ', line=241)
+W('20,2641', 0o55630, '', 'TS', 'COEFFR', line=242)
+W('20,2642', 0o41627, 'JACCUV', 'CS', 'COEFFQ', line=243)
+W('20,2643', 0o00006, '', 'EXTEND', line=244)
+W('20,2644', 0o71531, '', 'MP', '1JACCQ', '1JACCQ IS SCALED AT PI/4', line=245)
+W('20,2645', 0o55533, '', 'TS', '1JACCU', '1JACCU USED AS TEMPORARY STORAGE', line=246)
+W('20,2646', 0o31630, '', 'CA', 'COEFFR', line=247)
+W('20,2647', 0o00006, '', 'EXTEND', line=248)
+W('20,2650', 0o71532, '', 'MP', '1JACCR', line=249)
+W('20,2651', 0o61533, '', 'AD', '1JACCU', line=250)
+W('20,2652', 0o00006, '', 'EXTEND', line=251)
+W('20,2653', 0o74736, '', 'MP', 'BIT14', 'SCALING CHANGED FROM PI/4 TO PI/2', line=252)
+W('20,2654', 0o55533, '', 'TS', '1JACCU', line=253)
+W('20,2655', 0o55534, '', 'TS', '1JACCV', 'SCALED AT PI/2 RADIANS/SEC(2)', line=254)
+W('20,2656', 0o10154, '', 'CCS', 'MPAC', 'COMPUTE L,PVT-CG IF IN DESCENT', line=255)
+W('20,2657', 0o34755, '', 'CAF', 'ZERO', 'ZERO SWITCHES AND GO TO 1/ACCONT IN', line=256)
+W('20,2660', 0o55502, '', 'TS', 'ALLOWGTS', '      ASCENT', line=257)
+W('20,2661', 0o13230, '', 'TCF', '1/ACCONT -1', line=258)
+
+W('20,2662', 0o44752, '', 'CS', 'TWO', line=260)
+W('20,2663', 0o54154, '', 'TS', 'MPAC', line=261)
+W('20,2664', 0o44753, '', 'CS', 'ONE', line=262)
+W('20,2665', 0o54155, '', 'TS', 'MPAC +1', line=263)
+W('20,2666', 0o12547, '', 'TCF', 'STCTR1', line=264)
+
+# THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE ROTATION OF THE GIMBALS.  THE EQUATION
+# IMPLEMENTED IN BOTH THE Y-X PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = TL/I*D(DELTA)/DT, WHERE
+# T = ENGINE THRUST FORCE
+# L = PIVOT TO CG DISTANCE OF ENGINE
+# I = MOMENT OF INERTIA
+
+W('20,2667', 0o31246, 'LRESC', 'CAE', 'ABDELV', 'SCALED AT 2(13) CM/SEC(2)', line=272)
+W('20,2670', 0o00006, '', 'EXTEND', line=273)
+W('20,2671', 0o71244, '', 'MP', 'MASS', 'SCALED AT B+16 KGS', line=274)
+W('20,2672', 0o02776, '', 'TC', 'DVOVSUB', 'GET QUOTIENT WITH OVERFLOW PROTECTION', line=275)
+W('20,2673', 0o03101, '', 'ADRES', 'GFACTM', kind='data', line=276)
+
+# MASS IS DIVIDED BY ACCELERATION OF GRAVITY IN ORDER TO MATCH THE UNITS OF IXX,IYY,IZZ, WHICH ARE SLUG-FT(2).
+# THE RATIO OF ACCELERATION FROM PIPAS TO ACCELERATION OF GRAVITY IS THE SAME IN METRIC OR ENGINEERING UNITS, SO
+# THAT IS UNCONVERTED.  2.20462 CONVERTS KG. TO LB.  NOW T IN IN A SCALED AT 2(14).
+
+W('20,2674', 0o00006, '', 'EXTEND', line=282)
+W('20,2675', 0o71527, '', 'MP', 'L,PVT-CG', 'SCALED AT 8 FEET.', line=283)
+# Page 1490
+W('20,2676', 0o00004, '', 'INHINT', line=285)
+W('20,2677', 0o54154, '', 'TS', 'MPAC', line=286)
+W('20,2700', 0o00006, '', 'EXTEND', line=287)
+W('20,2701', 0o71532, '', 'MP', '1JACCR', line=288)
+W('20,2702', 0o02776, '', 'TC', 'DVOVSUB', 'GET QUOTIENT WITH OVERFLOW PROTECTION', line=289)
+W('20,2703', 0o02000, '', 'ADRES', 'TORKJET1', kind='data', line=290)
+
+W('20,2704', 0o55511, '', 'TS', 'ACCDOTR', 'SCALED AT PI/2(7)', line=292)
+W('20,2705', 0o30154, '', 'CA', 'MPAC', line=293)
+W('20,2706', 0o00006, '', 'EXTEND', line=294)
+W('20,2707', 0o71531, '', 'MP', '1JACCQ', line=295)
+W('20,2710', 0o02776, '', 'TC', 'DVOVSUB', 'GET QUOTIENT WITH OVERFLOW PROTECTION', line=296)
+W('20,2711', 0o02000, '', 'ADRES', 'TORKJET1', kind='data', line=297)
+
+W('20,2712', 0o55507, 'SPSCONT', 'TS', 'ACCDOTQ', 'SCALED AT PI/2(7)', line=299)
+W('20,2713', 0o00006, '', 'EXTEND', line=300)
+W('20,2714', 0o73077, '', 'MP', 'DGBF', '.3ACCDOTQ SCALED AT PI/2(8)', line=301)
+W('20,2715', 0o55504, '', 'TS', 'KQ', line=302)
+W('20,2716', 0o31511, '', 'CAE', 'ACCDOTR', '.3ACCDOTR AT PI/2(8)', line=303)
+W('20,2717', 0o00006, '', 'EXTEND', line=304)
+W('20,2720', 0o73077, '', 'MP', 'DGBF', line=305)
+W('20,2721', 0o55506, '', 'TS', 'KRDAP', line=306)
+W('20,2722', 0o00006, '', 'EXTEND', '', 'NOW COMPUTE QACCDOT, RACCDOT, THE SIGNED', line=307)
+W('20,2723', 0o00012, '', 'READ', 'CHAN12', 'JERK TERMS.  STORE CHANNEL 12. WITH GIMBAL', line=308)
+W('20,2724', 0o54155, '', 'TS', 'MPAC +1', 'DRIVE BITS 9 THROUGH 12 SET LOOP', line=309)
+W('20,2725', 0o34752, '', 'CAF', 'BIT2', 'INDEX TO COMPUTE RACCDOT, THEN QACCDOT.', line=310)
+W('20,2726', 0o12730, '', 'TCF', 'LOOP3', line=311)
+W('20,2727', 0o34755, '', 'CAF', 'ZERO', 'ACCDOTQ AND ACCDOTR ARE NOT NEGATIVE,', line=312)
+W('20,2730', 0o54154, 'LOOP3', 'TS', 'MPAC', 'BECAUSE THEY ARE MAGNITUDES', line=313)
+W('20,2731', 0o30155, '', 'CA', 'MPAC +1', line=314)
+W('20,2732', 0o50154, '', 'INDEX', 'MPAC', 'MASK CHANNEL IMAGE FOR ANY GIMBAL MOTION', line=315)
+W('20,2733', 0o73073, '', 'MASK', 'GIMBLBTS', line=316)
+W('20,2734', 0o00006, '', 'EXTEND', line=317)
+W('20,2735', 0o12751, '', 'BZF', 'ZACCDOT', 'IF NONE, Q(R)ACCDOT IS ZERO.', line=318)
+W('20,2736', 0o30155, '', 'CA', 'MPAC +1', line=319)
+W('20,2737', 0o50154, '', 'INDEX', 'MPAC', 'GIMBAL IS MOVING.  IS ROTATION POSITIVE.', line=320)
+W('20,2740', 0o73074, '', 'MASK', 'GIMBLBTS +1', line=321)
+W('20,2741', 0o00006, '', 'EXTEND', line=322)
+W('20,2742', 0o12746, '', 'BZF', 'FRSTZERO', 'IF NOT POSITIVE, BRANCH', line=323)
+W('20,2743', 0o50154, '', 'INDEX', 'MPAC', 'POSITIVE ROTATION, NEGATIVE Q(R)ACCDOT.', line=324)
+W('20,2744', 0o41507, '', 'CS', 'ACCDOTQ', line=325)
+W('20,2745', 0o12752, '', 'TCF', 'STACCDOT', line=326)
+W('20,2746', 0o50154, 'FRSTZERO', 'INDEX', 'MPAC', 'NEGATIVE ROTATION, POSITIVE Q(R)ACCDOT.', line=327)
+W('20,2747', 0o31507, '', 'CA', 'ACCDOTQ', line=328)
+W('20,2750', 0o12752, '', 'TCF', 'STACCDOT', line=329)
+W('20,2751', 0o34755, 'ZACCDOT', 'CAF', 'ZERO', line=330)
+W('20,2752', 0o50154, 'STACCDOT', 'INDEX', 'MPAC', line=331)
+W('20,2753', 0o55510, '', 'TS', 'QACCDOT', 'STORE Q(R)ACCDOT.', line=332)
+W('20,2754', 0o10154, '', 'CCS', 'MPAC', line=333)
+W('20,2755', 0o12727, '', 'TCF', 'LOOP3 -1', 'NOW DO QACCDOT.', line=334)
+# Page 1491
+W('20,2756', 0o40111, '', 'CS', 'DAPBOOLS', 'IS GIMBAL USABLE?', line=336)
+W('20,2757', 0o74736, '', 'MASK', 'USEQRJTS', line=337)
+W('20,2760', 0o00006, '', 'EXTEND', line=338)
+W('20,2761', 0o13706, '', 'BZF', 'DOWNGTS', 'NO. BE SURE THE GIMBAL SWITCHES ARE DOWN', line=339)
+W('20,2762', 0o41274, '', 'CS', 'T5ADR', 'YES.  IS THE DAP RUNNINT?', line=340)
+W('20,2763', 0o63765, '', 'AD', 'PAXISADR', line=341)
+W('20,2764', 0o00006, '', 'EXTEND', line=342)
+W('20,2765', 0o12767, '', 'BZF', '+2', line=343)
+W('20,2766', 0o13706, '', 'TCF', 'DOWNGTS', 'NO. BE SURE THE GIMBAL SWITCHES ARE DOWN', line=344)
+W('20,2767', 0o11633, '', 'CCS', 'INGTS', 'YES.  IS GTS IN CONTROL?', line=345)
+W('20,2770', 0o12773, '', 'TCF', 'DOCKTEST', 'YES.  PROCEED WITH 1/ACCS.', line=346)
+W('20,2771', 0o04674, '', 'TC', 'IBNKCALL', 'NO. NULL OFFSET AND FIND ALLOWGTS', line=347)
+W('20,2772', 0o43330, '', 'CADR', 'TIMEGMBL', kind='data', line=348)
+
+W('20,2773', 0o10157, 'DOCKTEST', 'CCS', 'DOCKTEMP', 'BYPASS 1/ACCONT WHEN DOCKED.', line=350)
+W('20,2774', 0o13671, '', 'TCF', '1/ACCRET', line=351)
+W('20,2775', 0o13231, '', 'TCF', '1/ACCONT', line=352)
+
+# Page 1492
+# SUBROUTINE:   DVOVSUB
+# AUTHOR:       C. WORK, MOD 0, 12 JUNE 68
+# PURPOSE:      THIS SUBROUTINE PROVIDES A SINGLE-PRECISION MACHINE LANGUAGE DIVISION OPERATION WHICH RETURNS
+# (1) THE QUOTIENT, IF THE DIVISION WAS NORMAL.
+# (2) NEGMAX, IF THE QUOTIENT WAS IMPROPER AND NEGATIVE.
+# (3) POSMAX, IF THE QUOTIENT WAS IMPROPER AND POSITIVE OR IF THERE WAS A ZERO DIVISOR.
+# THE CALLING PROGRAM IS PRESUMED TO BE A JOB IN THE F BANK WHICH CONTAINS DVOVSUB.  E BANK MUST BE 6.
+# THE DIVISOR FOR THIS ROUTINE MAY BE IN EITHER FIXED OR ERASABLE STORAGE.  SIGN AGREEMENT IS
+# ASSUMED BETWEEN THE TWO HALVES OF THE DIVIDEND.  (THIS IS CERTAIN IF THE A AND L REGISTERS ARE THE
+# RESULT OF A MULTIPLICATION OPERATION.)
+# CALL SEQUENCE:        L       TC      DVOVSUB
+# L +1    ADRES   (DIVISOR)
+# L +2    RETURN HERE, WITH RESULT IN A,L
+# INPUT:        DIVIDEND IN A,L (SIGN AGREEMENT ASSUMED), DIVISOR IN LOCATION DESIGNATED BY "ADRES".
+# DIVISOR MAY BE IN THE DVOVSUB FBANK,FIXED-FIXED FBANK,EBANK 6, OR UNSWITCHED ERASABLE.
+# OUTPUT:       QUOTIENT AND REMAINDER, OR POSMAX (NEGMAX), WHICHEVER IS APPROPRIATE.
+# DEBRIS:       SCRATCHX,SCRATCHY,SCRATCHZ,A,L  (NOTE: SCRATCHX,Y,Z ARE EQUATED TO MPAC +4,+5, AND +6.)
+# ABORTS OR ALARMS:  NONE
+# EXITS:        TO THE CALL POINT +2.
+# SUBROUTINES CALLED:  NONE.
+
+W('20,2776', 0o54161, 'DVOVSUB', 'TS', 'SCRATCHY', 'SAVE UPPER HALF OF DIVIDEND', line=376)
+W('20,2777', 0o54160, '', 'TS', 'SCRATCHX', line=377)
+W('20,3000', 0o50002, '', 'INDEX', 'Q', 'OBTAIN ADDRESS OF DIVISOR.', line=378)
+W('20,3001', 0o30000, '', 'CA', '0', line=379)
+W('20,3002', 0o24002, '', 'INCR', 'Q', 'STEP Q FOR PROPER RETURN SEQUENCE.', line=380)
+W('20,3003', 0o50000, '', 'INDEX', 'A', line=381)
+W('20,3004', 0o30000, '', 'CA', '0', 'PICK UP THE DIVISOR.', line=382)
+W('20,3005', 0o00006, '', 'EXTEND', '', 'RETURN POSMAX FOR A ZERO DIVISOR.', line=383)
+W('20,3006', 0o13035, '', 'BZF', 'MAXPLUS', line=384)
+
+W('20,3007', 0o54162, '', 'TS', 'SCRATCHZ', 'STORE DIVISOR.', line=386)
+
+W('20,3010', 0o10000, '', 'CCS', 'A', 'GET ABS(DIVISOR) IN THE A REGISTER.', line=388)
+W('20,3011', 0o64753, '', 'AD', 'BIT1', line=389)
+W('20,3012', 0o13014, '', 'TCF', 'ZEROPLUS', line=390)
+W('20,3013', 0o64753, '', 'AD', 'BIT1', line=391)
+
+W('20,3014', 0o56161, 'ZEROPLUS', 'XCH', 'SCRATCHY', 'STORE ABS(DIVISOR).  PICK UP TOP HALF OF', line=393)
+W('20,3015', 0o00006, '', 'EXTEND', '', 'DIVIDEND.', line=394)
+W('20,3016', 0o63020, '', 'BZMF', 'GOODNEG', 'GET -ABS(DIVIDEND)', line=395)
+# Page 1493
+W('20,3017', 0o40000, '', 'CS', 'A', line=397)
+
+W('20,3020', 0o60161, 'GOODNEG', 'AD', 'SCRATCHY', 'ABS(DIVISOR) - ABS(DIVIDEND)', line=399)
+W('20,3021', 0o00006, '', 'EXTEND', line=400)
+W('20,3022', 0o63027, '', 'BZMF', 'MAKEMAX', 'BRANCH IF DIVISION IS NOT PROPER.', line=401)
+
+W('20,3023', 0o30160, '', 'CA', 'SCRATCHX', 'RE-ESTABLISH THE DIVIDEND', line=403)
+W('20,3024', 0o00006, '', 'EXTEND', line=404)
+W('20,3025', 0o10162, '', 'DV', 'SCRATCHZ', 'QUOTIENT IN THE A, REMAINDER IN L.', line=405)
+W('20,3026', 0o00002, '', 'TC', 'Q', 'RETURN TO CALLER.', line=406)
+
+W('20,3027', 0o10160, 'MAKEMAX', 'CCS', 'SCRATCHX', 'DETERMINE THE SIGN OF THE QUOTIENT.', line=408)
+W('20,3030', 0o10162, '', 'CCS', 'SCRATCHZ', 'SCRATCHX AND SCRATCHZ ARE NON-ZERO.', line=409)
+W('20,3031', 0o13035, '', 'TCF', 'MAXPLUS', line=410)
+W('20,3032', 0o10162, '', 'CCS', 'SCRATCHZ', line=411)
+W('20,3033', 0o34735, '', 'CAF', 'NEGMAX', '+,- OR -,+', line=412)
+W('20,3034', 0o00002, '', 'TC', 'Q', line=413)
+W('20,3035', 0o34733, 'MAXPLUS', 'CAF', 'POSMAX', '-,- OR +,+', line=414)
+W('20,3036', 0o00002, '', 'TC', 'Q', line=415)
+
+# COEFFICIENTS FOR THE JET ACCELERATION CURVE FITS
+# THE CURVE FITS ARE OF THE FORM --
+#
+# 1JACC = A/(MASS + C) + B
+#
+# A IS SCALED AT PI/4 RAD/SEC**2 B+16KG, B IS SCALED AT PI/4 RAD/SEC**2, AND C IS SCALED AT B +16 KG.
+#
+# THE CURVE FIT FOR L,PVT-CG IS OF THE SAME FORM, EXCEPT THAT A IS SCALED AT 8 FT B+16 KG, B IS SCALED AT 8 FT,
+# AND C IS SCALED AT B+16 KG.
+
+W('20,3037', 0o01240, '', '2DEC', '+.0410511917', 'L             A               DESCENT', kind='data', line=427)
+W('20,3040', 0o22513, kind='data', line=427)
+
+W('20,3041', 0o00141, 'INERCONA', '2DEC', '+.0059347674', '1JACCP        A               DESCENT', kind='data', line=429)
+W('20,3042', 0o07416, kind='data', line=429)
+
+W('20,3043', 0o00030, '', '2DEC', '+.0014979264', '1JACCQ        A               DESCENT', kind='data', line=431)
+W('20,3044', 0o21261, kind='data', line=431)
+
+W('20,3045', 0o00021, '', '2DEC', '+.0010451889', '1JACCR        A               DESCENT', kind='data', line=433)
+W('20,3046', 0o03766, kind='data', line=433)
+
+W('20,3047', 0o00153, '', '2DEC', '+.0065443852', '1JACCP        A               ASCENT', kind='data', line=435)
+W('20,3050', 0o07111, kind='data', line=435)
+
+W('20,3051', 0o00072, '', '2DEC', '+.0035784354', '1JACCQ        A               ASCENT', kind='data', line=437)
+W('20,3052', 0o24103, kind='data', line=437)
+
+W('20,3053', 0o00135, '', '2DEC', '+.0056946631', '1JACCR        A               ASCENT', kind='data', line=439)
+W('20,3054', 0o11511, kind='data', line=439)
+
+W('20,3055', 0o04754, '', 'DEC', '+.155044', 'L             B               DESCENT', kind='data', line=441)
+W('20,3056', 0o77142, '', 'DEC', '-.025233', 'L             C               DESCENT', kind='data', line=442)
+# Page 1494
+W('20,3057', 0o00061, 'INERCONB', 'DEC', '+.002989', '1JACCP        B               DESCENT', kind='data', line=444)
+W('20,3060', 0o00217, 'INERCONC', 'DEC', '+.008721', '1JACCP        C               DESCENT', kind='data', line=445)
+W('20,3061', 0o00464, '', 'DEC', '+.018791', '1JACCQ        B               DESCENT', kind='data', line=446)
+W('20,3062', 0o75642, '', 'DEC', '-.068163', '1JACCQ        C               DESCENT', kind='data', line=447)
+W('20,3063', 0o00536, '', 'DEC', '+.021345', '1JACCR        B               DESCENT', kind='data', line=448)
+W('20,3064', 0o75705, '', 'DEC', '-.066027', '1JACCR        C               DESCENT', kind='data', line=449)
+
+W('20,3065', 0o00001, '', 'DEC', '+.000032', '1JACCP        B               ASCENT', kind='data', line=451)
+W('20,3066', 0o77616, '', 'DEC', '-.006923', '1JACCP        C               ASCENT', kind='data', line=452)
+W('20,3067', 0o05154, '', 'DEC', '+.162862', '1JACCQ        B               ASCENT', kind='data', line=453)
+W('20,3070', 0o00052, '', 'DEC', '+.002588', '1JACCQ        C               ASCENT', kind='data', line=454)
+W('20,3071', 0o00231, '', 'DEC', '+.009312', '1JACCR        B               ASCENT', kind='data', line=455)
+W('20,3072', 0o77174, '', 'DEC', '-.023608', '1JACCR        C               ASCENT', kind='data', line=456)
+
+W('20,3073', 0o01400, 'GIMBLBTS', 'OCTAL', '01400', kind='data', line=458)
+W('20,3074', 0o01000, '', 'OCTAL', '01000', kind='data', line=459)
+W('20,3075', 0o06000, '', 'OCTAL', '06000', kind='data', line=460)
+W('20,3076', 0o04000, '', 'OCTAL', '04000', kind='data', line=461)
+W('20,3077', 0o23146, 'DGBF', 'DEC', '0.6', '.3 SCALED AT 1/2', kind='data', line=462)
+W('20,3100', 0o13241, '0.35356', 'DEC', '0.35356', '.70711 SCALED AT 2', kind='data', line=463)
+W('20,3101', 0o00337, 'GFACTM', 'OCT', '337', '979.24/2.20462 AT B+15', kind='data', line=464)
+W('20,3102', 0o26501, '.7071', 'DEC', '.70711', kind='data', line=465)
+W('20,3103', 0o51276, '-.7071', 'DEC', '-.70711', kind='data', line=466)
+W('20,3104', 0o62362, '-EPSMAX', 'DEC', '-.42265', kind='data', line=467)
+
+# CSM-DOCKED INERTIA COMPUTATIONS
+
+W('20,3105', 0o34753, 'DOCKED', 'CA', 'ONE', 'COEFTR  = 1 FOR INERTIA COEFFICIENTS', line=471)
+W('20,3106', 0o54160, 'SPSLOOP1', 'TS', 'COEFCTR', '        = 7 FOR CG COEFFICIENTS', line=472)
+W('20,3107', 0o34753, '', 'CA', 'ONE', 'MASSCTR = 1 FOR CSM', line=473)
+W('20,3110', 0o54161, '', 'TS', 'MASSCTR', '        = 0 FOR LEM', line=474)
+
+W('20,3111', 0o50160, '', 'INDEX', 'COEFCTR', line=476)
+W('20,3112', 0o33212, '', 'CA', 'COEFF -1', 'COEFF -1 = C', line=477)
+W('20,3113', 0o00006, '', 'EXTEND', line=478)
+W('20,3114', 0o71331, '', 'MP', 'LEMMASS', line=479)
+W('20,3115', 0o00006, '', 'EXTEND', line=480)
+W('20,3116', 0o71332, '', 'MP', 'CSMMASS', 'LET X = CSMMASS AND Y = LEMMASS', line=481)
+
+W('20,3117', 0o50160, '', 'INDEX', 'COEFCTR', line=483)
+W('20,3120', 0o63213, '', 'AD', 'COEFF', 'COEFF = F', line=484)
+W('20,3121', 0o54154, '', 'TS', 'MPAC', 'MPAC = C X Y + F', line=485)
+W('20,3122', 0o13126, '', 'TCF', '+4', line=486)
+
+W('20,3123', 0o54161, 'SPSLOOP2', 'TS', 'MASSCTR', 'LOOP TWICE THROUGH HERE TO OBTAIN', line=488)
+W('20,3124', 0o00006, '', 'EXTEND', '', 'MPAC = MPAC + (A X +D)X + (B Y +E)Y', line=489)
+W('20,3125', 0o26160, '', 'DIM', 'COEFCTR', '               LOOP #1     LOOP #2', line=490)
+W('20,3126', 0o50160, '', 'INDEX', 'COEFCTR', line=491)
+W('20,3127', 0o33215, '', 'CA', 'COEFF +2', 'COEFF +2 = A OR B', line=492)
+W('20,3130', 0o00006, '', 'EXTEND', line=493)
+# Page 1495
+W('20,3131', 0o50161, '', 'INDEX', 'MASSCTR', line=495)
+W('20,3132', 0o71331, '', 'MP', 'LEMMASS', line=496)
+W('20,3133', 0o50160, '', 'INDEX', 'COEFCTR', line=497)
+W('20,3134', 0o63217, '', 'AD', 'COEFF +4', 'COEFF +4 = E OR D', line=498)
+W('20,3135', 0o00006, '', 'EXTEND', line=499)
+W('20,3136', 0o50161, '', 'INDEX', 'MASSCTR', line=500)
+W('20,3137', 0o71331, '', 'MP', 'LEMMASS', line=501)
+W('20,3140', 0o26154, '', 'ADS', 'MPAC', line=502)
+
+W('20,3141', 0o10161, '', 'CCS', 'MASSCTR', line=504)
+W('20,3142', 0o13123, '', 'TCF', 'SPSLOOP2', line=505)
+W('20,3143', 0o10160, '', 'CCS', 'COEFCTR', 'IF COEFCTR IS POS, EXIT FROM LOOP WITH', line=506)
+W('20,3144', 0o13153, '', 'TCF', '+7', 'CG X DELDOT = MPAC X 4 PI RAD-CM/SEC', line=507)
+W('20,3145', 0o00000, 'TORQCONS', '2DEC', '0.51443 B-14', 'CORRESPONDS TO 500 LB-FT', kind='data', line=508)
+W('20,3146', 0o20354, kind='data', line=508)
+
+W('20,3147', 0o30154, '', 'CA', 'MPAC', line=510)
+W('20,3150', 0o54155, '', 'TS', 'MPAC +1', 'INERTIA = (MPAC +1) X 2(38) KG-CM(2)', line=511)
+W('20,3151', 0o34757, '', 'CA', 'SEVEN', line=512)
+W('20,3152', 0o13106, '', 'TCF', 'SPSLOOP1', line=513)
+
+W('20,3153', 0o33212, '', 'CA', '1JACCCON', '1JACC=1JACCCON/MASS', line=515)
+W('20,3154', 0o22007, '', 'ZL', line=516)
+W('20,3155', 0o02776, '', 'TC', 'DVOVSUB', line=517)
+W('20,3156', 0o01244, '', 'ADRES', 'MASS', kind='data', line=518)
+W('20,3157', 0o55530, '', 'TS', '1JACC', 'SCALED AT PI/4', line=519)
+
+W('20,3160', 0o34733, '', 'CA', 'POSMAX', 'SET INVERSE JET ACCELERATIONS TO POSMAX,', line=521)
+W('20,3161', 0o55551, '', 'TS', '1/ANETP', 'WHICH CORRESPONDS TO ACCEL. OF 1.4 D/SS.', line=522)
+W('20,3162', 0o55571, '', 'TS', '1/ANET2 +1', line=523)
+W('20,3163', 0o55572, '', 'TS', '1/ANET2 +2', line=524)
+W('20,3164', 0o55611, '', 'TS', '1/ANET2 +17D', line=525)
+W('20,3165', 0o55612, '', 'TS', '1/ANET2 +18D', line=526)
+W('20,3166', 0o00006, '', 'EXTEND', line=527)
+W('20,3167', 0o33146, '', 'DCA', 'TORQCONS', line=528)
+W('20,3170', 0o00006, '', 'EXTEND', line=529)
+W('20,3171', 0o10155, '', 'DV', 'MPAC +1', line=530)
+W('20,3172', 0o00004, '', 'INHINT', line=531)
+W('20,3173', 0o55531, '', 'TS', '1JACCQ', 'SCALED AT PI/4', line=532)
+W('20,3174', 0o55532, '', 'TS', '1JACCR', line=533)
+
+W('20,3175', 0o33103, '', 'CA', '-.7071', line=535)
+W('20,3176', 0o55627, '', 'TS', 'COEFFQ', 'COEFFQ AND COEFFR ARE CHOSEN TO MAKE U-', line=536)
+W('20,3177', 0o33102, '', 'CA', '.7071', 'AND V-AXES ORTHOGONAL FOR DOCKED CASE', line=537)
+W('20,3200', 0o55630, '', 'TS', 'COEFFR', line=538)
+W('20,3201', 0o31244, '', 'CA', 'MASS', 'SCALED AT 2(16) KG', line=539)
+W('20,3202', 0o00006, '', 'EXTEND', line=540)
+W('20,3203', 0o70154, '', 'MP', 'MPAC', 'SCALED AT 4 PI RAD-CM/SEC', line=541)
+W('20,3204', 0o00006, '', 'EXTEND', line=542)
+W('20,3205', 0o71246, '', 'MP', 'ABDELV', 'SCALED AT 2(13) CM/SEC(2)', line=543)
+W('20,3206', 0o02776, '', 'TC', 'DVOVSUB', 'GET QUOTIENT WITH OVERFLOW PROTECTION', line=544)
+# Page 1496
+W('20,3207', 0o00155, '', 'ADRES', 'MPAC +1', kind='data', line=546)
+
+W('20,3210', 0o55511, '', 'TS', 'ACCDOTR', line=548)
+W('20,3211', 0o12712, '', 'TCF', 'SPSCONT', 'CONTINUE K, KSQ CALCULATIONS', line=549)
+
+W('20,3212', 0o00167, '1JACCCON', 'OCT', '00167', 'SCALED AT PI/4X2(16) RAD/SEC(2)-KG', kind='data', line=551)
+
+# 2     2
+# COEFFICIENTS FOR CURVE FIT OF THE FORM Z = A X  +B Y  +C X Y +D X +E Y +F
+
+W('20,3213', 0o06176, 'COEFF', 'DEC', '.19518', 'C  COEFFICIENT OF INERTIA', kind='data', line=556)
+W('20,3214', 0o77650, '', 'DEC', '-.00529', 'F             "', kind='data', line=557)
+W('20,3215', 0o72260, '', 'DEC', '-.17670', 'B             "', kind='data', line=558)
+W('20,3216', 0o76637, '', 'DEC', '-.03709', 'A             "', kind='data', line=559)
+W('20,3217', 0o02167, '', 'DEC', '.06974', 'E             "', kind='data', line=560)
+W('20,3220', 0o00645, '', 'DEC', '.02569', 'D             "', kind='data', line=561)
+
+W('20,3221', 0o06335, '', 'DEC', '.20096', 'C  COEFFICIENT OF CG', kind='data', line=563)
+W('20,3222', 0o04256, '', 'DEC', '.13564', 'F          "', kind='data', line=564)
+W('20,3223', 0o30163, '', 'DEC', '.75704', 'B          "', kind='data', line=565)
+W('20,3224', 0o64072, '', 'DEC', '-.37142', 'A          "', kind='data', line=566)
+W('20,3225', 0o53632, '', 'DEC', '-.63117', 'E          "', kind='data', line=567)
+W('20,3226', 0o15133, '', 'DEC', '.41179', 'D          "', kind='data', line=568)
+
+# ASSIGNMENT OF TEMPORARIES FOR 1/ACCS (EXCLUDING 1/ACCONT)
+# MPAC, MPAC +1, MPAC +2  USED EXPLICITLY
+S('COEFCTR', 'equals', 0o160, line=572)
+S('MASSCTR', 'equals', 0o161, line=573)
+S('SCRATCHX', 'equals', 0o160, line=574)  # SCRATCH AREA FOR DVOVSUB ROUTINE.
+S('SCRATCHY', 'equals', 0o161, line=575)
+S('SCRATCHZ', 'equals', 0o162, line=576)
+
+S('DOCKTEMP', 'equals', 0o157, line=578)  # RECORD OF CSMDOCKED BIT OF DAPBOOLS
+S('EPSILON', 'equals', 0o155, line=579)
+S('-EPSILON', 'equals', 0o155, line=580)
+W('20,3227', 0o71777, '-.1875', 'DEC', '-.18750', kind='data', line=581)
+
+# Page 1497
+#   BANK 20
+#   SETLOC DAPS3
+#   BANK
+
+#   EBANK= AOSQ
+
+#   COUNT* $$/DAPAO
+
+W('20,3230', 0o55633, '', 'TS', 'INGTS', 'ZERO INGTS IN ASCENT', line=592)
+W('20,3231', 0o31346, '1/ACCONT', 'CA', 'DB', 'INITIALIZE DBVAL1,2,3', line=593)
+W('20,3232', 0o00006, '', 'EXTEND', line=594)
+W('20,3233', 0o74737, '', 'MP', 'BIT13', line=595)
+W('20,3234', 0o54001, '', 'TS', 'L', '0.25 DB', line=596)
+W('20,3235', 0o60000, '', 'AD', 'A', line=597)
+W('20,3236', 0o54115, '', 'TS', 'DBVAL3', '0.50 DB', line=598)
+W('20,3237', 0o41346, '', 'CS', 'DBVAL1', line=599)
+W('20,3240', 0o60001, '', 'AD', 'L', line=600)
+W('20,3241', 0o54114, '', 'TS', 'DBVAL2', '-.75 DB', line=601)
+
+W('20,3242', 0o00004, 'GETAOSUV', 'INHINT', line=603)
+W('20,3243', 0o31541, '', 'CAE', 'AOSR', 'COMPUTE ASOU AND AOSV BY ROTATING', line=604)
+W('20,3244', 0o54001, '', 'TS', 'L', '      AOSQ AND AOSR.', line=605)
+W('20,3245', 0o31537, '', 'CAE', 'AOSQ', line=606)
+W('20,3246', 0o04674, '', 'TC', 'IBNKCALL', line=607)
+W('20,3247', 0o37146, '', 'CADR', 'ROT-TOUV', kind='data', line=608)
+W('20,3250', 0o53544, '', 'DXCH', 'AOSU', line=609)
+
+W('20,3251', 0o00003, '', 'RELINT', line=611)
+W('20,3252', 0o30111, '', 'CA', 'DAPBOOLS', line=612)
+W('20,3253', 0o74744, '', 'MASK', 'DRIFTBIT', 'ZERO DURING ULLAGE AND POWERED FLIGHT.', line=613)
+W('20,3254', 0o10000, '', 'CCS', 'A', 'IF DRIFTING LIGHT,', line=614)
+W('20,3255', 0o34753, '', 'CA', 'ONE', '      SET DRIFTER TO 1', line=615)
+W('20,3256', 0o54116, '', 'TS', 'DRIFTER', 'SAVE TO TEST FOR DRIFTING FLIGHT LATER', line=616)
+W('20,3257', 0o61502, '', 'AD', 'ALLOWGTS', 'NON-ZERO IF DRIFT OR GTS NEAR', line=617)
+W('20,3260', 0o10000, '', 'CCS', 'A', line=618)
+W('20,3261', 0o33763, '', 'CA', 'FLATVAL', 'DRIFTING FLIGHT, STORE .8 IN FLAT', line=619)
+W('20,3262', 0o54151, '', 'TS', 'FLATEMP', 'IN POWERED FLIGHT, STORE ZERO IN FLAT', line=620)
+W('20,3263', 0o00006, '', 'EXTEND', line=621)
+W('20,3264', 0o13270, '', 'BZF', 'DOPAXIS', 'IF POWERED AND NO GTS, START P AXIS,', line=622)
+W('20,3265', 0o10116, '', 'CCS', 'DRIFTER', 'OTHERWISE SET ZONE3LIM', line=623)
+W('20,3266', 0o33762, '', 'CA', 'ZONE3MAX', '17.5 MS, SCALED AT 4 SECONDS.', line=624)
+W('20,3267', 0o54152, '', 'TS', 'Z3TEM', line=625)
+
+W('20,3270', 0o31530, 'DOPAXIS', 'CA', '1JACC', '1JACC AT PI/4 = 2JACC AT PI/2 =', line=627)
+# ANET AT PI/2 = ANET/ACOAST AT 2(6).
+W('20,3271', 0o64743, '', 'AD', 'BIT9', '1 + ANET/ACOAST AT 2(6)', line=629)
+W('20,3272', 0o54157, '', 'TS', 'FUNTEM', line=630)
+
+W('20,3273', 0o31530, '', 'CA', '1JACC', line=632)
+# Page 1498
+W('20,3274', 0o03700, '', 'TC', 'INVERT', line=634)
+W('20,3275', 0o00004, '', 'INHINT', '', 'P AXIS DATA MUST BE CONSISTENT', line=635)
+W('20,3276', 0o55551, '', 'TS', '1/ANETP', 'SCALED AT 2(7)/PI.', line=636)
+W('20,3277', 0o55552, '', 'TS', '1/ANETP +1', line=637)
+
+W('20,3300', 0o44743, '', 'CS', 'BIT9', '-1 AT 2(6)', line=639)
+W('20,3301', 0o00006, '', 'EXTEND', line=640)
+W('20,3302', 0o71551, '', 'MP', '1/ANETP', '-1/ANET AT 2(13)/PI', line=641)
+W('20,3303', 0o00006, '', 'EXTEND', line=642)
+W('20,3304', 0o10157, '', 'DV', 'FUNTEM', '-1/(ANET + ANET**2/ACOAST) AT 2(7)/PI', line=643)
+W('20,3305', 0o55557, '', 'TS', 'PACCFUN', line=644)
+W('20,3306', 0o55560, '', 'TS', 'PACCFUN +1', line=645)
+
+W('20,3307', 0o34733, '', 'CA', '1/.03', 'NO AOS FOR P AXIS, ACOAST = AMIN', line=647)
+W('20,3310', 0o55553, '', 'TS', '1/ACOSTP', line=648)
+W('20,3311', 0o55554, '', 'TS', '1/ACOSTP +1', line=649)
+W('20,3312', 0o00003, '', 'RELINT', line=650)
+
+W('20,3313', 0o22007, '', 'ZL', line=652)
+W('20,3314', 0o10116, '', 'CCS', 'DRIFTER', line=653)
+W('20,3315', 0o53544, '', 'DXCH', 'AOSU', 'ZERO AOSU,V IF IN DRIFT, JUST TO BE SURE', line=654)
+
+W('20,3316', 0o34755, 'UAXIS', 'CA', 'ZERO', 'DO U AXIS COMPUTATIONS', line=656)
+W('20,3317', 0o54154, '', 'TS', 'UV', 'ZERO FOR U AXIS, ONE FOR V AXIS.', line=657)
+
+W('20,3320', 0o54163, 'BOTHAXES', 'TS', 'SIGNAOS', 'CODING COMMON TO U,V AXES', line=659)
+W('20,3321', 0o50154, '', 'INDEX', 'UV', line=660)
+W('20,3322', 0o11543, '', 'CCS', 'AOSU', 'PICK UP ABS(AOSU OR AOSV)', line=661)
+W('20,3323', 0o64753, '', 'AD', 'ONE', 'RESTORE TO PROPER VALUE', line=662)
+W('20,3324', 0o13327, '', 'TCF', '+3', 'AND LEAVE SIGNAOS AT ZERO', line=663)
+W('20,3325', 0o64753, '', 'AD', 'ONE', 'NEGATIVE, RESTORE TO PROPER VALUE', line=664)
+W('20,3326', 0o24163, '', 'INCR', 'SIGNAOS', 'AND SET SIGNAOS TO ONE TO SHOW AOS NEG', line=665)
+W('20,3327', 0o54162, '', 'TS', 'ABSAOS', 'SAVE ABS(AOS)', line=666)
+W('20,3330', 0o40163, '', 'CS', 'SIGNAOS', line=667)
+W('20,3331', 0o54164, '', 'TS', '-SIGNAOS', 'USED AS AN INDEX', line=668)
+
+W('20,3332', 0o31346, '', 'CA', 'DBVAL1', 'SET DB1, DB2 TO DBVAL1 (= DB)', line=670)
+W('20,3333', 0o54143, '', 'TS', 'DBB1', line=671)
+W('20,3334', 0o54144, '', 'TS', 'DBB2', line=672)
+
+W('20,3335', 0o30162, '', 'CA', 'ABSAOS', 'TEST MAGNITUDE OF ABS(AOS)', line=674)
+W('20,3336', 0o63764, '', 'AD', '-.03R/S2', line=675)
+W('20,3337', 0o00006, '', 'EXTEND', line=676)
+W('20,3340', 0o63432, '', 'BZMF', 'NOTMUCH', 'ABS(AOS) LESS THAN AMIN', line=677)
+W('20,3341', 0o10151, 'BIGAOS', 'CCS', 'FLATEMP', 'AGS(AOS) GREATER THAN AMIN', line=678)
+W('20,3342', 0o13372, '', 'TCF', 'SKIPDB1', 'I DRIFT OR GTS, DO NOT COMPUTE DB', line=679)
+
+W('20,3343', 0o31346, '', 'CA', 'DBVAL1', line=681)
+W('20,3344', 0o50164, '', 'INDEX', '-SIGNAOS', line=682)
+# Page 1499
+W('20,3345', 0o26144, '', 'ADS', 'DBB2', 'DB2(1) = 2 DB', line=684)
+W('20,3346', 0o50163, '', 'INDEX', 'SIGNAOS', line=685)
+W('20,3347', 0o54145, '', 'TS', 'DBB4', 'DB4(3) = 1 DB', line=686)
+W('20,3350', 0o33227, '', 'CA', '-.1875', '-.1875 PI/2 RAD/SEC(2) SCALED AT PI/2', line=687)
+W('20,3351', 0o60162, '', 'AD', 'ABSAOS', 'ABSAOS IS SCALED AT PI/2', line=688)
+W('20,3352', 0o00006, '', 'EXTEND', line=689)
+W('20,3353', 0o63356, '', 'BZMF', '+3', line=690)
+W('20,3354', 0o40115, '', 'CS', 'DBVAL3', '-.5 DB', line=691)
+W('20,3355', 0o13365, '', 'TCF', 'DBONE', line=692)
+W('20,3356', 0o40162, '', 'CS', 'ABSAOS', line=693)
+W('20,3357', 0o60000, '', 'DOUBLE', line=694)
+W('20,3360', 0o60000, '', 'DOUBLE', line=695)
+W('20,3361', 0o64736, '', 'AD', 'BIT14', line=696)
+W('20,3362', 0o60000, '', 'DOUBLE', '', '1-8 ABSAOS.  (8 IS 16/PI SCALED AT 2/PI)', line=697)
+W('20,3363', 0o00006, '', 'EXTEND', line=698)
+W('20,3364', 0o71346, '', 'MP', 'DB', line=699)
+W('20,3365', 0o50163, 'DBONE', 'INDEX', 'SIGNAOS', 'DB1(2)=(1-8 ABSAOS) DB.  IF ABSAOS IS', line=700)
+W('20,3366', 0o54143, '', 'TS', 'DBB1', 'GREATER THAN .1875 THEN DB1(2) = -.5 DB', line=701)
+W('20,3367', 0o30114, '', 'CA', 'DBVAL2', line=702)
+W('20,3370', 0o50164, '', 'INDEX', '-SIGNAOS', line=703)
+W('20,3371', 0o54146, '', 'TS', 'DBB3', 'DB3(4) = -.75 DB', line=704)
+
+W('20,3372', 0o30162, 'SKIPDB1', 'CA', 'ABSAOS', 'ABS(AOS) GREATER THAN AMIN, SO IT IS', line=706)
+W('20,3373', 0o00006, '', 'EXTEND', line=707)
+W('20,3374', 0o74740, '', 'MP', 'BIT12', line=708)
+W('20,3375', 0o60162, '', 'AD', 'ABSAOS', '(9/8) ABSAOS.', line=709)
+W('20,3376', 0o03700, '', 'TC', 'INVERT', 'ALL RIGHT TO DIVIDE', line=710)
+W('20,3377', 0o50164, '', 'INDEX', '-SIGNAOS', line=711)
+W('20,3400', 0o54130, '', 'TS', '1/ACOSTT +1', '1/ACOASTPOS(NET) = 1/ABS(AOS)', line=712)
+W('20,3401', 0o34733, '', 'CA', '1/.03', line=713)
+W('20,3402', 0o50163, '', 'INDEX', 'SIGNAOS', line=714)
+W('20,3403', 0o54127, '', 'TS', '1/ACOSTT', '1/ACOASTNEG(POS) = 1/AIN', line=715)
+
+W('20,3404', 0o30162, '', 'CA', 'ABSAOS', line=717)
+W('20,3405', 0o61533, '', 'AD', '1JACCU', line=718)
+W('20,3406', 0o61533, '', 'AD', '1JACCU', '2 JACC + ABS(AOS)', line=719)
+W('20,3407', 0o64743, '', 'AD', 'BIT9', 'MAXIMUM VALUE IN COMPUTATIONS', line=720)
+W('20,3410', 0o54000, '', 'TS', 'A', 'TEST FOR OVERFLOW', line=721)
+W('20,3411', 0o13456, '', 'TCF', 'SKIPDB2', 'NO OVERFLOW, DO NORMAL COMPUTATION', line=722)
+
+W('20,3412', 0o30162, '', 'CA', 'ABSAOS', 'RESCALE TO PI TO PREVENT OVERFLOW', line=724)
+W('20,3413', 0o00006, '', 'EXTEND', line=725)
+W('20,3414', 0o74736, '', 'MP', 'BIT14', line=726)
+W('20,3415', 0o61533, '', 'AD', '1JACCU', '1 JACC AT PI/2 = 2JACC AT PI', line=727)
+W('20,3416', 0o54157, '', 'TS', 'ANET', 'ANETPOS(NEG) MAX SCALED AT PI =', line=728)
+# ANETPOS(NEG) MAX/ACOASTNEG(POS) AT 2(7)
+W('20,3417', 0o64744, '', 'AD', 'BIT8', '1 + ANETPOS/ACOASTNEG AT 2(7)', line=730)
+W('20,3420', 0o56157, '', 'XCH', 'ANET', 'SAVE IN ANET, WHILE PICKING UP ANET', line=731)
+W('20,3421', 0o03700, '', 'TC', 'INVERT', line=732)
+W('20,3422', 0o00006, '', 'EXTEND', line=733)
+# Page 1500
+W('20,3423', 0o74736, '', 'MP', 'BIT14', 'SCALE 1/ANET AT 2(7)/PI', line=735)
+W('20,3424', 0o54160, '', 'TS', '1/ANET', line=736)
+
+W('20,3425', 0o33431, '', 'CA', 'ACCHERE', 'SET UP RETURN FROM COMPUTATION ROUTINE', line=738)
+W('20,3426', 0o54161, '', 'TS', 'ARET', line=739)
+W('20,3427', 0o44744, '', 'CS', 'BIT8', '-1 AT 2(7)', line=740)
+W('20,3430', 0o13733, '', 'TCF', 'DOACCFUN', 'FINISH ACCFUN COMPUTATION', line=741)
+
+W('20,3431', 0o13463, 'ACCHERE', 'TCF', 'ACCTHERE', line=743)
+
+W('20,3432', 0o54001, 'NOTMUCH', 'TS', 'L', 'ABS(AOS) LESS THAN AMIN, SAVE IN L', line=745)
+W('20,3433', 0o34733, '', 'CA', '1/.03', 'ACOASTPOS,NEG = AMIN', line=746)
+W('20,3434', 0o54127, '', 'TS', '1/ACOSTT', line=747)
+W('20,3435', 0o54130, '', 'TS', '1/ACOSTT +1', line=748)
+
+W('20,3436', 0o10151, '', 'CCS', 'FLATEMP', line=750)
+W('20,3437', 0o13456, '', 'TCF', 'SKIPDB2', 'DO NOT COMPUTE DB IF DRIFT OR GTS', line=751)
+
+W('20,3440', 0o34744, '', 'CA', '.0125RS', 'AMIN/2', line=753)
+W('20,3441', 0o60001, '', 'AD', 'L', 'L HAS ABS(AOS) - AMIN', line=754)
+W('20,3442', 0o00006, '', 'EXTEND', '', 'RESULT IS ABS(AOS)- AMIN/2', line=755)
+W('20,3443', 0o63453, '', 'BZMF', 'NOAOS', 'ABS(AOS) LESS THAN AMIN/2', line=756)
+
+W('20,3444', 0o30115, 'SOMEAOS', 'CA', 'DBVAL3', 'AMIN/2 LT ABS(AOS) LT AMIN', line=758)
+W('20,3445', 0o50164, '', 'INDEX', '-SIGNAOS', line=759)
+W('20,3446', 0o54146, '', 'TS', 'DBB3', 'DB3(4) = DB/2', line=760)
+W('20,3447', 0o60000, '', 'AD', 'A', line=761)
+W('20,3450', 0o50163, '', 'INDEX', 'SIGNAOS', line=762)
+W('20,3451', 0o54145, '', 'TS', 'DBB4', 'DB4(3) = DB', line=763)
+W('20,3452', 0o13456, '', 'TCF', 'SKIPDB2', line=764)
+
+W('20,3453', 0o31346, 'NOAOS', 'CA', 'DBVAL1', line=766)
+W('20,3454', 0o54146, '', 'TS', 'DBB3', 'DB3,4 = DB', line=767)
+W('20,3455', 0o54145, '', 'TS', 'DBB4', line=768)
+
+W('20,3456', 0o30162, 'SKIPDB2', 'CA', 'ABSAOS', 'ANETPOS(NEG) MAX = 2 JACC + ABS(AOS)', line=770)
+W('20,3457', 0o61533, '', 'AD', '1JACCU', line=771)
+W('20,3460', 0o61533, '', 'AD', '1JACCU', line=772)
+W('20,3461', 0o54157, '', 'TS', 'ANET', 'CANNOT OVERFLOW HERE', line=773)
+W('20,3462', 0o03724, 'CL1/NET+', 'TC', 'DO1/NET+', 'COMPUTE 1/ANET, ACCFUN', line=774)
+
+W('20,3463', 0o50164, 'ACCTHERE', 'INDEX', '-SIGNAOS', line=776)
+W('20,3464', 0o54134, '', 'TS', 'Z5TEM +2', 'STORE ACCFUN IN TEMPORARY BUFFER', line=777)
+W('20,3465', 0o30160, '', 'CA', '1/ANET', line=778)
+W('20,3466', 0o50164, '', 'INDEX', '-SIGNAOS', line=779)
+W('20,3467', 0o54126, '', 'TS', '1/ATEM2 +2', 'STORE 1/ANET IN TEMPORARY BUFFER', line=780)
+
+W('20,3470', 0o30162, '', 'CA', 'ABSAOS', 'SEE IF OVERFLOW IN MIN CASE', line=782)
+W('20,3471', 0o61533, '', 'AD', '1JACCU', line=783)
+# Page 1501
+W('20,3472', 0o64743, '', 'AD', 'BIT9', 'MAXIMUM POSSIBLE VALUE', line=785)
+W('20,3473', 0o54000, '', 'TS', 'A', 'OVERFLOW POSSIBLE BUT REMOTE', line=786)
+W('20,3474', 0o13476, '', 'TCF', '+2', line=787)
+W('20,3475', 0o34733, '', 'CA', 'POSMAX', 'IF OVERFLOW, TRUNCATE TO PI/2', line=788)
+W('20,3476', 0o63764, '', 'AD', '-.03R/S2', 'RESTORE TO CORRECT VALUE', line=789)
+W('20,3477', 0o54157, '', 'TS', 'ANET', line=790)
+W('20,3500', 0o03724, '', 'TC', 'DO1/NET+', 'COMPUTE 1/ANET, ACCFUN', line=791)
+
+W('20,3501', 0o50164, '', 'INDEX', '-SIGNAOS', 'STORE MIN VALUES JUST AS MAX VALUES', line=793)
+W('20,3502', 0o54132, '', 'TS', 'Z5TEM', line=794)
+W('20,3503', 0o30160, '', 'CA', '1/ANET', line=795)
+W('20,3504', 0o50164, '', 'INDEX', '-SIGNAOS', line=796)
+W('20,3505', 0o54124, '', 'TS', '1/ATEM2', line=797)
+
+W('20,3506', 0o40162, '', 'CS', 'ABSAOS', 'NOW DO NEG(POS) CASES', line=799)
+W('20,3507', 0o61533, '', 'AD', '1JACCU', line=800)
+W('20,3510', 0o61533, '', 'AD', '1JACCU', 'ANETNEG(POS) MAX', line=801)
+W('20,3511', 0o03712, '', 'TC', '1/ANET-', 'COMPUTE 1/ANET, ACCFUN, AND ACCSW', line=802)
+W('20,3512', 0o50163, '', 'INDEX', 'SIGNAOS', 'STORE NEG(POS) VALUES JUST AS POS(NEG)', line=803)
+W('20,3513', 0o54133, '', 'TS', 'Z1TEM +2', line=804)
+W('20,3514', 0o54001, '', 'TS', 'L', 'SAVE IN L FOR POSSIBLE FUTURE USE', line=805)
+W('20,3515', 0o30160, '', 'CA', '1/ANET', line=806)
+W('20,3516', 0o50163, '', 'INDEX', 'SIGNAOS', line=807)
+W('20,3517', 0o54125, '', 'TS', '1/ATEM1 +2', line=808)
+W('20,3520', 0o40162, '', 'CS', 'ABSAOS', line=809)
+W('20,3521', 0o61533, '', 'AD', '1JACCU', '1/ANETNEG(POS) MIN', line=810)
+W('20,3522', 0o54157, '', 'TS', 'ANET', line=811)
+W('20,3523', 0o63764, '', 'AD', '-.03R/S2', 'TEST FOR AMIN', line=812)
+W('20,3524', 0o00006, '', 'EXTEND', '', 'IF ANET LESS THAN AMIN, STORE MAX JET', line=813)
+W('20,3525', 0o63743, '', 'BZMF', 'FIXMIN', 'VALUES FOR MIN JETS AND SET ACCSW', line=814)
+
+W('20,3526', 0o03720, '', 'TC', '1/NETMIN', 'OTHERWISE DO MIN JET COMPUTATIONS', line=816)
+W('20,3527', 0o50163, 'STMIN-', 'INDEX', 'SIGNAOS', 'STORE VALUES', line=817)
+W('20,3530', 0o54131, '', 'TS', 'Z1TEM', line=818)
+W('20,3531', 0o30160, '', 'CA', '1/ANET', line=819)
+W('20,3532', 0o50163, '', 'INDEX', 'SIGNAOS', line=820)
+W('20,3533', 0o54123, '', 'TS', '1/ATEM1', line=821)
+
+W('20,3534', 0o50154, '', 'INDEX', 'UV', line=823)
+W('20,3535', 0o33770, '', 'CA', '+UMASK', line=824)
+W('20,3536', 0o71262, '', 'MASK', 'CH5MASK', 'TEST FOR +U (+V) JET FAILURES', line=825)
+W('20,3537', 0o00006, '', 'EXTEND', line=826)
+W('20,3540', 0o13545, '', 'BZF', 'FAIL-', line=827)
+W('20,3541', 0o30124, '', 'CA', '1/ATEM2', 'REPLACE FUNCTION VALUES DEPENDING ON THE', line=828)
+W('20,3542', 0o54126, '', 'TS', '1/ATEM2 +2', 'FAILED JET PAIR WITH CORRESPONDING ONE-', line=829)
+W('20,3543', 0o30132, '', 'CA', 'Z5TEM', 'JET (OR AMIN) FUNCTION VALUES', line=830)
+W('20,3544', 0o54134, '', 'TS', 'Z5TEM +2', line=831)
+W('20,3545', 0o50154, 'FAIL-', 'INDEX', 'UV', line=832)
+# Page 1502
+W('20,3546', 0o33766, '', 'CA', '-UMASK', line=834)
+W('20,3547', 0o71262, '', 'MASK', 'CH5MASK', 'TEST FOR -U (-V) JET FAILURES', line=835)
+W('20,3550', 0o00006, '', 'EXTEND', line=836)
+W('20,3551', 0o13556, '', 'BZF', 'DBFUN', line=837)
+W('20,3552', 0o30123, '', 'CA', '1/ATEM1', 'REPLACE FUNCTION VALUES DEPENDING ON THE', line=838)
+W('20,3553', 0o54125, '', 'TS', '1/ATEM1 +2', 'FAILED JET PAIR WITH CORRESPONDING ONE-', line=839)
+W('20,3554', 0o30131, '', 'CA', 'Z1TEM', 'JET (OR AMIN) FUNCTION VALUES', line=840)
+W('20,3555', 0o54133, '', 'TS', 'Z1TEM +2', line=841)
+
+W('20,3556', 0o40146, 'DBFUN', 'CS', 'DBB3', 'COMPUTE AXISDIST', line=843)
+W('20,3557', 0o60143, '', 'AD', 'DBB1', line=844)
+W('20,3560', 0o60151, '', 'AD', 'FLATEMP', line=845)
+W('20,3561', 0o54147, '', 'TS', 'AXDSTEM', line=846)
+W('20,3562', 0o40145, '', 'CS', 'DBB4', line=847)
+W('20,3563', 0o60144, '', 'AD', 'DBB2', line=848)
+W('20,3564', 0o60151, '', 'AD', 'FLATEMP', line=849)
+W('20,3565', 0o54150, '', 'TS', 'AXDSTEM +1', line=850)
+
+W('20,3566', 0o00004, '', 'INHINT', line=852)
+W('20,3567', 0o10154, '', 'CCS', 'UV', 'TEST FOR U OR V AXIS', line=853)
+W('20,3570', 0o13612, '', 'TCF', 'STORV', 'V AXIS        STORE V VALUES', line=854)
+
+W('20,3571', 0o30122, '', 'CA', 'ACCSW', 'U AXIS        STORE U VALUES', line=856)
+W('20,3572', 0o55547, '', 'TS', 'ACCSWU', line=857)
+
+W('20,3573', 0o34320, '', 'CA', 'NINE', 'TRANSFER 10 WORDS VIA GENTRAN', line=859)
+W('20,3574', 0o05545, '', 'TC', 'GENTRAN +1', line=860)
+W('20,3575', 0o00123, '', 'ADRES', '1/ATEM1', 'TEMPORARY BUFFER', kind='data', line=861)
+W('20,3576', 0o01567, '', 'ADRES', '1/ANET1', 'THE REAL PLACE', kind='data', line=862)
+
+W('20,3577', 0o00003, '', 'RELINT', line=864)
+W('20,3600', 0o52144, '', 'DXCH', 'DBB1', 'SAVE U DBS FOR LATER STORING', line=865)
+W('20,3601', 0o52136, '', 'DXCH', 'UDB1', line=866)
+W('20,3602', 0o52146, '', 'DXCH', 'DBB4', line=867)
+W('20,3603', 0o52140, '', 'DXCH', 'UDB4', line=868)
+
+W('20,3604', 0o52150, '', 'DXCH', 'AXDSTEM', line=870)
+W('20,3605', 0o52142, '', 'DXCH', 'UAXDIST', line=871)
+
+W('20,3606', 0o34753, '', 'CA', 'ONE', 'NOW DO V AXIS', line=873)
+W('20,3607', 0o54154, '', 'TS', 'UV', line=874)
+W('20,3610', 0o34755, '', 'CA', 'ZERO', line=875)
+W('20,3611', 0o13320, '', 'TCF', 'BOTHAXES', 'AND DO IT AGAIN', line=876)
+
+W('20,3612', 0o30122, 'STORV', 'CA', 'ACCSW', 'STORE V AXIS VALUES', line=878)
+W('20,3613', 0o55550, '', 'TS', 'ACCSWV', line=879)
+W('20,3614', 0o34320, '', 'CA', 'NINE', line=880)
+W('20,3615', 0o05545, '', 'TC', 'GENTRAN +1', line=881)
+# Page 1503
+W('20,3616', 0o00123, '', 'ADRES', '1/ATEM1', 'TEMPORARY BUFFER', kind='data', line=883)
+W('20,3617', 0o01607, '', 'ADRES', '1/ANET1 +16D', 'THE REAL PLACE', kind='data', line=884)
+
+# NOW STORE DEADBANDS FOR ALL AXES
+W('20,3620', 0o52152, '', 'DXCH', 'FLATEMP', 'FLAT AND ZONE3LIM', line=887)
+W('20,3621', 0o53556, '', 'DXCH', 'FLAT', line=888)
+
+W('20,3622', 0o31346, '', 'CA', 'DBVAL1', 'COMPUTE P AXIS DEADBANDS', line=890)
+W('20,3623', 0o55561, '', 'TS', 'PDB1', line=891)
+W('20,3624', 0o55562, '', 'TS', 'PDB2', line=892)
+W('20,3625', 0o61555, '', 'AD', 'FLAT', line=893)
+W('20,3626', 0o55564, '', 'TS', 'PDB3', line=894)
+W('20,3627', 0o55563, '', 'TS', 'PDB4', line=895)
+W('20,3630', 0o34755, '', 'CA', 'ZERO', line=896)
+W('20,3631', 0o55565, '', 'TS', 'PAXDIST', line=897)
+W('20,3632', 0o55566, '', 'TS', 'PAXDIST +1', line=898)
+
+W('20,3633', 0o11555, '', 'CCS', 'FLAT', line=900)
+W('20,3634', 0o13652, '', 'TCF', 'DRFDB', 'DRIFT OR GTS -- COMPUTE DBS', line=901)
+
+W('20,3635', 0o52136, '', 'DXCH', 'UDB1', 'STORE U DEADBANDS', line=903)
+W('20,3636', 0o53602, '', 'DXCH', 'FIREDB', 'CANNOT USE GENTRAN BECAUSE OF RELINT', line=904)
+W('20,3637', 0o52140, '', 'DXCH', 'UDB4', line=905)
+W('20,3640', 0o53604, '', 'DXCH', 'COASTDB', line=906)
+W('20,3641', 0o52142, '', 'DXCH', 'UAXDIST', line=907)
+W('20,3642', 0o53606, '', 'DXCH', 'AXISDIST', line=908)
+W('20,3643', 0o52144, '', 'DXCH', 'DBB1', 'STORE V AXIS DEADBANDS', line=909)
+W('20,3644', 0o53622, '', 'DXCH', 'FIREDB +16D', 'COULD USE GENTRAN IF DESIRED', line=910)
+W('20,3645', 0o52146, '', 'DXCH', 'DBB4', line=911)
+W('20,3646', 0o53624, '', 'DXCH', 'COASTDB +16D', line=912)
+W('20,3647', 0o52150, '', 'DXCH', 'AXDSTEM', line=913)
+W('20,3650', 0o53626, '', 'DXCH', 'AXISDIST +16D', line=914)
+
+W('20,3651', 0o13672, '', 'TCF', '1/ACCRET +1', 'ALL DONE', line=916)
+W('20,3652', 0o31346, 'DRFDB', 'CA', 'DBVAL1', 'DRIFT DEADBANDS', line=917)
+W('20,3653', 0o55601, '', 'TS', 'FIREDB', line=918)
+W('20,3654', 0o55602, '', 'TS', 'FIREDB +1', line=919)
+W('20,3655', 0o55621, '', 'TS', 'FIREDB +16D', line=920)
+W('20,3656', 0o55622, '', 'TS', 'FIREDB +17D', line=921)
+W('20,3657', 0o61555, '', 'AD', 'FLAT', line=922)
+W('20,3660', 0o55603, '', 'TS', 'COASTDB', line=923)
+W('20,3661', 0o55604, '', 'TS', 'COASTDB +1', line=924)
+W('20,3662', 0o55623, '', 'TS', 'COASTDB +16D', line=925)
+W('20,3663', 0o55624, '', 'TS', 'COASTDB +17D', line=926)
+W('20,3664', 0o34755, '', 'CA', 'ZERO', line=927)
+W('20,3665', 0o55605, '', 'TS', 'AXISDIST', line=928)
+W('20,3666', 0o55606, '', 'TS', 'AXISDIST +1', line=929)
+W('20,3667', 0o55625, '', 'TS', 'AXISDIST +16D', line=930)
+W('20,3670', 0o55626, '', 'TS', 'AXISDIST +17D', line=931)
+
+# Page 1504
+W('20,3671', 0o00004, '1/ACCRET', 'INHINT', line=934)
+W('20,3672', 0o40111, '', 'CS', 'DAPBOOLS', 'SET BIT TO INDICATE DATA GOOD.', line=935)
+W('20,3673', 0o74751, '', 'MASK', 'ACCSOKAY', line=936)
+W('20,3674', 0o26111, '', 'ADS', 'DAPBOOLS', line=937)
+W('20,3675', 0o00003, '', 'RELINT', line=938)
+W('20,3676', 0o30117, '', 'CA', 'ACCRETRN', line=939)
+W('20,3677', 0o04640, '', 'TC', 'BANKJUMP', 'RETURN TO CALLER', line=940)
+
+W('20,3700', 0o54165, 'INVERT', 'TS', 'HOLD', 'ROUTINE TO INVERT -INPUT AT PI/2', line=942)
+W('20,3701', 0o34743, '', 'CA', 'BIT9', '1 AT 2(6)', line=943)
+W('20,3702', 0o22007, '', 'ZL', '', 'ZERO L FOR ACCURACY AND TO PREVENT OVFLO', line=944)
+W('20,3703', 0o00006, '', 'EXTEND', line=945)
+W('20,3704', 0o10165, '', 'DV', 'HOLD', line=946)
+W('20,3705', 0o00002, '', 'TC', 'Q', 'RESULT AT 2(7)/PI', line=947)
+
+W('20,3706', 0o34755, 'DOWNGTS', 'CAF', 'ZERO', 'ZERO SWITCHES WHEN USEQRJTS BIT IS UP', line=949)
+W('20,3707', 0o55502, '', 'TS', 'ALLOWGTS', '      OR DAP IS OFF', line=950)
+W('20,3710', 0o55633, '', 'TS', 'INGTS', line=951)
+W('20,3711', 0o12773, '', 'TCF', 'DOCKTEST', line=952)
+
+W('20,3712', 0o22007, '1/ANET-', 'ZL', line=954)
+W('20,3713', 0o22122, '', 'LXCH', 'ACCSW', 'ZERO ACCSW', line=955)
+W('20,3714', 0o54157, '', 'TS', 'ANET', 'SAVE ANET', line=956)
+W('20,3715', 0o63764, '', 'AD', '-.03R/S2', 'TEST FOR MIN VALUE', line=957)
+W('20,3716', 0o00006, '', 'EXTEND', line=958)
+W('20,3717', 0o63740, '', 'BZMF', 'NETNEG', 'ANET LESS THAN AMIN, SO FAKE IT', line=959)
+W('20,3720', 0o30157, '1/NETMIN', 'CA', 'ANET', line=960)
+W('20,3721', 0o00006, '', 'EXTEND', line=961)
+W('20,3722', 0o50164, '', 'INDEX', '-SIGNAOS', line=962)
+W('20,3723', 0o70130, '', 'MP', '1/ACOSTT +1', 'ANETNEG(POS)/ACOASTPOS(NEG) AT 2(6)', line=963)
+
+# THE FOLLOWING CODING IS VALID FOR BOTH POS OR NEG
+# VALUES OF AOS
+
+W('20,3724', 0o64743, 'DO1/NET+', 'AD', 'BIT9', '1 + ANET/ACOAST AT 2(6)', line=968)
+W('20,3725', 0o56157, '', 'XCH', 'ANET', 'SAVE AND PICK UP ANET', line=969)
+W('20,3726', 0o00006, '', 'EXTEND', line=970)
+W('20,3727', 0o22161, '', 'QXCH', 'ARET', 'SAVE RETURN', line=971)
+W('20,3730', 0o03700, '', 'TC', 'INVERT', line=972)
+W('20,3731', 0o54160, '', 'TS', '1/ANET', '1/ANET AT 2(7)/PI', line=973)
+W('20,3732', 0o44743, '', 'CS', 'BIT9', '-1 AT 2(6)', line=974)
+W('20,3733', 0o00006, 'DOACCFUN', 'EXTEND', line=975)
+W('20,3734', 0o70160, '', 'MP', '1/ANET', '-1/ANET AT 2(13)/PI', line=976)
+W('20,3735', 0o00006, '', 'EXTEND', line=977)
+W('20,3736', 0o10157, '', 'DV', 'ANET', 'ACCFUN AT 2(7)/PI', line=978)
+W('20,3737', 0o00161, '', 'TC', 'ARET', 'RETURN', line=979)
+
+W('20,3740', 0o43764, 'NETNEG', 'CS', '-.03R/S2', 'ANET LESS THAN AMIN -- SET EQUAL TO AMIN', line=981)
+W('20,3741', 0o54157, '', 'TS', 'ANET', line=982)
+# Page 1505
+W('20,3742', 0o13721, '', 'TCF', '1/NETMIN +1', 'CONTINUE AS IF NOTHING HAPPENED.', line=984)
+
+W('20,3743', 0o10163, 'FIXMIN', 'CCS', 'SIGNAOS', line=986)
+W('20,3744', 0o34752, '', 'CA', 'TWO', 'IF AOS NEG, ACCSW = +1', line=987)
+W('20,3745', 0o67747, '', 'AD', 'NEGONE', 'IF AOS POS, ACCSW = -1', line=988)
+W('20,3746', 0o54122, '', 'TS', 'ACCSW', line=989)
+W('20,3747', 0o60154, '', 'AD', 'UV', 'IF ACCSW = +1, TEST FOR +U (+V) JET FAIL', line=990)
+W('20,3750', 0o50000, '', 'INDEX', 'A', 'IF ACCSW = -1, TEST FOR -U (-V) JET FAIL', line=991)
+W('20,3751', 0o33767, '', 'CA', '-UMASK +1', line=992)
+W('20,3752', 0o71262, '', 'MASK', 'CH5MASK', line=993)
+W('20,3753', 0o00006, '', 'EXTEND', line=994)
+W('20,3754', 0o13760, '', 'BZF', '+4', line=995)
+W('20,3755', 0o43764, '', 'CS', '-.03R/S2', 'JET FAILURE -- CANNOT USE 2-JET VALUES', line=996)
+W('20,3756', 0o54157, '', 'TS', 'ANET', 'ANET = AMIN', line=997)
+W('20,3757', 0o13526, '', 'TCF', 'STMIN- -1', 'CALCULATE FUNCTIONS USING AMIN', line=998)
+W('20,3760', 0o30001, '', 'CA', 'L', 'L HAS ACCFUN', line=999)
+W('20,3761', 0o13527, '', 'TCF', 'STMIN-', 'STORE MAX VALUES FOR MIN JETS', line=1000)
+
+# ERASABLE ASSIGNMENTS FOR 1/ACCONT
+
+S('1/ANETP', 'equals', 0o3151, line=1004)
+S('1/ACOSTP', 'equals', 0o3153, line=1005)
+S('PACCFUN', 'equals', 0o3157, line=1006)
+S('PDB1', 'equals', 0o3161, line=1007)
+S('PDB2', 'equals', 0o3162, line=1008)
+S('PDB4', 'equals', 0o3163, line=1009)
+S('PDB3', 'equals', 0o3164, line=1010)
+S('PAXDIST', 'equals', 0o3165, line=1011)
+
+S('ACCSW', 'equals', 0o122, line=1013)  # EXECUTIVE TEMPORARIES
+# CANNOT DO CCS NEWJOB DURING 1/ACCS
+S('1/ATEM1', 'equals', 0o123, line=1015)  # TEMP BUFFER FOR U AND V AXES
+S('1/ATEM2', 'equals', 0o124, line=1016)
+S('1/ACOSTT', 'equals', 0o127, line=1017)
+S('Z1TEM', 'equals', 0o131, line=1018)
+S('Z5TEM', 'equals', 0o132, line=1019)
+
+S('UDB1', 'equals', 0o135, line=1021)  # UAXIS DEADBAND BUFFER
+S('UDB2', 'equals', 0o136, line=1022)
+S('UDB4', 'equals', 0o137, line=1023)
+S('UDB3', 'equals', 0o140, line=1024)
+S('UAXDIST', 'equals', 0o141, line=1025)
+
+S('DBB1', 'equals', 0o143, line=1027)  # TEMP DEADBAND BUFFER, ALSO V AXIS
+S('DBB2', 'equals', 0o144, line=1028)
+S('DBB4', 'equals', 0o145, line=1029)
+S('DBB3', 'equals', 0o146, line=1030)
+S('AXDSTEM', 'equals', 0o147, line=1031)
+
+# Page 1506
+S('FLATEMP', 'equals', 0o151, line=1034)
+S('Z3TEM', 'equals', 0o152, line=1035)  # MUST FOLLOW FLATEMP
+
+S('DBVAL1', 'equals', 0o1346, line=1037)
+S('DBVAL2', 'equals', 0o114, line=1038)
+S('DBVAL3', 'equals', 0o115, line=1039)
+
+S('DRIFTER', 'equals', 0o116, line=1041)
+
+S('UV', 'equals', 0o154, line=1043)
+S('ANET', 'equals', 0o157, line=1044)
+S('FUNTEM', 'equals', 0o157, line=1045)
+S('1/ANET', 'equals', 0o160, line=1046)
+S('ARET', 'equals', 0o161, line=1047)
+S('ABSAOS', 'equals', 0o162, line=1048)
+S('SIGNAOS', 'equals', 0o163, line=1049)
+S('-SIGNAOS', 'equals', 0o164, line=1050)
+S('HOLD', 'equals', 0o165, line=1051)
+S('ACCRETRN', 'equals', 0o117, line=1052)
+
+W('20,3762', 0o00110, 'ZONE3MAX', 'DEC', '.004375', '17.5 MS (35 MS FOR 1 JET) AT 4 SECONDS', kind='data', line=1054)
+W('20,3763', 0o00443, 'FLATVAL', 'DEC', '.01778', '.8 AT PI/4 RAD', kind='data', line=1055)
+W('20,3764', 0o77377, '-.03R/S2', 'OCT', '77377', '-PI/2(7) AT PI/2', kind='data', line=1056)
+
+S('.0125RS', 'equals', 0o4744, line=1058)  # PI/2(+8) AT PI/2
+S('1/.03', 'equals', 0o4733, line=1059)  # 2(7)/PI AT 2(7)/PI
+
+W('20,3765', 0o02213, 'PAXISADR', 'GENADR', 'PAXIS', kind='data', line=1061)
+
+# THE FOLLOWING 4 CONSTANTS ARE JET
+# FAILURE MASKS AND ARE INDEXED
+W('20,3766', 0o00110, '-UMASK', 'OCT', '00110', '-U', kind='data', line=1065)
+W('20,3767', 0o00022, '', 'OCT', '00022', '-V', kind='data', line=1066)
+W('20,3770', 0o00204, '+UMASK', 'OCT', '00204', '+U', kind='data', line=1067)
+W('20,3771', 0o00041, '', 'OCT', '00041', '+V', kind='data', line=1068)

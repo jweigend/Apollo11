@@ -1,0 +1,1258 @@
+"""FRESH_START_AND_RESTART.agc -- Luminary 1A (build 099), Apollo 11 Lunar Module guidance computer
+
+Converted from external/Apollo-11/Luminary099/FRESH_START_AND_RESTART.agc by agc2py (the Apollo 11 AGC -> Python converter).
+Pages 211-237 of the original program listing.
+
+Every ``W(address, word, label, operator, operand, comment)`` line is one
+15-bit word of the AGC rope memory; ``S(name, kind, value)`` defines a symbol.
+Original comments are preserved as Python comments.
+"""
+
+from agc.program import Module
+
+MODULE = Module('FRESH_START_AND_RESTART', 'FRESH_START_AND_RESTART.agc', 'Luminary099', pages='211-237')
+W = MODULE.W
+S = MODULE.S
+
+# Copyright:    Public domain.
+# Filename:     FRESH_START_AND_RESTART.agc
+# Purpose:      Part of the source code for Luminary 1A build 099.
+# It is part of the source code for the Lunar Module's (LM)
+# Apollo Guidance Computer (AGC), for Apollo 11.
+# Assembler:    yaYUL
+# Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
+# Website:      www.ibiblio.org/apollo.
+# Pages:        211-237
+# Mod history:  2009-05-19 HG   Transcribed from page images.
+# 2010-12-31 JL   Fixed page number comments.
+# 2011-01-06 JL   Fixed pseudo-label indentation.
+# 2011-01-06 JL   Added missing comment characters.
+#
+# This source code has been transcribed or otherwise adapted from
+# digitized images of a hardcopy from the MIT Museum.  The digitization
+# was performed by Paul Fjeld, and arranged for by Deborah Douglas of
+# the Museum.  Many thanks to both.  The images (with suitable reduction
+# in storage size and consequent reduction in image quality as well) are
+# available online at www.ibiblio.org/apollo.  If for some reason you
+# find that the images are illegible, contact me at info@sandroid.org
+# about getting access to the (much) higher-quality images which Paul
+# actually created.
+#
+# Notations on the hardcopy document read, in part:
+#
+# Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
+# 16:27 JULY 14, 1969
+
+# Page 211
+#   BANK 10
+#   SETLOC FRANDRES
+#   BANK
+
+#   EBANK= LST1
+
+#   COUNT* $$/START  # FRESH AND RESTART
+W('05,2447', 0o00004, 'SLAP1', 'INHINT', '', 'FRESH START.  COMES HERE FROM PINBALL.', line=38)
+W('05,2450', 0o03107, '', 'TC', 'STARTSUB', 'SUBROUTINE DOES MOST OF THE WORK', line=39)
+
+W('05,2451', 0o12456, 'STARTSW', 'TCF', 'SKIPSIM', 'PATCH....TCF STARTSIM FOR SIMULATION', line=41)
+W('05,2452', 0o34736, 'STARTSIM', 'CAF', 'BIT14', line=42)
+W('05,2453', 0o05105, '', 'TC', 'FINDVAC', line=43)
+W('05,2454', 0o77777, 'SIM2CADR', 'OCT', '77777', 'PATCH 2CADR (AND EBANK DESIGNATION) OF', kind='data', line=44)
+W('05,2455', 0o77777, '', 'OCT', '77777', 'SIMULATION START ADDRESS.', kind='data', line=45)
+
+W('05,2456', 0o31036, 'SKIPSIM', 'CA', 'DSPTAB +11D', 'TURN OFF ALL DSPTAB +11D LAMPS', line=47)
+W('05,2457', 0o74771, '', 'MASK', 'BITS4&6', 'EXCEPT THE GIMBAL LOCK & NO ATT ONLY ON', line=48)
+W('05,2460', 0o64735, '', 'AD', 'BIT15', 'REQUESTED FRESH START.', line=49)
+W('05,2461', 0o55036, '', 'TS', 'DSPTAB +11D', line=50)
+
+W('05,2462', 0o34740, '', 'CA', 'BIT12', 'INITIALIZE DOWNLINK EARASABLE MEMORY', line=52)
+W('05,2463', 0o54333, '', 'TS', 'DUMPCNT', 'DUMP FOR ONE PASS', line=53)
+
+W('05,2464', 0o34755, '', 'CA', 'ZERO', line=55)
+W('05,2465', 0o55365, '', 'TS', 'ERCOUNT', line=56)
+W('05,2466', 0o54375, '', 'TS', 'FAILREG', line=57)
+W('05,2467', 0o54376, '', 'TS', 'FAILREG +1', line=58)
+W('05,2470', 0o54377, '', 'TS', 'FAILREG +2', line=59)
+W('05,2471', 0o54320, '', 'TS', 'REDOCTR', line=60)
+
+W('05,2472', 0o44644, '', 'CS', 'PRIO12', line=62)
+W('05,2473', 0o55313, '', 'TS', 'DSRUPTSW', line=63)
+
+W('05,2474', 0o34736, 'DOFSTART', 'CAF', 'BIT14', 'INSURE ENGINE IS OFF.', line=65)
+W('05,2475', 0o00006, '', 'EXTEND', line=66)
+W('05,2476', 0o01011, '', 'WRITE', 'DSALMOUT', line=67)
+W('05,2477', 0o44755, '', 'CS', 'ZERO', line=68)
+W('05,2500', 0o54055, '', 'TS', 'THRUST', line=69)
+
+W('05,2501', 0o34751, 'DOFSTRT1', 'CAF', 'FOUR', line=71)
+W('05,2502', 0o55273, '', 'TS', 'RCSFLAGS', 'INITIALIZE ATTITUDE ERROR DISPLAYS.', line=72)
+W('05,2503', 0o34355, '', 'CA', 'PRIO30', line=73)
+W('05,2504', 0o54366, '', 'TS', 'RESTREG', 'SUPER BANK PRIORITY FOR DISPLAYS.', line=74)
+
+W('05,2505', 0o34755, '', 'CA', 'ZERO', line=76)
+W('05,2506', 0o55246, '', 'TS', 'ABDELV', 'DAP INITIALIZATION', line=77)
+W('05,2507', 0o54371, '', 'TS', 'NVSAVE', line=78)
+W('05,2510', 0o55072, '', 'TS', 'EBANKTEM', line=79)
+# Page 212
+W('05,2511', 0o55262, '', 'TS', 'CH5MASK', line=81)
+W('05,2512', 0o55263, '', 'TS', 'CH6MASK', line=82)
+W('05,2513', 0o55276, '', 'TS', 'PVALVEST', 'FOR RCS FAILURE MONITOR', line=83)
+W('05,2514', 0o55360, '', 'TS', 'ERESTORE', '***** MUST NOT BE REMOVED FROM DOFSTART', line=84)
+W('05,2515', 0o55362, '', 'TS', 'SMODE', '***** MUST NOT BE REMOVED FROM DOFSTART', line=85)
+W('05,2516', 0o54332, '', 'TS', 'DNLSTCOD', 'SELECT P00 DOWNLIST', line=86)
+W('05,2517', 0o55324, '', 'TS', 'AGSWORD', 'ALLOW AGS INITIALIZATION', line=87)
+W('05,2520', 0o55501, '', 'TS', 'UPSVFLAG', 'ZERO UPDATE STATE VECTOR REQUEST FLAGWRD', line=88)
+W('05,2521', 0o00006, '', 'EXTEND', line=89)
+W('05,2522', 0o01005, '', 'WRITE', 'CHAN5', 'TURN OFF RCS JETS.', line=90)
+W('05,2523', 0o00006, '', 'EXTEND', line=91)
+W('05,2524', 0o01006, '', 'WRITE', 'CHAN6', 'TURN OFF RCS JETS.', line=92)
+W('05,2525', 0o00006, '', 'EXTEND', line=93)
+W('05,2526', 0o01012, '', 'WRITE', 'CHAN12', line=94)
+W('05,2527', 0o00006, '', 'EXTEND', line=95)
+W('05,2530', 0o01013, '', 'WRITE', 'CHAN13', line=96)
+W('05,2531', 0o00006, '', 'EXTEND', line=97)
+W('05,2532', 0o01014, '', 'WRITE', 'CHAN14', line=98)
+W('05,2533', 0o41036, '', 'CS', 'DSPTAB +11D', line=99)
+W('05,2534', 0o74771, '', 'MASK', 'BITS4&6', line=100)
+W('05,2535', 0o10000, '', 'CCS', 'A', line=101)
+W('05,2536', 0o02542, '', 'TC', '+4', line=102)
+W('05,2537', 0o34771, '', 'CA', 'BITS4&6', line=103)
+W('05,2540', 0o00006, '', 'EXTEND', '', 'THE IMU WAS IN COARSE ALIGN IN GIMBAL', line=104)
+W('05,2541', 0o05012, '', 'WOR', 'CHAN12', 'LOCK, SO PUT IT BACK INTO COARSE ALIGN.', line=105)
+W('05,2542', 0o02643, '', 'TC', 'MR.KLEAN', line=106)
+
+W('05,2543', 0o44755, '', 'CS', 'ZERO', line=108)
+W('05,2544', 0o55011, '', 'TS', 'MODREG', line=109)
+
+W('05,2545', 0o33362, '', 'CAF', 'IM30INIF', 'FRESH START IMU INITIALIZATION', line=111)
+W('05,2546', 0o55302, '', 'TS', 'IMODES30', line=112)
+
+W('05,2547', 0o33067, '', 'CAF', 'MAXDB', line=114)
+W('05,2550', 0o55346, '', 'TS', 'DB', line=115)
+W('05,2551', 0o34751, '', 'CAF', 'FOUR', line=116)
+W('05,2552', 0o55325, '', 'TS', 'RATEINDX', 'INITIALZE KALCMANU RATE', line=117)
+W('05,2553', 0o33063, '', 'CA', 'BOOLSTRT', line=118)
+W('05,2554', 0o54111, '', 'TS', 'DAPBOOLS', line=119)
+W('05,2555', 0o35015, '', 'CAF', 'EBANK6', line=120)
+W('05,2556', 0o54003, '', 'TS', 'EBANK', line=121)
+#   EBANK= HIASCENT
+
+W('05,2557', 0o33060, '', 'CA', 'STIKSTRT', line=124)
+W('05,2560', 0o55444, '', 'TS', 'STIKSENS', line=125)
+W('05,2561', 0o33061, '', 'CA', 'RATESTRT', line=126)
+W('05,2562', 0o55476, '', 'TS', '-RATEDB', line=127)
+W('05,2563', 0o32000, '', 'CAF', 'FULLAPS', 'INITIALIZE MAXIMUM ASCENT MASS FOR USE', line=128)
+W('05,2564', 0o55400, '', 'TS', 'HIASCENT', '  BY 1/ACCS UNTIL THE PAD LOAD IS DONE.', line=129)
+W('05,2565', 0o33064, '', 'CA', '77001OCT', '    LOAD DAP FILTER GAINS PAD LOAD.', line=130)
+# Page 213
+W('05,2566', 0o55403, '', 'TS', 'DKTRAP', '      TO BEST PRESENT ESTIMATE OF GOODIES', line=132)
+W('05,2567', 0o55406, '', 'TS', 'LMTRAP', '.14 DEG', line=133)
+W('05,2570', 0o33065, '', 'CA', '60DEC', line=134)
+W('05,2571', 0o55405, '', 'TS', 'DKKAOSN', line=135)
+W('05,2572', 0o55410, '', 'TS', 'LMKAOSN', '6 SEC GAIN FOR ALPHA', line=136)
+W('05,2573', 0o34755, '', 'CA', 'ZERO', line=137)
+W('05,2574', 0o55407, '', 'TS', 'LMOMEGAN', 'UNITY GAIN', line=138)
+W('05,2575', 0o34363, '', 'CA', 'TEN', line=139)
+W('05,2576', 0o55404, '', 'TS', 'DKOMEGAN', '1 SEC GAIN FOR OMEGA', line=140)
+W('05,2577', 0o34744, '', 'CAF', 'BIT8', 'SET DOCKED DB TO 1.4 DEG.  MAY OVERWRITE', line=141)
+W('05,2600', 0o55411, '', 'TS', 'DKDB', '      WITH PAD LOAD.', line=142)
+W('05,2601', 0o35026, '', 'CAF', 'IM33INIT', line=143)
+W('05,2602', 0o64746, '', 'AD', 'BIT6', 'KEEP BOTH DAP AND ERROR-NEEDLES DISPLAY', line=144)
+W('05,2603', 0o55303, '', 'TS', 'IMODES33', '      OFF UNTIL ICDU ZERO IS FINISHED.', line=145)
+
+W('05,2604', 0o00006, '', 'EXTEND', '', 'INITIALIZE SWITCHES ONLY ON FRESH START.', line=147)
+W('05,2605', 0o33367, '', 'DCA', 'SWINIT', line=148)
+W('05,2606', 0o52075, '', 'DXCH', 'STATE', line=149)
+W('05,2607', 0o33370, '', 'CA', 'SWINIT +2', line=150)
+W('05,2610', 0o54076, '', 'TS', 'STATE +2', line=151)
+W('05,2611', 0o34737, '', 'CA', 'REFSMBIT', 'DO NOT ALTER REFSMFLG ON FRESH START.', line=152)
+W('05,2612', 0o70077, '', 'MASK', 'STATE +3', line=153)
+W('05,2613', 0o63371, '', 'AD', 'SWINIT +3', line=154)
+W('05,2614', 0o54077, '', 'TS', 'STATE +3', line=155)
+W('05,2615', 0o00006, '', 'EXTEND', line=156)
+W('05,2616', 0o33373, '', 'DCA', 'SWINIT +4', line=157)
+W('05,2617', 0o52101, '', 'DXCH', 'STATE +4', line=158)
+W('05,2620', 0o00006, '', 'EXTEND', line=159)
+W('05,2621', 0o33375, '', 'DCA', 'SWINIT +6', line=160)
+W('05,2622', 0o52103, '', 'DXCH', 'STATE +6', line=161)
+W('05,2623', 0o34744, '', 'CA', 'SURFFBIT', 'DO NOT ALTER  SURFFLAG ON FRESH START.', line=162)
+W('05,2624', 0o64740, '', 'AD', 'CMOONBIT', '              CMOONFLG', line=163)
+W('05,2625', 0o64741, '', 'AD', 'LMOONBIT', '              LMOONFLG', line=164)
+W('05,2626', 0o70104, '', 'MASK', 'STATE +8D', line=165)
+W('05,2627', 0o63376, '', 'AD', 'SWINIT +8D', line=166)
+W('05,2630', 0o54104, '', 'TS', 'STATE +8D', line=167)
+W('05,2631', 0o33377, '', 'CA', 'SWINIT +9D', line=168)
+W('05,2632', 0o54105, '', 'TS', 'STATE +9D', line=169)
+W('05,2633', 0o34737, '', 'CA', 'APSFLBIT', 'DO NOT ALTER APSFLAG ON FRESH START.', line=170)
+W('05,2634', 0o70106, '', 'MASK', 'STATE +10D', line=171)
+W('05,2635', 0o63400, '', 'AD', 'SWINIT +10D', line=172)
+W('05,2636', 0o54106, '', 'TS', 'STATE +10D', line=173)
+W('05,2637', 0o33401, '', 'CAF', 'SWINIT +11D', line=174)
+W('05,2640', 0o54107, '', 'TS', 'STATE +11D', line=175)
+
+W('05,2641', 0o04635, 'ENDRSTRT', 'TC', 'POSTJUMP', 'NOW IN ANOTHER BANK.', line=177)
+W('05,2642', 0o03210, '', 'CADR', 'DUMMYJOB +2', "PICKS UP AT RELINT.   (DON'T ZERO NEWJOB)", kind='data', line=178)
+
+W('05,2643', 0o00004, 'MR.KLEAN', 'INHINT', line=180)
+# Page 214
+W('05,2644', 0o00006, '', 'EXTEND', line=182)
+W('05,2645', 0o34755, '', 'DCA', 'NEG0', line=183)
+W('05,2646', 0o52755, '', 'DXCH', '-PHASE2', line=184)
+W('05,2647', 0o00006, 'P00KLEAN', 'EXTEND', line=185)
+W('05,2650', 0o34755, '', 'DCA', 'NEG0', line=186)
+W('05,2651', 0o52761, '', 'DXCH', '-PHASE4', line=187)
+W('05,2652', 0o00006, 'V37KLEAN', 'EXTEND', line=188)
+W('05,2653', 0o34755, '', 'DCA', 'NEG0', line=189)
+W('05,2654', 0o52753, '', 'DXCH', '-PHASE1', line=190)
+W('05,2655', 0o00006, '', 'EXTEND', line=191)
+W('05,2656', 0o34755, '', 'DCA', 'NEG0', line=192)
+W('05,2657', 0o52757, '', 'DXCH', '-PHASE3', line=193)
+W('05,2660', 0o00006, '', 'EXTEND', line=194)
+W('05,2661', 0o34755, '', 'DCA', 'NEG0', line=195)
+W('05,2662', 0o52763, '', 'DXCH', '-PHASE5', line=196)
+W('05,2663', 0o00006, '', 'EXTEND', line=197)
+W('05,2664', 0o34755, '', 'DCA', 'NEG0', line=198)
+W('05,2665', 0o52765, '', 'DXCH', '-PHASE6', line=199)
+W('05,2666', 0o00002, '', 'TC', 'Q', line=200)
+
+# Page 215
+# COMES HERE FROM LOCATION 4000, GOJAM, RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+
+#   EBANK= LST1
+W('05,2667', 0o24320, 'GOPROG', 'INCR', 'REDOCTR', 'ADVANCE RESTART COUNTER.', line=206)
+
+W('05,2670', 0o22002, '', 'LXCH', 'Q', line=208)
+W('05,2671', 0o00006, '', 'EXTEND', line=209)
+W('05,2672', 0o04007, '', 'ROR', 'SUPERBNK', line=210)
+W('05,2673', 0o53433, '', 'DXCH', 'RSBBQ', line=211)
+W('05,2674', 0o31036, '', 'CA', 'DSPTAB +11D', line=212)
+W('05,2675', 0o74750, '', 'MASK', 'BIT4', line=213)
+W('05,2676', 0o00006, '', 'EXTEND', line=214)
+W('05,2677', 0o12703, '', 'BZF', '+4', line=215)
+W('05,2700', 0o64746, '', 'AD', 'BIT6', 'SET ERROR COUNTER ENABLE', line=216)
+W('05,2701', 0o00006, '', 'EXTEND', line=217)
+W('05,2702', 0o05012, '', 'WOR', 'CHAN12', 'ISS WAS IN COARSE ALIGN SO GO BACK TO', line=218)
+W('05,2703', 0o03070, 'BUTTONS', 'TC', 'LIGHTSET', line=219)
+
+# ERASCHK TEMPORARILY STORES THE CONTENST OF TWO ERASABLE LOCATIONS, X
+# AND X+1 INTO SKEEP5 AND SKEEP6.  IT ALSO STORES X INTO SKEEP7 AND
+# ERESTORE.  IF ERASCHK IS INTERRUPTED BY A RESTART, C(ERESTORE) SHOULD
+# EQUAL C(SKEEP7), AND SHOULD BE A + NUMBER LESS THAN 2000 OCT.  OTHERWISE
+# C(ERESTORE) SHOULD EQUAL +0.
+
+W('05,2704', 0o34350, '', 'CAF', 'HI5', line=227)
+W('05,2705', 0o71360, '', 'MASK', 'ERESTORE', line=228)
+W('05,2706', 0o00006, '', 'EXTEND', line=229)
+W('05,2707', 0o12711, '', 'BZF', '+2', 'IF ERESTORE NOT = +0 OR +N LESS THAN 2K,', line=230)
+W('05,2710', 0o13105, '', 'TCF', 'NONAVKEY +3', 'DO FRESH START -- E MEMORY MIGHT BE BAD', line=231)
+W('05,2711', 0o41360, '', 'CS', 'ERESTORE', line=232)
+W('05,2712', 0o00006, '', 'EXTEND', line=233)
+W('05,2713', 0o12730, '', 'BZF', 'DORSTART', '= +0 CONTINUE WITH RESTART.', line=234)
+W('05,2714', 0o61377, '', 'AD', 'SKEEP7', line=235)
+W('05,2715', 0o00006, '', 'EXTEND', line=236)
+W('05,2716', 0o12720, '', 'BZF', '+2', '= SKEEP7, RESTORE E MEMORY.', line=237)
+W('05,2717', 0o13105, '', 'TCF', 'NONAVKEY +3', 'DO FRESH START -- E MEMORY MIGHT BE BAD', line=238)
+W('05,2720', 0o31374, '', 'CA', 'SKEEP4', line=239)
+W('05,2721', 0o54003, '', 'TS', 'EBANK', 'EBANK OF E MEMORY THAT WAS UNDER TEST.', line=240)
+W('05,2722', 0o00006, '', 'EXTEND', '', '(NOT DXCH SINCE THIS MIGHT HAPPEN AGAIN)', line=241)
+W('05,2723', 0o31376, '', 'DCA', 'SKEEP5', line=242)
+W('05,2724', 0o51377, '', 'INDEX', 'SKEEP7', line=243)
+W('05,2725', 0o52001, '', 'DXCH', '0000', 'E MEMORY RESTORED', line=244)
+W('05,2726', 0o34755, '', 'CA', 'ZERO', line=245)
+W('05,2727', 0o55360, '', 'TS', 'ERESTORE', line=246)
+W('05,2730', 0o03107, 'DORSTART', 'TC', 'STARTSUB', 'DO INITIALIZATION AFTER ERASE RESTORE.', line=247)
+
+W('05,2731', 0o44736, 'SETINFL', 'CS', 'INTFLBIT', line=249)
+W('05,2732', 0o70106, '', 'MASK', 'FLGWRD10', line=250)
+W('05,2733', 0o54106, '', 'TS', 'FLGWRD10', line=251)
+# Page 216
+W('05,2734', 0o33364, '', 'CA', '9,6,4', 'LEAVE PROG ALARM, GIMBAL LOCK, NO ATT', line=253)
+W('05,2735', 0o71036, '', 'MASK', 'DSPTAB +11D', 'LAMPS INTACT ON HARDWARE RESTART', line=254)
+W('05,2736', 0o64735, '', 'AD', 'BIT15', line=255)
+W('05,2737', 0o57036, '', 'XCH', 'DSPTAB +11D', line=256)
+W('05,2740', 0o33350, '', 'CAF', 'IFAILINH', 'LEAVE IMU FAILURE INHIBITS INTACT ON', line=257)
+W('05,2741', 0o71302, '', 'MASK', 'IMODES30', 'HARDWARE RESTART, RESET ALL FAILURE', line=258)
+W('05,2742', 0o63363, '', 'AD', 'IM30INIR', 'CODES.', line=259)
+W('05,2743', 0o55302, '', 'TS', 'IMODES30', line=260)
+
+W('05,2744', 0o31324, '', 'CA', 'AGSWORD', 'BE SURE OF CORRECT DOWNLIST', line=262)
+W('05,2745', 0o54332, '', 'TS', 'DNLSTCOD', line=263)
+
+W('05,2746', 0o34750, '', 'CA', 'BIT4', 'TURN ON THROTTLE COUNTER', line=265)
+W('05,2747', 0o00006, '', 'EXTEND', line=266)
+W('05,2750', 0o05014, '', 'WOR', 'CHAN14', 'TURN ON THRUST DRIVE', line=267)
+W('05,2751', 0o40101, '', 'CS', 'FLAGWRD5', line=268)
+W('05,2752', 0o74745, '', 'MASK', 'ENGONBIT', line=269)
+W('05,2753', 0o10000, '', 'CCS', 'A', line=270)
+W('05,2754', 0o12761, '', 'TCF', '+5', line=271)
+W('05,2755', 0o34737, '', 'CAF', 'BIT13', line=272)
+W('05,2756', 0o00006, '', 'EXTEND', line=273)
+W('05,2757', 0o05011, '', 'WOR', 'DSALMOUT', 'TURN ENGINE ON', line=274)
+W('05,2760', 0o12775, '', 'TCF', 'GOPROG3', line=275)
+W('05,2761', 0o34736, '', 'CAF', 'BIT14', line=276)
+W('05,2762', 0o00006, '', 'EXTEND', line=277)
+W('05,2763', 0o05011, '', 'WOR', 'DSALMOUT', 'TURN ENGINE OFF', line=278)
+W('05,2764', 0o12775, '', 'TCF', 'GOPROG3', line=279)
+
+W('05,2765', 0o00004, 'ENEMA', 'INHINT', line=281)
+W('05,2766', 0o03116, '', 'TC', 'STARTSB1', line=282)
+W('05,2767', 0o12771, '', 'TCF', 'GOPROG2A', line=283)
+W('05,2770', 0o03146, 'GOPROG2', 'TC', 'STARTSB2', line=284)
+W('05,2771', 0o03070, 'GOPROG2A', 'TC', 'LIGHTSET', line=285)
+W('05,2772', 0o43066, '', 'CS', 'RSFLGBTS', 'CLEAR BITS 7 AND 14.', line=286)
+W('05,2773', 0o70106, '', 'MASK', 'FLGWRD10', line=287)
+W('05,2774', 0o54106, '', 'TS', 'FLGWRD10', line=288)
+
+W('05,2775', 0o34756, 'GOPROG3', 'CAF', 'NUMGRPS', 'VERIFY PHASE TABLE AGREEMENTS', line=290)
+W('05,2776', 0o54161, 'PCLOOP', 'TS', 'MPAC +5', line=291)
+W('05,2777', 0o60000, '', 'DOUBLE', line=292)
+W('05,3000', 0o00006, '', 'EXTEND', line=293)
+W('05,3001', 0o50000, '', 'INDEX', 'A', line=294)
+W('05,3002', 0o30753, '', 'DCA', '-PHASE1', 'COMPLEMENT INTO A, DIRECT INTO L.', line=295)
+W('05,3003', 0o00006, '', 'EXTEND', line=296)
+W('05,3004', 0o06001, '', 'RXOR', 'LCHAN', 'RESULT MUST BE -0 FOR AGREEMENT.', line=297)
+W('05,3005', 0o10000, '', 'CCS', 'A', line=298)
+W('05,3006', 0o13054, '', 'TCF', 'PTBAD', 'RESTART FAILURE.', line=299)
+W('05,3007', 0o13054, '', 'TCF', 'PTBAD', line=300)
+W('05,3010', 0o13054, '', 'TCF', 'PTBAD', line=301)
+# Page 217
+W('05,3011', 0o10161, '', 'CCS', 'MPAC +5', 'PROCESS ALL RESTART GROUPS.', line=303)
+W('05,3012', 0o12776, '', 'TCF', 'PCLOOP', line=304)
+
+W('05,3013', 0o54162, '', 'TS', 'MPAC +6', 'SET TO +0.', line=306)
+W('05,3014', 0o05315, '', 'TC', 'MMDSPLAY', 'DISPLAY MAJOR MODE', line=307)
+
+W('05,3015', 0o00004, '', 'INHINT', '', 'RELINT DONE IN MMDSPLAY', line=309)
+
+W('05,3016', 0o44736, '', 'CS', 'DIDFLBIT', 'CLEAR DIDFLAG IN ORDER TO FORCE R10 TO', line=311)
+W('05,3017', 0o70075, '', 'MASK', 'FLAGWRD1', 'RE-INITIALIZE ITSELF IF IT HAD BEEN', line=312)
+W('05,3020', 0o54075, '', 'TS', 'FLAGWRD1', 'OPERATION AT THE TIME OF THE RESTART.', line=313)
+
+W('05,3021', 0o44740, '', 'CS', 'RODFLBIT', 'CLEAR RODFLAG.  IF P66 IS IN OPERATION', line=315)
+W('05,3022', 0o70075, '', 'MASK', 'FLAGWRD1', '      IT WILL RE-INITIALIZE ITSELF AND', line=316)
+W('05,3023', 0o54075, '', 'TS', 'FLAGWRD1', '      CONTINUE.', line=317)
+
+W('05,3024', 0o44741, '', 'CS', 'P21FLBIT', 'CLEAR P21 FLAG SO THAT P21 WILL COMPUTE', line=319)
+W('05,3025', 0o70074, '', 'MASK', 'FLAGWRD0', 'NEW BASE STATE VECTORS.', line=320)
+W('05,3026', 0o54074, '', 'TS', 'FLAGWRD0', line=321)
+
+W('05,3027', 0o34756, '', 'CAF', 'NUMGRPS', 'SEE IF ANY GROUPS RUNNING.', line=323)
+W('05,3030', 0o54161, 'NXTRST', 'TS', 'MPAC +5', line=324)
+W('05,3031', 0o60000, '', 'DOUBLE', line=325)
+W('05,3032', 0o50000, '', 'INDEX', 'A', line=326)
+W('05,3033', 0o10753, '', 'CCS', 'PHASE1', line=327)
+W('05,3034', 0o13036, '', 'TCF', 'PACTIVE', 'PNZ -- GROUP ACTIVE.', line=328)
+W('05,3035', 0o13043, '', 'TCF', 'PINACT', '+0 -- GROUP NOT RUNNING.', line=329)
+
+W('05,3036', 0o54154, 'PACTIVE', 'TS', 'MPAC', line=331)
+W('05,3037', 0o24154, '', 'INCR', 'MPAC', 'ABS OF PHASE.', line=332)
+W('05,3040', 0o24162, '', 'INCR', 'MPAC +6', 'INDICATE GROUP DEMANDS PRESENT.', line=333)
+W('05,3041', 0o33062, '', 'CA', 'RACTCADR', line=334)
+W('05,3042', 0o04622, '', 'TC', 'SWCALL', 'MUST RETURN TO SWRETURN.', line=335)
+
+W('05,3043', 0o10161, 'PINACT', 'CCS', 'MPAC +5', 'PROCESS ALL RESTART GROUPS.', line=337)
+W('05,3044', 0o13030, '', 'TCF', 'NXTRST', line=338)
+
+W('05,3045', 0o10162, '', 'CCS', 'MPAC +6', 'NO, CHECK PHASE ACTIVITY FLAG', line=340)
+W('05,3046', 0o12641, '', 'TCF', 'ENDRSTRT', 'PHASE ACTIVE', line=341)
+W('05,3047', 0o34735, '', 'CAF', 'BIT15', 'IS MODE -0', line=342)
+W('05,3050', 0o71011, '', 'MASK', 'MODREG', line=343)
+W('05,3051', 0o00006, '', 'EXTEND', line=344)
+W('05,3052', 0o16001, '', 'BZF', 'GOTOPOOH', 'NO', line=345)
+W('05,3053', 0o12641, '', 'TCF', 'ENDRSTRT', 'YES', line=346)
+W('05,3054', 0o05567, 'PTBAD', 'TC', 'ALARM', 'SET ALARM TO SHOW PHASE TABLE FAILURE.', line=347)
+W('05,3055', 0o01107, '', 'OCT', '1107', kind='data', line=348)
+
+W('05,3056', 0o12501, '', 'TCF', 'DOFSTRT1', line=350)
+# ******** ****** ******
+# Page 218
+# DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING POOH PEOPLE.
+
+S('OCT10000', 'equals', 0o4737, line=355)
+S('OCT30000', 'equals', 0o4355, line=356)
+W('05,3057', 0o07777, 'OCT7777', 'OCT', '7777', kind='data', line=357)
+W('05,3060', 0o32321, 'STIKSTRT', 'DEC', '0.825268', '20 D/S MAXIMUM COMPANDED RATE', kind='data', line=358)
+W('05,3061', 0o77445, 'RATESTRT', 'DEC', '-218', kind='data', line=359)
+W('05,3062', 0o03526, 'RACTCADR', 'CADR', 'RESTARTS', kind='data', line=360)
+W('05,3063', 0o21312, 'BOOLSTRT', 'OCT', '21312', kind='data', line=361)
+W('05,3064', 0o77001, '77001OCT', 'OCT', '77001', '.14 DEG SCALED AT 4.5 DEG', kind='data', line=362)
+W('05,3065', 0o00074, '60DEC', 'DEC', '60', kind='data', line=363)
+W('05,3066', 0o20100, 'RSFLGBTS', 'OCT', '20100', kind='data', line=364)
+W('05,3067', 0o03434, 'MAXDB', 'OCTAL', '03434', '5 DEG ATTITUDE DEADBAND, SCALED AT 45.', kind='data', line=365)
+
+W('05,3070', 0o34747, 'LIGHTSET', 'CAF', 'BIT5', 'CHECK FOR MARK REJECT AND ERROR RESET', line=367)
+W('05,3071', 0o00006, '', 'EXTEND', line=368)
+W('05,3072', 0o02016, '', 'RAND', 'NAVKEYIN', line=369)
+W('05,3073', 0o00006, '', 'EXTEND', line=370)
+W('05,3074', 0o13102, '', 'BZF', 'NONAVKEY', 'NO MARK REJECT', line=371)
+W('05,3075', 0o00006, '', 'EXTEND', line=372)
+W('05,3076', 0o00015, '', 'READ', 'MNKEYIN', 'CHECK IF KEYS 2M AND 5M ON', line=373)
+W('05,3077', 0o63361, '', 'AD', '-ELR', 'MAIN DSKY KEYCODE (BITS 1-5)', line=374)
+W('05,3100', 0o00006, '', 'EXTEND', line=375)
+W('05,3101', 0o13103, '', 'BZF', '+2', line=376)
+
+W('05,3102', 0o00002, 'NONAVKEY', 'TC', 'Q', line=378)
+
+W('05,3103', 0o03107, '', 'TC', 'STARTSUB', line=380)
+W('05,3104', 0o12474, '', 'TCF', 'DOFSTART', line=381)
+W('05,3105', 0o03107, '', 'TC', 'STARTSUB', line=382)
+W('05,3106', 0o12501, '', 'TCF', 'DOFSTRT1', "DO FRESH START BUT DON'T TOUCH ENGINE", line=383)
+
+# Page 219
+# INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
+
+#   EBANK= AOSQ
+W('05,3107', 0o33351, 'STARTSUB', 'CAF', 'LDNPHAS1', 'SET POINTER SO NEXT 20MS DOWNRUPT WILL', line=389)
+W('05,3110', 0o54335, '', 'TS', 'DNTMGOTO', 'CAUSE THE CURRENT DOWNLIST TO BE', line=390)
+# INTERRUPTED AND START SENDING FROM THE
+# BEGINNING OF THE CURRENT DOWNLIST.
+W('05,3111', 0o34746, '', 'CAF', 'BIT6', line=393)
+W('05,3112', 0o00006, '', 'EXTEND', line=394)
+W('05,3113', 0o02033, '', 'RAND', 'CHAN33', line=395)
+W('05,3114', 0o63365, '', 'AD', 'RMODINIT', line=396)
+W('05,3115', 0o54110, '', 'TS', 'RADMODES', line=397)
+
+W('05,3116', 0o34733, 'STARTSB1', 'CAF', 'POSMAX', line=399)
+W('05,3117', 0o54026, '', 'TS', 'TIME3', line=400)
+W('05,3120', 0o67746, '', 'AD', 'MINUS2', line=401)
+W('05,3121', 0o54027, '', 'TS', 'TIME4', line=402)
+W('05,3122', 0o67747, '', 'AD', 'NEGONE', line=403)
+W('05,3123', 0o54030, '', 'TS', 'TIME5', line=404)
+
+W('05,3124', 0o35015, '', 'CAF', 'EBANK6', line=406)
+W('05,3125', 0o54003, '', 'TS', 'EBANK', line=407)
+
+W('05,3126', 0o44737, '', 'CS', 'BIT13', 'CAUSE DAPIDLER TO CALL 1/ACCS', line=409)
+W('05,3127', 0o71273, '', 'MASK', 'RCSFLAGS', line=410)
+W('05,3130', 0o55273, '', 'TS', 'RCSFLAGS', 'ZERO BIT 13', line=411)
+W('05,3131', 0o34733, '', 'CAF', 'POSMAX', 'DISABLE TIME6 CLOCK.  JUST IN CASE A T6', line=412)
+W('05,3132', 0o55466, '', 'TS', 'T6NEXT', '      RUPT IS ALREADY IN THE PRIORITY CHAIN,', line=413)
+W('05,3133', 0o00006, '', 'EXTEND', '', '      ENSURE THAT ITS INPUTS WILL RENDER IT', line=414)
+W('05,3134', 0o03013, '', 'WAND', 'CHAN13', '      INEFFECTUAL.', line=415)
+W('05,3135', 0o34755, '', 'CAF', 'ZERO', line=416)
+W('05,3136', 0o55465, '', 'TS', 'NXT6ADR', line=417)
+W('05,3137', 0o55472, '', 'TS', 'NEXTP', line=418)
+
+W('05,3140', 0o44751, '', 'CS', 'ACCSOKAY', line=420)
+W('05,3141', 0o70111, '', 'MASK', 'DAPBOOLS', line=421)
+W('05,3142', 0o54111, '', 'TS', 'DAPBOOLS', line=422)
+
+W('05,3143', 0o00006, '', 'EXTEND', '', 'SET T5RUPT FOR DAPIDLER PROGRAM.', line=424)
+W('05,3144', 0o33347, '', 'DCA', 'IDLEADR', line=425)
+W('05,3145', 0o53275, '', 'DXCH', 'T5ADR', line=426)
+
+W('05,3146', 0o33360, 'STARTSB2', 'CAF', 'OCT30001', 'DURING SOFTWARE RESTART, DO NOT DISTURB', line=428)
+W('05,3147', 0o00006, '', 'EXTEND', '', 'ENGINE ON, OFF AND ISS WARNING.', line=429)
+W('05,3150', 0o03011, '', 'WAND', 'DSALMOUT', line=430)
+
+W('05,3151', 0o44743, '', 'CS', 'READRBIT', 'CLEAR READRFLG FOR R29', line=432)
+W('05,3152', 0o70077, '', 'MASK', 'FLAGWRD3', line=433)
+W('05,3153', 0o54077, '', 'TS', 'FLAGWRD3', line=434)
+# Page 220
+
+W('05,3154', 0o40077, '', 'CS', 'FLAGWRD3', 'DURING SOFTWARE RESTART, CLEAR TURNON,', line=437)
+W('05,3155', 0o74741, '', 'MASK', 'NR29FBIT', 'REPOSITION, CDU ZERO AND REMODE BITS', line=438)
+W('05,3156', 0o00006, '', 'EXTEND', '', 'IN RADMODES, SINCE TASKS ASSOCIATED', line=439)
+W('05,3157', 0o13161, '', 'BZF', '+2', 'WITH THESE BITS HAVE BEEN KILLED', line=440)
+W('05,3160', 0o34742, '', 'CAF', 'BIT10', 'ALSO IF R29 HAD BEEN REQUESTED.', line=441)
+W('05,3161', 0o63354, '', 'AD', 'OCT32001', '(NOR29FLG = 0) CLEAR BIT 10 RADMODES', line=442)
+W('05,3162', 0o40000, '', 'COM', '', 'TO MAKE R29 FORGET IT HAD STARTED', line=443)
+W('05,3163', 0o70110, '', 'MASK', 'RADMODES', 'DESIGNATING', line=444)
+W('05,3164', 0o54110, '', 'TS', 'RADMODES', line=445)
+W('05,3165', 0o33356, '', 'CAF', 'OCT27470', 'DURING SOFTWARE RESTART, DO NOT DISTURB', line=446)
+W('05,3166', 0o00006, '', 'EXTEND', '', 'IMU FLAGS.  (COARSE ALIGN ENABLE, ZERO', line=447)
+W('05,3167', 0o03012, '', 'WAND', 'CHAN12', 'IMU CDUS, ENABLE IMU COUNTER) AND GIMBAL', line=448)
+# TRIM DRIVES.  LEAVE RR LOCKON ENABLE
+# ALONE.
+
+W('05,3170', 0o44750, '', 'CS', 'NORRMBIT', 'ENABLE R25.', line=452)
+W('05,3171', 0o70101, '', 'MASK', 'FLAGWRD5', line=453)
+W('05,3172', 0o54101, '', 'TS', 'FLAGWRD5', line=454)
+
+W('05,3173', 0o44741, '', 'CS', 'R77FLBIT', 'CLEAR R77FLAG', line=456)
+W('05,3174', 0o70101, '', 'MASK', 'FLAGWRD5', line=457)
+W('05,3175', 0o54101, '', 'TS', 'FLAGWRD5', line=458)
+W('05,3176', 0o33357, '', 'CAF', 'OCT74160', 'DURING SOFTWARE RESTART, DO NOT DISTURB', line=459)
+W('05,3177', 0o00006, '', 'EXTEND', '', 'TELEMETRY FLAGS, RESET TRAP FLAGS, AND', line=460)
+W('05,3200', 0o03013, '', 'WAND', 'CHAN13', 'ENABLE T6RUPT FLAG.', line=461)
+
+W('05,3201', 0o34740, '', 'CAF', 'BIT12', 'REENABLE RUPT10 (RUPT QUICKLY', line=463)
+W('05,3202', 0o00006, '', 'EXTEND', '', '      RESUMES EXCEPT DURING P64)', line=464)
+W('05,3203', 0o05013, '', 'WOR', 'CHAN13', line=465)
+
+W('05,3204', 0o34746, '', 'CAF', 'BIT6', 'DURING SOFTWARE RESTART, DO NOT DISTURB', line=467)
+W('05,3205', 0o00006, '', 'EXTEND', '', 'GYRO ENABLE FLAG.', line=468)
+W('05,3206', 0o03014, '', 'WAND', 'CHAN14', line=469)
+
+#   EBANK= LST1
+W('05,3207', 0o35007, '', 'CAF', 'STARTEB', line=472)
+W('05,3210', 0o54003, '', 'TS', 'EBANK', 'SET FOR E3', line=473)
+
+W('05,3211', 0o34734, '', 'CAF', 'NEG1/2', 'INITIALIZE WAITLIST DELTA-TS.', line=475)
+W('05,3212', 0o55407, '', 'TS', 'LST1 +7', line=476)
+W('05,3213', 0o55406, '', 'TS', 'LST1 +6', line=477)
+W('05,3214', 0o55405, '', 'TS', 'LST1 +5', line=478)
+W('05,3215', 0o55404, '', 'TS', 'LST1 +4', line=479)
+W('05,3216', 0o55403, '', 'TS', 'LST1 +3', line=480)
+W('05,3217', 0o55402, '', 'TS', 'LST1 +2', line=481)
+W('05,3220', 0o55401, '', 'TS', 'LST1 +1', line=482)
+W('05,3221', 0o55400, '', 'TS', 'LST1', line=483)
+
+W('05,3222', 0o45236, '', 'CS', 'ENDTASK', line=485)
+W('05,3223', 0o55410, '', 'TS', 'LST2', line=486)
+# Page 221
+W('05,3224', 0o55412, '', 'TS', 'LST2 +2', line=488)
+W('05,3225', 0o55414, '', 'TS', 'LST2 +4', line=489)
+W('05,3226', 0o55416, '', 'TS', 'LST2 +6', line=490)
+W('05,3227', 0o55420, '', 'TS', 'LST2 +8D', line=491)
+W('05,3230', 0o55422, '', 'TS', 'LST2 +10D', line=492)
+W('05,3231', 0o55424, '', 'TS', 'LST2 +12D', line=493)
+W('05,3232', 0o55426, '', 'TS', 'LST2 +14D', line=494)
+W('05,3233', 0o55430, '', 'TS', 'LST2 +16D', line=495)
+W('05,3234', 0o45237, '', 'CS', 'ENDTASK +1', line=496)
+W('05,3235', 0o55411, '', 'TS', 'LST2 +1', line=497)
+W('05,3236', 0o55413, '', 'TS', 'LST2 +3', line=498)
+W('05,3237', 0o55415, '', 'TS', 'LST2 +5', line=499)
+W('05,3240', 0o55417, '', 'TS', 'LST2 +7', line=500)
+W('05,3241', 0o55421, '', 'TS', 'LST2 +9D', line=501)
+W('05,3242', 0o55423, '', 'TS', 'LST2 +11D', line=502)
+W('05,3243', 0o55425, '', 'TS', 'LST2 +13D', line=503)
+W('05,3244', 0o55427, '', 'TS', 'LST2 +15D', line=504)
+W('05,3245', 0o55431, '', 'TS', 'LST2 +17D', line=505)
+
+W('05,3246', 0o44755, '', 'CS', 'ZERO', 'MAKE ALL EXECUTIVE REGISTER SETS', line=507)
+W('05,3247', 0o54167, '', 'TS', 'PRIORITY', 'AVAILABLE.', line=508)
+W('05,3250', 0o54203, '', 'TS', 'PRIORITY +12D', line=509)
+W('05,3251', 0o54217, '', 'TS', 'PRIORITY +24D', line=510)
+W('05,3252', 0o54233, '', 'TS', 'PRIORITY +36D', line=511)
+W('05,3253', 0o54247, '', 'TS', 'PRIORITY +48D', line=512)
+W('05,3254', 0o54263, '', 'TS', 'PRIORITY +60D', line=513)
+W('05,3255', 0o54277, '', 'TS', 'PRIORITY +72D', line=514)
+W('05,3256', 0o54313, '', 'TS', 'PRIORITY +84D', line=515)
+
+W('05,3257', 0o55313, '', 'TS', 'DSRUPTSW', line=517)
+W('05,3260', 0o54067, '', 'TS', 'NEWJOB', 'SHOWS NO ACTIVE JOBS.', line=518)
+
+W('05,3261', 0o33353, '', 'CAF', 'VAC1ADRC', 'MAKE ALL VAC AREAS AVAILABLE.', line=520)
+W('05,3262', 0o54400, '', 'TS', 'VAC1USE', line=521)
+W('05,3263', 0o63355, '', 'AD', 'LTHVACA', line=522)
+W('05,3264', 0o54454, '', 'TS', 'VAC2USE', line=523)
+W('05,3265', 0o63355, '', 'AD', 'LTHVACA', line=524)
+W('05,3266', 0o54530, '', 'TS', 'VAC3USE', line=525)
+W('05,3267', 0o63355, '', 'AD', 'LTHVACA', line=526)
+W('05,3270', 0o54604, '', 'TS', 'VAC4USE', line=527)
+W('05,3271', 0o63355, '', 'AD', 'LTHVACA', line=528)
+W('05,3272', 0o54660, '', 'TS', 'VAC5USE', line=529)
+
+W('05,3273', 0o34363, '', 'CAF', 'TEN', line=531)
+W('05,3274', 0o54154, 'DSPOFF', 'TS', 'MPAC', 'R1, R2, R3', line=532)
+W('05,3275', 0o44740, '', 'CS', 'BIT12', line=533)
+W('05,3276', 0o50154, '', 'INDEX', 'MPAC', line=534)
+W('05,3277', 0o55023, '', 'TS', 'DSPTAB', line=535)
+W('05,3300', 0o10154, '', 'CCS', 'MPAC', line=536)
+W('05,3301', 0o13274, '', 'TCF', 'DSPOFF', line=537)
+
+# Page 222
+W('05,3302', 0o55326, '', 'TS', 'DELAYLOC', line=540)
+W('05,3303', 0o55327, '', 'TS', 'DELAYLOC +1', line=541)
+W('05,3304', 0o55330, '', 'TS', 'DELAYLOC +2', line=542)
+W('05,3305', 0o55074, '', 'TS', 'R1SAVE', line=543)
+W('05,3306', 0o54045, '', 'TS', 'INLINK', line=544)
+W('05,3307', 0o54776, '', 'TS', 'DSPCNT', line=545)
+W('05,3310', 0o55042, '', 'TS', 'CADRSTOR', line=546)
+W('05,3311', 0o55013, '', 'TS', 'REQRET', line=547)
+W('05,3312', 0o55015, '', 'TS', 'CLPASS', line=548)
+W('05,3313', 0o55012, '', 'TS', 'DSPLOCK', line=549)
+W('05,3314', 0o55020, '', 'TS', 'MONSAVE', 'KILL MONITOR', line=550)
+W('05,3315', 0o55021, '', 'TS', 'MONSAVE1', line=551)
+W('05,3316', 0o55001, '', 'TS', 'VERBREG', line=552)
+W('05,3317', 0o55002, '', 'TS', 'NOUNREG', line=553)
+W('05,3320', 0o55043, '', 'TS', 'DSPLIST', line=554)
+W('05,3321', 0o55312, '', 'TS', 'MARKSTAT', line=555)
+W('05,3322', 0o55044, '', 'TS', 'EXTVBACT', 'MAKE EXTENDED VERBS AVAILABLE', line=556)
+W('05,3323', 0o55304, '', 'TS', 'IMUCADR', line=557)
+W('05,3324', 0o55305, '', 'TS', 'OPTCADR', line=558)
+W('05,3325', 0o55306, '', 'TS', 'RADCADR', line=559)
+W('05,3326', 0o55307, '', 'TS', 'ATTCADR', line=560)
+W('05,3327', 0o55314, '', 'TS', 'LGYRO', line=561)
+W('05,3330', 0o54100, '', 'TS', 'FLAGWRD4', 'KILL INTERFACE DISPLAYS', line=562)
+W('05,3331', 0o34760, '', 'CAF', 'NOUTCON', line=563)
+W('05,3332', 0o55016, '', 'TS', 'NOUT', line=564)
+
+W('05,3333', 0o44753, '', 'CS', 'ONE', line=566)
+W('05,3334', 0o55100, '', 'TS', 'SAMPLIM', line=567)
+W('05,3335', 0o34746, '', 'CAF', 'BIT6', line=568)
+W('05,3336', 0o71303, '', 'MASK', 'IMODES33', 'LEAVE BIT 6 UNCHANGED', line=569)
+W('05,3337', 0o65026, '', 'AD', 'IM33INIT', 'NO PIP OR TM FAILS.  BIT6=0 IN THIS WORD.', line=570)
+W('05,3340', 0o55303, '', 'TS', 'IMODES33', line=571)
+
+W('05,3341', 0o33352, '', 'CAF', 'LESCHK', 'SELF CHECK GO-TO REGISTER.', line=573)
+W('05,3342', 0o55361, '', 'TS', 'SELFRET', line=574)
+
+W('05,3343', 0o44360, '', 'CS', 'VD1', line=576)
+W('05,3344', 0o54777, '', 'TS', 'DSPCOUNT', line=577)
+
+W('05,3345', 0o00002, '', 'TC', 'Q', line=579)
+#   EBANK= AOSQ
+W('05,3346', 0o02024, 'IDLEADR', '2CADR', 'DAPIDLER', kind='data', line=581)
+W('05,3347', 0o34066, kind='data', line=581)
+
+W('05,3350', 0o00435, 'IFAILINH', 'OCT', '435', kind='data', line=583)
+W('05,3351', 0o03515, 'LDNPHAS1', 'GENADR', 'DNPHASE1', kind='data', line=584)
+W('05,3352', 0o03336, 'LESCHK', 'GENADR', 'SELFCHK', kind='data', line=585)
+W('05,3353', 0o00400, 'VAC1ADRC', 'ADRES', 'VAC1USE', kind='data', line=586)
+W('05,3354', 0o32001, 'OCT32001', 'OCT', '32001', kind='data', line=587)
+W('05,3355', 0o00054, 'LTHVACA', 'DEC', '44', kind='data', line=588)
+
+# Page 223
+W('05,3356', 0o27470, 'OCT27470', 'OCT', '27470', kind='data', line=591)
+W('05,3357', 0o74160, 'OCT74160', 'OCT', '74160', kind='data', line=592)
+W('05,3360', 0o30001, 'OCT30001', 'OCT', '30001', kind='data', line=593)
+S('STARTEB', 'equals', 0o5007, line=594)
+S('NUMGRPS', 'equals', 0o4756, line=595)
+W('05,3361', 0o77755, '-ELR', 'OCT', '-22', '-ERROR LIGHT RESET KEY CODE.', kind='data', line=596)
+W('05,3362', 0o37411, 'IM30INIF', 'OCT', '37411', 'INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW', kind='data', line=597)
+W('05,3363', 0o37000, 'IM30INIR', 'OCT', '37000', kind='data', line=598)
+S('IM33INIT', 'equals', 0o5026, line=599)  # NO PIP OR TM FAIL SIGNALS.
+W('05,3364', 0o00450, '9,6,4', 'OCT', '450', kind='data', line=600)
+W('05,3365', 0o00102, 'RMODINIT', 'OCT', '00102', kind='data', line=601)
+W('05,3366', 0o00000, 'SWINIT', 'OCT', '0', kind='data', line=602)
+W('05,3367', 0o00000, '', 'OCT', '0', kind='data', line=603)
+W('05,3370', 0o00000, '', 'OCT', '0', kind='data', line=604)
+W('05,3371', 0o02000, '', 'OCT', '02000', 'BIT 11 = NOR29FLG', kind='data', line=605)
+W('05,3372', 0o00000, '', 'OCT', '0', kind='data', line=606)
+W('05,3373', 0o00000, '', 'OCT', '0', kind='data', line=607)
+W('05,3374', 0o00000, '', 'OCT', '0', kind='data', line=608)
+W('05,3375', 0o00100, '', 'OCT', '00100', kind='data', line=609)
+
+W('05,3376', 0o00000, '', 'OCT', '0', kind='data', line=611)
+W('05,3377', 0o00000, '', 'OCT', '0', kind='data', line=612)
+W('05,3400', 0o00000, '', 'OCT', '0', kind='data', line=613)
+W('05,3401', 0o40000, '', 'OCT', '40000', 'BIT 15 = LRBYPASS.', kind='data', line=614)
+
+# Page 224
+# PROGRAM NAME          GOTOPOOH                ASSEMBLY SUNDANCE
+# LOG SECTION           FRESH START AND RESTART
+#
+# FUNCTIONAL DESCRIPTION
+#
+# FLASH V 37 ON DSKY MM CHANGE REQUEST
+#
+# INPUT/OUTPUT INFORMATION
+#
+# A. CALLING SEQUENCE                     TC GOTOPOOH
+# B. ERASABLE INITIALIZATION              NONE
+# C. OUTPUT FLASH V 37 ON DSKY
+# D. DEBRIS                               L
+#
+# PROGRAM ANALYSIS
+#
+# A. SUBROUTINES CALLED                   PRIODSPR, LINUS
+# B. NORMAL EXIT                          TCF ENDOFJOB
+# C. ALARM AND ABORT EXITS                NONE
+
+#   BLOCK 03
+#   SETLOC FFTAG5
+#   BANK
+
+#   COUNT* $$/P00
+W('6001', 0o34764, 'GOTOPOOH', 'CAF', 'OCT33', '4.33 SPOT FOR GOP00FIX', line=642)
+W('6002', 0o54001, '', 'TS', 'L', line=643)
+W('6003', 0o40000, '', 'COM', line=644)
+W('6004', 0o52761, '', 'DXCH', '-PHASE4', line=645)
+
+W('6005', 0o04635, '', 'TC', 'POSTJUMP', line=647)
+W('6006', 0o10024, '', 'CADR', 'GOP00FIX', kind='data', line=648)
+W('6007', 0o00024, 'OCT24', 'MM', '20', kind='data', line=649)
+W('6010', 0o00031, 'OCT31', 'MM', '25', kind='data', line=650)
+
+#   BANK 20
+#   SETLOC VERB37
+#   BANK
+
+#   COUNT* $$/P00  # VERB 37 AND P00 IN BANK 4.
+W('04,2024', 0o05516, 'GOP00FIX', 'TC', 'DOWNFLAG', 'ALLOW X-AXIS OVERRIDE', line=657)
+W('04,2025', 0o00311, '', 'ADRES', 'XOVINFLG', kind='data', line=658)
+
+W('04,2026', 0o05516, '', 'TC', 'DOWNFLAG', 'INSURE THAT ULLAGE IS OFF', line=660)
+W('04,2027', 0o00314, '', 'ADRES', 'ULLAGFLG', kind='data', line=661)
+# Page 225
+W('04,2030', 0o05476, '', 'TC', 'CLEARMRK +2', 'RELEASE MARK DISPLAY SYSTEM.', line=663)
+W('04,2031', 0o32037, '', 'CAF', 'V37N99', line=664)
+W('04,2032', 0o04616, '', 'TC', 'BANKCALL', line=665)
+W('04,2033', 0o20476, '', 'CADR', 'GOFLASH', kind='data', line=666)
+W('04,2034', 0o12031, '', 'TCF', '-3', line=667)
+W('04,2035', 0o12031, '', 'TCF', '-4', line=668)
+W('04,2036', 0o12031, '', 'TCF', '-5', line=669)
+
+W('04,2037', 0o11343, 'V37N99', 'VN', '3799', kind='data', line=671)
+
+# Page 226
+# PROGRAM NAME          V37                     ASSEMBLY SUNDANCE
+#
+# LOG SECTION           FRESH START AND RESTART
+#
+# FUNCTIONAL DESCRIPTION
+#
+# 1. CHECK IF NEW PROGRAM ALLOWED.  IF BIT 1 OF FLAGWRD2 (NODOFLAG) IS SET, AN ALARM 1520 IS CALLED.
+# 2. CHECK FOR VALIDITY OF PROGRAM SELECTED.  IF AN INVALID PROGRAM IS SELECTED, THE OPERATOR ERROR LIGHT IS
+# SET AND CURRENT ACTIVITY, IF ANY, CONTINUE.
+# 3. SERVICER IS TERMINATED IF IT HAS BEEN RUNNING.
+# 4. INSTALL IS EXECUTED TO AVOID INTERRUPTING INTEGRATION.
+# 5. THE ENGINE IS TURNED OFF AND THE DAP IS INITIALIZED FOR COAST.
+# 6. TRACK AND UPDATE FLAGS ARE SET TO ZERO.
+# 7. DISPLAY SYSTEM IS RELEASED.
+# 8. THE FOLLOWING ARE PERFORMED FOR EACH OF THE THREE CASES.
+# A. PROGRAM SELECTED IS P00
+# 1. RENDEZVOUS AND P25 FLAGS ARE RESET.  (KILL P20 AND P25)
+# 2. STATINT1 IS SCHEDULED BY SETTING RESTART GROUP 2.
+# 3. MAJOR MODE 00 IS STORED IN THE MODE REGISTER (MODREG).
+# 4. SUPERBANK 3 IS SELECTED.
+# 5. NODOFLAG IS RESET.
+# 6. ALL RESTART GROUPS EXCEPT GROUP2 ARE CLEARED. CONTROL IS TRANSFERRED TO RESTART PROGRAM (GOPROG2)
+# WHICH CAUSES ALL CURRENT ACTIVITY TO BE DISCONTINUED AND A 9 MINUTE INTEGRATION CYCLE TO BE
+# INITIATED.
+# B. PROGRAM SELECTES IS P20 OR P25.
+# 1. IF THE CURRENT MAJOR MODE IS THE SAME AS THE SELECTED NEWPROGRAM.  THE PROGRAM IS RE-INITIALIZED
+# VIA V37XEQ, ALL RESTART GROUPS, EXCEPT GROUP 4 ARE CLEARED.
+# 2. IF THE CURRENT MAJOR MODE IS NOT EQUAL TO THE NEW REQUEST, A CHECK IS MADE TO SEE IF THE REQUEST-
+# ED MAJOR MODE HAS BEEN RUNNING THE BACKGROUND,
+# AND IF IT HAS, NO NEW PROGRAM IS SCHEDULED, THE EXISTING
+# P20 OR P25 IS RESTARTED TO CONTINUE, AND ITS MM IS SET.
+# 3. CONTROL IS TRANSFERRED TO GOPROG2.
+# C. PROGRAM SELECTED IS NEITHER P00, P20, NOR P25
+# 1. V37XEQ IS SCHEDULED (AS A JOB) BY SETTING RESTART GROUP 4
+# 2. ALL CURRENT ACTIVITY EXCEPT RENDEZVOUS AND TRACKING IS DISCONTINUED BY CLEARING ALL RESTART
+# GROUPS.  IF THE RENDEZVOUS OR THE P25 FLAG IS ON, GROUP 2 IS NOT CLEARED, ALLOWING THESE PROGRAMS
+# TO CONTINUE.
+#
+# INPUT/OUTPUT INFORMATION
+#
+# A. CALLING SEQUENCE
+# CONTROL IS DIRECTED TO V37 BY THE VERBFAN ROUTINE.
+# VERBFAN GOES TO C(VERBTAB+C(VERBREG)). VERB 37 = MMCHANG.
+# MMCHANG EXECUTES A `TC POSTJUMP', CADR V37.
+#
+# B. ERASABLE INITIALIZATION              NONE
+#
+# C. OUTPUT
+# Page 227
+# MAJOR MOD CHANGE
+#
+# D. DEBRIS
+# MMNUMBER, MPAC +1, MINDEX, BASETEMP +C(MINDEX), FLAGWRD0, FLAGWRD1, FLAGWRD2, MODREG, GOLOC -1,
+# GOLOC, GOLOC +1, GOLOC +2, BASETEMP, -PHASE2, PHASE2, -PHASE4
+#
+# PROGRAM ANALYSIS
+#
+# A. SUBROUTINES CALLED
+# ALARM, RELDSP, PINBRNCH, INTSTALL, ENGINOF2, ALLCOAST, V37KLEAN, GOPROG2, FALTON, FINDVAC, SUPERSW,
+# DSPMM
+#
+# B. NORMAL EXIT                          TC ENDOFJOB
+#
+# C. ALARMS                               1520 (MAJOR MODE CHANGE NOT PERMITTED)
+
+W('04,2040', 0o54775, 'V37', 'TS', 'MMNUMBER', 'SAVE MAJOR MODE', line=739)
+W('04,2041', 0o34355, '', 'CAF', 'PRIO30', 'RESTART AT PINBALL PRIORITY', line=740)
+W('04,2042', 0o54366, '', 'TS', 'RESTREG', line=741)
+
+W('04,2043', 0o31302, '', 'CA', 'IMODES30', 'IS IMU BEING INITIALIZED', line=743)
+W('04,2044', 0o74746, '', 'MASK', 'BIT6', line=744)
+W('04,2045', 0o10000, '', 'CCS', 'A', line=745)
+W('04,2046', 0o12065, '', 'TCF', 'CANTROD', line=746)
+
+W('04,2047', 0o40775, '', 'CS', 'MMNUMBER', 'IS P70 REQUESTED?', line=748)
+W('04,2050', 0o62400, '', 'AD', 'DEC70', line=749)
+W('04,2051', 0o00006, '', 'EXTEND', line=750)
+W('04,2052', 0o12373, '', 'BZF', 'SETUP70', 'YES', line=751)
+W('04,2053', 0o64753, '', 'AD', 'ONE', 'IS P71 REQUESTED?', line=752)
+W('04,2054', 0o00006, '', 'EXTEND', line=753)
+W('04,2055', 0o12372, '', 'BZF', 'SETUP71', 'YES', line=754)
+
+W('04,2056', 0o30775, '', 'CA', 'MMNUMBER', 'IS NEW REQUEST P00', line=756)
+W('04,2057', 0o00006, '', 'EXTEND', line=757)
+W('04,2060', 0o12107, '', 'BZF', 'ISSERVON', 'YES, CHECK SERVICER STATUS', line=758)
+
+W('04,2061', 0o40076, '', 'CS', 'FLAGWRD2', 'NO, IS NODO V37 FLAG SET', line=760)
+W('04,2062', 0o74753, '', 'MASK', 'NODOBIT', line=761)
+W('04,2063', 0o10000, '', 'CCS', 'A', line=762)
+W('04,2064', 0o12072, '', 'TCF', 'CHECKTAB', 'NO', line=763)
+W('04,2065', 0o05567, 'CANTROD', 'TC', 'ALARM', line=764)
+W('04,2066', 0o01520, '', 'OCT', '1520', kind='data', line=765)
+
+W('04,2067', 0o04457, 'V37BAD', 'TC', 'RELDSP', 'RELEASES DISPLAY FROM ASTRONAUT', line=767)
+
+W('04,2070', 0o04635, '', 'TC', 'POSTJUMP', 'BRING BACK LAST NORMAL DISPLAY IF THERE', line=769)
+W('04,2071', 0o21050, '', 'CADR', 'PINBRNCH', 'WAS ONE.  OTHERWISE DO AN EOJ.', kind='data', line=770)
+
+W('04,2072', 0o32477, 'CHECKTAB', 'CA', 'NOV37MM', 'INDEX FOR MM TABLES.', line=772)
+
+# Page 228
+W('04,2073', 0o54155, 'AGAINMM', 'TS', 'MPAC +1', line=775)
+W('04,2074', 0o50155, '', 'NDX', 'MPAC +1', line=776)
+W('04,2075', 0o32441, '', 'CA', 'PREMM1', 'OBTAIN WHICH MM THIS IS FOR', line=777)
+W('04,2076', 0o76074, '', 'MASK', 'LOW7', line=778)
+W('04,2077', 0o40000, '', 'COM', line=779)
+W('04,2100', 0o60775, '', 'AD', 'MMNUMBER', line=780)
+W('04,2101', 0o10000, '', 'CCS', 'A', line=781)
+W('04,2102', 0o10155, '', 'CCS', 'MPAC +1', 'IF GR, SEE IF ANY MORE IN LIST', line=782)
+W('04,2103', 0o12073, '', 'TCF', 'AGAINMM', 'YES, GET NEXT ONE', line=783)
+W('04,2104', 0o12322, '', 'TCF', 'V37NONO', 'LAST TIME OR PASSED MM', line=784)
+
+W('04,2105', 0o30155, '', 'CA', 'MPAC +1', line=786)
+W('04,2106', 0o54774, '', 'TS', 'MINDEX', 'SAVE INDEX FOR LATER', line=787)
+
+W('04,2107', 0o40103, 'ISSERVON', 'CS', 'FLAGWRD7', 'V37 FLAG SET -- I.E., IS SERVICER GOING', line=789)
+W('04,2110', 0o74746, '', 'MASK', 'V37FLBIT', line=790)
+W('04,2111', 0o10000, '', 'CCS', 'A', line=791)
+W('04,2112', 0o12134, '', 'TCF', 'CANV37', 'NO', line=792)
+
+W('04,2113', 0o05516, '', 'TC', 'DOWNFLAG', 'YES, TURN OFF THE AVERAGE FLAG AND', line=794)
+W('04,2114', 0o00163, '', 'ADRES', 'AVEGFLAG', 'WAIT FOR SERVICER TO RETURN TO CANV37', kind='data', line=795)
+
+W('04,2115', 0o32366, '', 'CAF', 'V37RETAD', line=797)
+W('04,2116', 0o55260, '', 'TS', 'OUTROUTE', line=798)
+
+W('04,2117', 0o15155, '', 'TCF', 'ENDOFJOB', line=800)
+
+W('04,2120', 0o40074, 'V37RET', 'CS', 'FLAGWRD0', 'IS P20 OR P22 RUNNING?', line=802)
+W('04,2121', 0o74745, '', 'MASK', 'RNDVZBIT', line=803)
+W('04,2122', 0o10000, '', 'CCS', 'A', line=804)
+W('04,2123', 0o12125, '', 'TCF', '+2', 'NO. CHECK FOR P25.', line=805)
+W('04,2124', 0o12132, '', 'TCF', '2.7SPT', 'YES. DO 2.7SPOT', line=806)
+W('04,2125', 0o40074, '', 'CS', 'FLAGWRD0', 'IS P25 RUNNING?', line=807)
+W('04,2126', 0o74743, '', 'MASK', 'P25FLBIT', line=808)
+W('04,2127', 0o10000, '', 'CCS', 'A', line=809)
+W('04,2130', 0o32367, '2.0SPT', 'CA', 'OCT37667', line=810)
+W('04,2131', 0o64747, '2.11SPT', 'AD', 'BIT5', line=811)
+W('04,2132', 0o62370, '2.7SPT', 'AD', 'OCT40072', line=812)
+W('04,2133', 0o05357, '', 'TC', 'PHSCHNGA', line=813)
+
+W('04,2134', 0o34755, 'CANV37', 'CAF', 'ZERO', line=815)
+W('04,2135', 0o00006, '', 'EXTEND', line=816)
+W('04,2136', 0o01007, '', 'WRITE', 'SUPERBNK', line=817)
+
+W('04,2137', 0o32365, '', 'CAF', 'R00AD', line=819)
+W('04,2140', 0o54374, '', 'TS', 'TEMPFLSH', line=820)
+
+W('04,2141', 0o05353, '', 'TC', 'PHASCHNG', line=822)
+W('04,2142', 0o00014, '', 'OCT', '14', kind='data', line=823)
+
+# Page 229
+
+W('04,2143', 0o06037, 'R00', 'TC', 'INTPRET', line=827)
+
+W('04,2144', 0o77624, '', 'CALL', '', 'WAIT FOR INTEGRATION TO FINISH', kind='interp', line=829)
+W('04,2145', 0o27414, '', '', 'INTSTALL', kind='operand', line=830)
+W('04,2146', 0o77776, 'DUMMYAD', 'EXIT', kind='interp', line=831)
+
+W('04,2147', 0o05516, '', 'TC', 'DOWNFLAG', line=833)
+W('04,2150', 0o00124, '', 'ADRES', '3AXISFLG', 'RESET 3-AXIT FLAG', kind='data', line=834)
+
+W('04,2151', 0o34735, '', 'CAF', 'LRBYBIT', 'CLEAN UP THE R12 FLAGWORD.', line=836)
+W('04,2152', 0o54107, '', 'TS', 'FLGWRD11', line=837)
+
+W('04,2153', 0o05516, '', 'TC', 'DOWNFLAG', 'INSURE THAT THE R04FLAG IS CLEAR.', line=839)
+W('04,2154', 0o00063, '', 'ADRES', 'R04FLAG', kind='data', line=840)
+
+W('04,2155', 0o05516, '', 'TC', 'DOWNFLAG', 'INSURE MUNFLAG IS CLEAR.', line=842)
+W('04,2156', 0o00141, '', 'ADRES', 'MUNFLAG', kind='data', line=843)
+
+W('04,2157', 0o05516, '', 'TC', 'DOWNFLAG', 'ALLOW X-AXIS OVERRIDE.', line=845)
+W('04,2160', 0o00311, '', 'ADRES', 'XOVINFLG', kind='data', line=846)
+W('04,2161', 0o10775, '', 'CCS', 'MMNUMBER', 'IS THIS A POOH REQUEST', line=847)
+W('04,2162', 0o12310, '', 'TCF', 'NOUVEAU', 'NO, PICK UP NEW PROGRAM', line=848)
+
+W('04,2163', 0o04457, 'POOH', 'TC', 'RELDSP', 'RELEASE DISPLAY SYSTEM', line=850)
+
+W('04,2164', 0o35017, '', 'CAF', 'PRIO5', 'SET VARIABLE RESTART PRIORITY FOR', line=852)
+W('04,2165', 0o55056, '', 'TS', 'PHSPRDT2', 'P00 INTEGRATION.', line=853)
+
+W('04,2166', 0o06011, '', 'TC', 'CLRADMOD', 'CLRADMOD DOES AN INHINT.', line=855)
+
+W('04,2167', 0o44753, '', 'CS', 'NODOBIT', 'TURN OFF NODOFLAG.', line=857)
+W('04,2170', 0o70076, '', 'MASK', 'FLAGWRD2', line=858)
+W('04,2171', 0o54076, '', 'TS', 'FLAGWRD2', line=859)
+
+W('04,2172', 0o34756, '', 'CA', 'FIVE', 'SET RESTART FOR STATEINT1', line=861)
+W('04,2173', 0o54001, '', 'TS', 'L', line=862)
+W('04,2174', 0o40000, '', 'COM', line=863)
+W('04,2175', 0o52755, '', 'DXCH', '-PHASE2', line=864)
+
+W('04,2176', 0o42371, '', 'CS', 'OCT700', 'TURN OFF P20, P25, IMU IN USE FLAG', line=866)
+W('04,2177', 0o70074, '', 'MASK', 'FLAGWRD0', line=867)
+W('04,2200', 0o54074, '', 'TS', 'FLAGWRD0', '                       REMDFLG', line=868)
+
+W('04,2201', 0o34755, '', 'CAF', 'DNLADP00', line=870)
+
+W('04,2202', 0o54332, 'SEUDOP00', 'TS', 'DNLSTCOD', 'SET UP APPROPRIATE DOWNLIST CODE', line=872)
+W('04,2203', 0o55324, '', 'TS', 'AGSWORD', '  (CURRENT LIST WILL BE COMPLETED BEFORE', line=873)
+# NEW ONE IS STARTED)
+W('04,2204', 0o04674, '', 'TC', 'IBNKCALL', line=875)
+W('04,2205', 0o75555, '', 'CADR', 'ENGINOF1', kind='data', line=876)
+
+# Page 230
+W('04,2206', 0o04674, '', 'TC', 'IBNKCALL', 'INSURE ALLCOAST.', line=879)
+W('04,2207', 0o40204, '', 'CADR', 'ALLCOAST', 'DOES A RESTORDB.', kind='data', line=880)
+
+W('04,2210', 0o44775, '', 'CS', 'OCT120', 'TURN OFF TRACK, UPDATE FLAGS', line=882)
+W('04,2211', 0o55072, '', 'TS', 'EBANKTEM', line=883)
+W('04,2212', 0o70075, '', 'MASK', 'FLAGWRD1', line=884)
+W('04,2213', 0o54075, '', 'TS', 'FLAGWRD1', line=885)
+
+W('04,2214', 0o04674, '', 'TC', 'IBNKCALL', 'KILL GROUPS 1,3,5,6', line=887)
+W('04,2215', 0o12652, '', 'CADR', 'V37KLEAN', kind='data', line=888)
+
+W('04,2216', 0o10775, '', 'CCS', 'MMNUMBER', 'IS IT POOH', line=890)
+W('04,2217', 0o12226, '', 'TCF', 'RENDV00', 'NO', line=891)
+W('04,2220', 0o04674, 'GOMOD', 'TC', 'IBNKCALL', 'REDUNDANT EXCEPT FOR GROUP 4', line=892)
+W('04,2221', 0o12647, '', 'CADR', 'P00KLEAN', kind='data', line=893)
+
+W('04,2222', 0o30775, '', 'CA', 'MMNUMBER', line=895)
+W('04,2223', 0o55011, '', 'TS', 'MODREG', line=896)
+
+W('04,2224', 0o04635, 'GOGOPROG', 'TC', 'POSTJUMP', line=898)
+W('04,2225', 0o12770, '', 'CADR', 'GOPROG2', kind='data', line=899)
+
+W('04,2226', 0o41011, 'RENDV00', 'CS', 'MODREG', 'IS CURRENT PROGRAM 22', line=901)
+W('04,2227', 0o62326, '', 'AD', 'OCT26', line=902)
+W('04,2230', 0o00006, '', 'EXTEND', line=903)
+W('04,2231', 0o12250, '', 'BZF', 'RESET22', 'YES -- CLEAR RENDEZVOUS FLAG', line=904)
+
+W('04,2232', 0o40775, '', 'CS', 'MMNUMBER', 'IS NE PROGRAM P22', line=906)
+W('04,2233', 0o62326, '', 'AD', 'OCT26', line=907)
+W('04,2234', 0o00006, '', 'EXTEND', line=908)
+W('04,2235', 0o12250, '', 'BZF', 'RESET22', line=909)
+
+W('04,2236', 0o67746, '', 'AD', 'NEG2', 'IS NEW PROGRAM = P20 OR P25', line=911)
+W('04,2237', 0o00006, '', 'EXTEND', line=912)
+W('04,2240', 0o12262, '', 'BZF', 'RENDN00', 'YES', line=913)
+W('04,2241', 0o64756, '', 'AD', 'FIVE', '25', line=914)
+W('04,2242', 0o00006, '', 'EXTEND', line=915)
+W('04,2243', 0o12262, '', 'BZF', 'RENDN00', 'YES', line=916)
+
+W('04,2244', 0o32324, '', 'CA', 'OCT500', 'NO, IS EITHER P20 OR P25 RUNNING', line=918)
+W('04,2245', 0o70074, '', 'MASK', 'FLAGWRD0', line=919)
+W('04,2246', 0o10000, '', 'CCS', 'A', line=920)
+W('04,2247', 0o12257, '', 'TCF', 'P00FIZZ', 'YES, LEAVE GROUP 2 TO PICK UP P20 OR P25', line=921)
+
+W('04,2250', 0o42371, 'RESET22', 'CS', 'OCT700', 'CLEAR RENDEZVOUS, P25', line=923)
+W('04,2251', 0o70074, '', 'MASK', 'FLAGWRD0', 'AND IMU IN USE FLAGS', line=924)
+W('04,2252', 0o54074, '', 'TS', 'FLAGWRD0', line=925)
+W('04,2253', 0o06011, '', 'TC', 'CLRADMOD', line=926)
+# Page 231
+
+W('04,2254', 0o00006, 'KILL2', 'EXTEND', '', 'NO, KILL 2', line=929)
+W('04,2255', 0o34755, '', 'DCA', 'NEG0', line=930)
+W('04,2256', 0o52755, '', 'DXCH', '-PHASE2', line=931)
+
+W('04,2257', 0o32364, 'P00FIZZ', 'CAF', 'V37QCAD', 'RESTART POINT FOR V37XEQ', line=933)
+W('04,2260', 0o54374, '', 'TS', 'TEMPFLSH', line=934)
+
+W('04,2261', 0o12224, '', 'TCF', 'GOGOPROG', line=936)
+
+W('04,2262', 0o41011, 'RENDN00', 'CS', 'MODREG', line=938)
+W('04,2263', 0o66007, '', 'AD', 'OCT24', line=939)
+W('04,2264', 0o00006, '', 'EXTEND', line=940)
+W('04,2265', 0o12254, '', 'BZF', 'KILL2', 'P20 OR P25 ON TOP OF P20 OR P25 --', line=941)
+
+W('04,2266', 0o64756, '', 'AD', 'FIVE', line=943)
+W('04,2267', 0o00006, '', 'EXTEND', line=944)
+W('04,2270', 0o12254, '', 'BZF', 'KILL2', line=945)
+
+W('04,2271', 0o32324, '', 'CA', 'OCT500', line=947)
+W('04,2272', 0o70074, '', 'MASK', 'FLAGWRD0', line=948)
+W('04,2273', 0o60775, '', 'AD', 'MMNUMBER', line=949)
+W('04,2274', 0o40000, '', 'COM', line=950)
+W('04,2275', 0o62327, '', 'AD', 'P20REG', 'IS IT 20 AND IS RENDEZVOUS FLAG ON', line=951)
+W('04,2276', 0o00006, '', 'EXTEND', line=952)
+W('04,2277', 0o12304, '', 'BZF', 'STATQUO', 'YES', line=953)
+W('04,2300', 0o62325, '', 'AD', 'OCT305', 'IS IT 25 AND IS P25 BIT ON', line=954)
+W('04,2301', 0o00006, '', 'EXTEND', line=955)
+W('04,2302', 0o12304, '', 'BZF', 'STATQUO', 'YES, LEAVE AS IS', line=956)
+W('04,2303', 0o12254, '', 'TCF', 'KILL2', line=957)
+
+W('04,2304', 0o40075, 'STATQUO', 'CS', 'FLAGWRD1', 'SET TRACKFLAG', line=959)
+W('04,2305', 0o74775, '', 'MASK', 'OCT120', '      UPDATE FLAG', line=960)
+W('04,2306', 0o26075, '', 'ADS', 'FLAGWRD1', line=961)
+
+W('04,2307', 0o12220, '', 'TCF', 'GOMOD', line=963)
+
+W('04,2310', 0o32324, 'NOUVEAU', 'CAF', 'OCT500', 'IS P20 OR P25 FLAG SET', line=965)
+W('04,2311', 0o70074, '', 'MASK', 'FLAGWRD0', line=966)
+W('04,2312', 0o10000, '', 'CCS', 'A', line=967)
+W('04,2313', 0o12316, '', 'TCF', '+3', 'YES', line=968)
+W('04,2314', 0o05516, '', 'TC', 'DOWNFLAG', 'NO, RESET IMUINUSE FLAG', line=969)
+W('04,2315', 0o00007, '', 'ADRES', 'IMUSE', kind='data', line=970)
+
+W('04,2316', 0o50774, '', 'INDEX', 'MINDEX', line=972)
+W('04,2317', 0o32500, '', 'CAF', 'DNLADMM1', 'OBTAIN APPROPIRATE DOWNLIST ADDRESS', line=973)
+
+W('04,2320', 0o00004, '', 'INHINT', line=975)
+W('04,2321', 0o12202, '', 'TCF', 'SEUDOP00', line=976)
+
+W('04,2322', 0o04364, 'V37NONO', 'TC', 'FALTON', "COME HERE IF MM REQUESTED DOESN'T EXIST", line=978)
+# Page 232
+W('04,2323', 0o12067, '', 'TCF', 'V37BAD', line=980)
+
+S('OCT00010', 'equals', 0o4750, line=982)
+W('04,2324', 0o00500, 'OCT500', 'OCT', '500', 'BITS 7 AND 9', kind='data', line=983)
+W('04,2325', 0o00305, 'OCT305', 'OCT', '305', kind='data', line=984)
+W('04,2326', 0o00026, 'OCT26', 'OCT', '26', kind='data', line=985)
+W('04,2327', 0o00124, 'P20REG', 'OCT', '124', kind='data', line=986)
+
+W('04,2330', 0o00004, 'V37XEQ', 'INHINT', line=988)
+W('04,2331', 0o50774, '', 'INDEX', 'MINDEX', line=989)
+W('04,2332', 0o32441, '', 'CAF', 'PREMM1', 'OBTAIN PRIO, EBANK, AND MM', line=990)
+W('04,2333', 0o55060, '', 'TS', 'MMTEMP', line=991)
+W('04,2334', 0o54020, '', 'TS', 'CYR', 'SHIFT RIGHT TO BITS 14-10', line=992)
+
+W('04,2335', 0o30020, '', 'CA', 'CYR', line=994)
+W('04,2336', 0o77725, '', 'MASK', 'PRIO37', line=995)
+W('04,2337', 0o55062, '', 'TS', 'PHSPRDT4', 'PRESET GROUP 4 RESTART PRIORITY', line=996)
+W('04,2340', 0o54063, '', 'TS', 'NEWPRIO', 'STORE PRIO FOR SPVAC', line=997)
+
+W('04,2341', 0o31060, '', 'CA', 'MMTEMP', 'OBTAIN EBANK -- BITS 8, 9, 10 OF MMTEMP.', line=999)
+W('04,2342', 0o00006, '', 'EXTEND', line=1000)
+W('04,2343', 0o74744, '', 'MP', 'BIT8', line=1001)
+W('04,2344', 0o74757, '', 'MASK', 'LOW3', line=1002)
+W('04,2345', 0o54001, '', 'TS', 'L', line=1003)
+
+W('04,2346', 0o50774, '', 'INDEX', 'MINDEX', line=1005)
+W('04,2347', 0o32403, '', 'CAF', 'FCADRMM1', line=1006)
+W('04,2350', 0o55061, '', 'TS', 'BASETEMP', 'MAKE BBCON BY ADDING HI5 OR FCADR', line=1007)
+W('04,2351', 0o74350, '', 'MASK', 'HI5', line=1008)
+W('04,2352', 0o26001, '', 'ADS', 'L', line=1009)
+
+W('04,2353', 0o31061, '', 'CA', 'BASETEMP', 'OBTAIN GENADR PORTION OF 2CADR.', line=1011)
+W('04,2354', 0o75012, '', 'MASK', 'LOW10', line=1012)
+W('04,2355', 0o64741, '', 'AD', 'BIT11', line=1013)
+
+W('04,2356', 0o05116, '', 'TC', 'SPVAC', line=1015)
+
+W('04,2357', 0o31060, 'V37XEQC', 'CA', 'MMTEMP', 'UPON RETURN FROM FINDVAC PLACE THE', line=1017)
+W('04,2360', 0o76074, '', 'MASK', 'LOW7', 'NEW MM IN MODREG (THE LOW 7 BITS OF', line=1018)
+W('04,2361', 0o05314, '', 'TC', 'NEWMODEA', 'PHSPRDT1)', line=1019)
+
+W('04,2362', 0o04457, '', 'TC', 'RELDSP', 'RELEASE DISPLAY', line=1021)
+W('04,2363', 0o05155, '', 'TC', 'ENDOFJOB', 'AND EXIT', line=1022)
+
+S('NEG7', 'equals', 0o5660, line=1024)
+
+S('MMTEMP', 'equals', 0o1060, line=1026)
+S('BASETEMP', 'equals', 0o1061, line=1027)
+W('04,2364', 0o10333, 'V37QCAD', 'CADR', 'V37XEQ +3', kind='data', line=1028)
+W('04,2365', 0o10146, 'R00AD', 'CADR', 'DUMMYAD', kind='data', line=1029)
+
+# Page 233
+W('04,2366', 0o10120, 'V37RETAD', 'CADR', 'V37RET', kind='data', line=1032)
+W('04,2367', 0o37667, 'OCT37667', 'OCT', '37667', kind='data', line=1033)
+W('04,2370', 0o40072, 'OCT40072', 'OCT', '40072', kind='data', line=1034)
+W('04,2371', 0o00700, 'OCT700', 'OCT', '700', kind='data', line=1035)
+
+W('04,2372', 0o36245, 'SETUP71', 'CAF', 'THREE', line=1037)
+W('04,2373', 0o54002, 'SETUP70', 'TS', 'Q', line=1038)
+W('04,2374', 0o00006, '', 'EXTEND', line=1039)
+W('04,2375', 0o32402, '', 'DCA', 'P70CADR', line=1040)
+W('04,2376', 0o60002, '', 'AD', 'Q', line=1041)
+W('04,2377', 0o52006, '', 'DTCB', line=1042)
+
+W('04,2400', 0o00106, 'DEC70', 'DEC', '70', kind='data', line=1044)
+#   EBANK= R
+W('04,2401', 0o02072, 'P70CADR', '2CADR', 'P70', kind='data', line=1046)
+W('04,2402', 0o42067, kind='data', line=1046)
+
+# FOR VERB 37 TWO TABLES ARE MAINTAINED.  EACH TABLE HAS AN ETRY FOR EACH
+# MAJOR MODE THAT CAN BE STARTED FROM THE KEYBOARD.  THE ENTRIES ARE PUT
+# INTO THE TABLE WITH THE ENTRY FOR THE HIGHEST MAJOR MODE COMING FIRST,
+# TO THE LOWEST MAJOR MODE WHICH IS THE LAST ENTRY IN EACH TABLE.
+#
+# THE FCADRMM TABLE CONTAINS THE FCADR OF THE STARTING JOB OF
+# THE MAJOR MODE.  FOR EXAMPLE,
+#
+# FCADRMM1        FCADR   P79             # START OF P 79
+# FCADR   PROG18          # START OF P 18
+# FCADR   P01             # START OF P 01
+#
+# NOTE:         THE FIRST ENTRY MUST BE LABELED FCADRMM1.
+# -----
+
+W('04,2403', 0o71526, 'FCADRMM1', 'FCADR', 'P79', kind='data', line=1063)
+W('04,2404', 0o71274, '', 'FCADR', 'P78', kind='data', line=1064)
+W('04,2405', 0o26207, '', 'FCADR', 'P76', kind='data', line=1065)
+W('04,2406', 0o72731, '', 'FCADR', 'P75', kind='data', line=1066)
+W('04,2407', 0o72547, '', 'FCADR', 'P74', kind='data', line=1067)
+W('04,2410', 0o72220, '', 'FCADR', 'P73', kind='data', line=1068)
+W('04,2411', 0o72031, '', 'FCADR', 'P72', kind='data', line=1069)
+W('04,2412', 0o62144, '', 'FCADR', 'LANDJUNK', kind='data', line=1070)
+W('04,2413', 0o64776, '', 'FCADR', 'P63LM', kind='data', line=1071)
+W('04,2414', 0o33314, '', 'FCADR', 'P57', kind='data', line=1072)
+W('04,2415', 0o32050, '', 'FCADR', 'PROG52', kind='data', line=1073)
+W('04,2416', 0o31427, '', 'FCADR', 'P51', kind='data', line=1074)
+W('04,2417', 0o75436, '', 'FCADR', 'P47LM', kind='data', line=1075)
+W('04,2420', 0o75410, '', 'FCADR', 'P42LM', kind='data', line=1076)
+W('04,2421', 0o75272, '', 'FCADR', 'P41LM', kind='data', line=1077)
+W('04,2422', 0o75147, '', 'FCADR', 'P40LM', kind='data', line=1078)
+W('04,2423', 0o71521, '', 'FCADR', 'P39', kind='data', line=1079)
+W('04,2424', 0o71271, '', 'FCADR', 'P38', kind='data', line=1080)
+# Page 234
+W('04,2425', 0o72725, '', 'FCADR', 'P35', kind='data', line=1082)
+W('04,2426', 0o72545, '', 'FCADR', 'P34', kind='data', line=1083)
+W('04,2427', 0o72216, '', 'FCADR', 'P33', kind='data', line=1084)
+W('04,2430', 0o72027, '', 'FCADR', 'P32', kind='data', line=1085)
+W('04,2431', 0o72450, '', 'FCADR', 'P31', kind='data', line=1086)
+W('04,2432', 0o72000, '', 'FCADR', 'P30', kind='data', line=1087)
+W('04,2433', 0o50404, '', 'FCADR', 'PROG25', kind='data', line=1088)
+W('04,2434', 0o50000, '', 'FCADR', 'PROG22', kind='data', line=1089)
+W('04,2435', 0o51505, '', 'FCADR', 'PROG21', kind='data', line=1090)
+W('04,2436', 0o50000, '', 'FCADR', 'PROG20', kind='data', line=1091)
+W('04,2437', 0o60061, '', 'FCADR', 'P12LM', kind='data', line=1092)
+W('04,2440', 0o77655, '', 'FCADR', 'P06', kind='data', line=1093)
+
+# THE PREMM TABLE CONTAINS THE E-BANK, MAJOR MODE, AND PRIORITY
+# INFORMATION, IT IS IN THE FOLLOWING FORM,
+#
+# PPP PPE EEM MMM MMM
+#
+# WHERE THE       7 M BITS CONTAIN THE MAJOR MODE NUMBER
+# 3 E BITS CONTAIN THE E-BANK NUMBER
+# 5 P BITS CONTAIN THE PRIORITY AT WHICH THE JOB IS
+# TO BE STARTED
+#
+# FOR EXAMPLE,
+#
+# PREMM1          OCT     67213           # PRIORITY      33
+# # E-BANK        5
+# # MAJOR MODE    11
+# OCT     25437           # PRIORITY      12
+# # E-BANK        6
+# # MAJOR MODE    31
+#
+# NOTE:         THE FIRST ENTRY MUST BE LABELED PREMM1
+
+W('04,2441', 0o27717, 'PREMM1', 'OCT', '27717', 'MM 79         EBANK 7         PRIO 13', kind='data', line=1116)
+W('04,2442', 0o27716, '', 'OCT', '27716', 'MM 78         EBANK 7         PRIO 13', kind='data', line=1117)
+W('04,2443', 0o27714, '', 'OCT', '27714', 'MM 76         EBANK 7         PRIO 13', kind='data', line=1118)
+W('04,2444', 0o27713, '', 'OCT', '27713', 'MM 75         EBANK 7         PRIO 13', kind='data', line=1119)
+W('04,2445', 0o27712, '', 'OCT', '27712', 'MM 74         EBANK 7         PRIO 13', kind='data', line=1120)
+W('04,2446', 0o27711, '', 'OCT', '27711', 'MM 73         EBANK 7         PRIO 13', kind='data', line=1121)
+W('04,2447', 0o27710, '', 'OCT', '27710', 'MM 72         EBANK 7         PRIO 13', kind='data', line=1122)
+W('04,2450', 0o27704, '', 'OCT', '27704', 'MM 68         EBANK 7         PRIO 13', kind='data', line=1123)
+W('04,2451', 0o27677, '', 'OCT', '27677', 'MM 63         EBANK 7         PRIO 13', kind='data', line=1124)
+W('04,2452', 0o27271, '', 'OCT', '27271', 'MM 57         EBANK 5         PRIO 13', kind='data', line=1125)
+W('04,2453', 0o27264, '', 'OCT', '27264', 'MM 52         EBANK 5         PRIO 13', kind='data', line=1126)
+W('04,2454', 0o27263, '', 'OCT', '27263', 'MM 51         EBANK 5         PRIO 13', kind='data', line=1127)
+W('04,2455', 0o27657, '', 'OCT', '27657', 'MM 47         EBANK 7         PRIO 13', kind='data', line=1128)
+W('04,2456', 0o27652, '', 'OCT', '27652', 'MM 42         EBANK 7         PRIO 13', kind='data', line=1129)
+W('04,2457', 0o27651, '', 'OCT', '27651', 'MM 41         EBANK 7         PRIO 13', kind='data', line=1130)
+W('04,2460', 0o27650, '', 'OCT', '27650', 'MM 40         EBANK 7         PRIO 13', kind='data', line=1131)
+W('04,2461', 0o27647, '', 'OCT', '27647', 'MM 39         EBANK 7         PRIO 13', kind='data', line=1132)
+W('04,2462', 0o27646, '', 'OCT', '27646', 'MM 38         EBANK 7         PRIO 13', kind='data', line=1133)
+# Page 235
+W('04,2463', 0o27643, '', 'OCT', '27643', 'MM 35         EBANK 7         PRIO 13', kind='data', line=1135)
+W('04,2464', 0o27642, '', 'OCT', '27642', 'MM 34         EBANK 7         PRIO 13', kind='data', line=1136)
+W('04,2465', 0o27641, '', 'OCT', '27641', 'MM 33         EBANK 7         PRIO 13', kind='data', line=1137)
+W('04,2466', 0o27640, '', 'OCT', '27640', 'MM 32         EBANK 7         PRIO 13', kind='data', line=1138)
+W('04,2467', 0o27637, '', 'OCT', '27637', kind='data', line=1139)
+W('04,2470', 0o27636, '', 'OCT', '27636', 'MM 30         EBANK 7         PRIO 13', kind='data', line=1140)
+W('04,2471', 0o27631, '', 'OCT', '27631', 'MM 25         EBANK 7         PRIO 13', kind='data', line=1141)
+W('04,2472', 0o27626, '', 'OCT', '27626', 'MM 22         EBANK 7         PRIO 13', kind='data', line=1142)
+W('04,2473', 0o27625, '', 'OCT', '27625', 'MM 21         EBANK 7         PRIO 13', kind='data', line=1143)
+W('04,2474', 0o27624, '', 'OCT', '27624', 'MM 20         EBANK 7         PRIO 13', kind='data', line=1144)
+W('04,2475', 0o27614, '', 'OCT', '27614', 'MM 12         EBANK 7         PRIO 13', kind='data', line=1145)
+W('04,2476', 0o27006, '', 'OCT', '27006', 'MM 06         EBANK 4         PRIO 13', kind='data', line=1146)
+
+# NOTE:         THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
+# -----         THE ABOVE LISTS-1 (I.E., THE NUMBER OF MAJOR MODES (EXCEPT P00)
+# THAT CAN BE CALLED FROM THE KEYBOARD MINUS ONE)
+
+W('04,2477', 0o00035, 'NOV37MM', 'DEC', '29', "MM'S -1", kind='data', line=1152)
+
+W('04,2500', 0o00002, 'DNLADMM1', 'ADRES', 'RENDEZVU', 'P79', kind='data', line=1154)
+W('04,2501', 0o00002, '', 'ADRES', 'RENDEZVU', 'P78', kind='data', line=1155)
+W('04,2502', 0o00002, '', 'ADRES', 'RENDEZVU', kind='data', line=1156)
+W('04,2503', 0o00002, '', 'ADRES', 'RENDEZVU', 'P75', kind='data', line=1157)
+W('04,2504', 0o00002, '', 'ADRES', 'RENDEZVU', 'P74', kind='data', line=1158)
+W('04,2505', 0o00002, '', 'ADRES', 'RENDEZVU', 'P73', kind='data', line=1159)
+W('04,2506', 0o00002, '', 'ADRES', 'RENDEZVU', 'P72', kind='data', line=1160)
+W('04,2507', 0o00004, '', 'ADRES', 'DESASCNT', 'P68', kind='data', line=1161)
+W('04,2510', 0o00004, '', 'ADRES', 'DESASCNT', 'P63', kind='data', line=1162)
+W('04,2511', 0o00005, '', 'ADRES', 'LUNRSALN', 'P57', kind='data', line=1163)
+W('04,2512', 0o00000, '', 'ADRES', 'COSTALIN', 'P52', kind='data', line=1164)
+W('04,2513', 0o00000, '', 'ADRES', 'COSTALIN', 'P51', kind='data', line=1165)
+W('04,2514', 0o00003, '', 'ADRES', 'ORBMANUV', 'P47', kind='data', line=1166)
+W('04,2515', 0o00003, '', 'ADRES', 'ORBMANUV', 'P42', kind='data', line=1167)
+W('04,2516', 0o00003, '', 'ADRES', 'ORBMANUV', 'P41', kind='data', line=1168)
+W('04,2517', 0o00003, '', 'ADRES', 'ORBMANUV', 'P40', kind='data', line=1169)
+W('04,2520', 0o00002, '', 'ADRES', 'RENDEZVU', 'P39', kind='data', line=1170)
+W('04,2521', 0o00002, '', 'ADRES', 'RENDEZVU', 'P38', kind='data', line=1171)
+W('04,2522', 0o00002, '', 'ADRES', 'RENDEZVU', 'P35', kind='data', line=1172)
+W('04,2523', 0o00002, '', 'ADRES', 'RENDEZVU', 'P34', kind='data', line=1173)
+W('04,2524', 0o00002, '', 'ADRES', 'RENDEZVU', 'P33', kind='data', line=1174)
+W('04,2525', 0o00002, '', 'ADRES', 'RENDEZVU', 'P32', kind='data', line=1175)
+W('04,2526', 0o00002, '', 'ADRES', 'RENDEZVU', 'P31LM', kind='data', line=1176)
+W('04,2527', 0o00002, '', 'ADRES', 'RENDEZVU', 'P30', kind='data', line=1177)
+W('04,2530', 0o00002, '', 'ADRES', 'RENDEZVU', 'P25', kind='data', line=1178)
+W('04,2531', 0o00005, '', 'ADRES', 'LUNRSALN', 'P22', kind='data', line=1179)
+W('04,2532', 0o00002, '', 'ADRES', 'RENDEZVU', 'P21', kind='data', line=1180)
+W('04,2533', 0o00002, '', 'ADRES', 'RENDEZVU', 'P20', kind='data', line=1181)
+W('04,2534', 0o00004, '', 'ADRES', 'DESASCNT', 'P12', kind='data', line=1182)
+W('04,2535', 0o00000, '', 'ADRES', 'COSTALIN', 'P06', kind='data', line=1183)
+S('DNLADP00', 'equals', 0o4755, line=1184)
+S('COSTALIN', 'equals', 0o0, line=1185)
+# Page 236
+S('AGSUPDAT', 'equals', 0o1, line=1187)
+S('RENDEZVU', 'equals', 0o2, line=1188)
+S('ORBMANUV', 'equals', 0o3, line=1189)
+S('DESASCNT', 'equals', 0o4, line=1190)
+S('LUNRSALN', 'equals', 0o5, line=1191)
+
+#   BANK 13
+#   SETLOC INTINIT
+#   BANK
+
+#   COUNT* $$/INTIN
+
+#   EBANK= RRECTCSM
+
+# THIS ROUTINE DOES THE P00 INTEGRATION
+
+W('13,2026', 0o43014, 'STATEUP', 'SET', 'BOF', 'EXTRAPOLATE CM STATE VECTOR', kind='interp', line=1203)
+W('13,2027', 0o01474, '', '', 'VINTFLAG', kind='operand', line=1204)
+W('13,2030', 0o04347, '', '', 'SURFFLAG', 'ALSO 6X6 W-MATRIX IF LM ON LUNAR', kind='operand', line=1205)
+W('13,2031', 0o26036, '', '', 'DOINT', '      SURFACE AND W-MATRIX VALID', kind='operand', line=1206)
+W('13,2032', 0o43014, '', 'BOF', 'SET', '      FOR RENDEZVOUS NAVIGATION.', kind='interp', line=1207)
+W('13,2033', 0o02756, '', '', 'RENDWFLG', kind='operand', line=1208)
+W('13,2034', 0o26036, '', '', 'DOINT', kind='operand', line=1209)
+W('13,2035', 0o01476, '', '', 'DIM0FLAG', kind='operand', line=1210)
+W('13,2036', 0o45014, 'DOINT', 'CLEAR', 'CALL', kind='interp', line=1211)
+W('13,2037', 0o01667, '', '', 'PRECIFLG', 'ENGAGES 4-TIME STEP LOGIC IN INTEGRATION', kind='operand', line=1212)
+W('13,2040', 0o27134, '', '', 'INTEGRV', 'WHEN MODREG = 0', kind='operand', line=1213)
+
+W('13,2041', 0o71214, '', 'BON', 'DLOAD', kind='interp', line=1215)
+W('13,2042', 0o04307, '', '', 'SURFFLAG', kind='operand', line=1216)
+W('13,2043', 0o26063, '', '', 'NO-INT', kind='operand', line=1217)
+W('13,2044', 0o01571, '', '', 'TETCSM', kind='operand', line=1218)
+W('13,2045', 0o34041, '', 'STCALL', 'TDEC1', kind='interp', line=1219)
+W('13,2046', 0o27414, '', '', 'INTSTALL', kind='operand', line=1220)
+W('13,2047', 0o45014, '', 'CLEAR', 'CALL', 'EXTRAPOLATE LM STATE VECTOR', kind='interp', line=1221)
+W('13,2050', 0o01674, '', '', 'VINTFLAG', kind='operand', line=1222)
+W('13,2051', 0o26644, '', '', 'SETIFLGS', kind='operand', line=1223)
+W('13,2052', 0o77614, '', 'BOF', '', 'ALSO 9X9 W-MATRIX IF W IS VALID', kind='interp', line=1224)
+W('13,2053', 0o02756, '', '', 'RENDWFLG', kind='operand', line=1225)
+W('13,2054', 0o26060, '', '', 'DOINT2', kind='operand', line=1226)
+W('13,2055', 0o43014, '', 'SET', 'SET', kind='interp', line=1227)
+W('13,2056', 0o01476, '', '', 'DIM0FLAG', kind='operand', line=1228)
+W('13,2057', 0o01475, '', '', 'D6OR9FLG', kind='operand', line=1229)
+W('13,2060', 0o45014, 'DOINT2', 'SET', 'CALL', kind='interp', line=1230)
+W('13,2061', 0o01467, '', '', 'PRECIFLG', 'DISENGAGE 4 TIME STEP LOGIC IN INTEG.', kind='operand', line=1231)
+W('13,2062', 0o27134, '', '', 'INTEGRV', kind='operand', line=1232)
+W('13,2063', 0o77614, 'NO-INT', 'CLRGO', kind='interp', line=1233)
+W('13,2064', 0o01236, '', '', 'NODOFLAG', kind='operand', line=1234)
+W('13,2065', 0o26632, '', '', 'ENDINT', kind='operand', line=1235)
+# Page 237
+# THISVINT IS CALLED BY MIDTOAV1 AND 2
+
+W('13,2066', 0o43414, 'THISVINT', 'CLEAR', 'RVQ', kind='interp', line=1239)
+W('13,2067', 0o01674, '', '', 'VINTFLAG', kind='operand', line=1240)

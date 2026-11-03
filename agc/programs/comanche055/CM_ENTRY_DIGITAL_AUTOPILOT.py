@@ -1,0 +1,1295 @@
+"""CM_ENTRY_DIGITAL_AUTOPILOT.agc -- Comanche (build 055), Apollo 11 Command Module guidance computer
+
+Converted from external/Apollo-11/Comanche055/CM_ENTRY_DIGITAL_AUTOPILOT.agc by agc2py (the Apollo 11 AGC -> Python converter).
+Pages 1063-1092 of the original program listing.
+
+Every ``W(address, word, label, operator, operand, comment)`` line is one
+15-bit word of the AGC rope memory; ``S(name, kind, value)`` defines a symbol.
+Original comments are preserved as Python comments.
+"""
+
+from agc.program import Module
+
+MODULE = Module('CM_ENTRY_DIGITAL_AUTOPILOT', 'CM_ENTRY_DIGITAL_AUTOPILOT.agc', 'Comanche055', pages='1063-1092')
+W = MODULE.W
+S = MODULE.S
+
+# Copyright:    Public domain.
+# Filename:     CM_ENTRY_DIGITAL_AUTOPILOT.agc
+# Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
+# It is part of the source code for the Command Module's (CM)
+# Apollo Guidance Computer (AGC), for Apollo 11.
+# Assembler:    yaYUL
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo.
+# Pages:        1063-1092
+# Mod history:  2009-05-13 RSB  Adapted from the Colossus249/ file of the
+# same name, using Comanche055 page images.
+# 2009-05-20 RSB  Corrections: Removed an extraneous label
+# EXDAPIN, added a missing instruction in
+# COMPAT.
+#
+# This source code has been transcribed or otherwise adapted from digitized
+# images of a hardcopy from the MIT Museum.  The digitization was performed
+# by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+# thanks to both.  The images (with suitable reduction in storage size and
+# consequent reduction in image quality as well) are available online at
+# www.ibiblio.org/apollo.  If for some reason you find that the images are
+# illegible, contact me at info@sandroid.org about getting access to the
+# (much) higher-quality images which Paul actually created.
+#
+# Notations on the hardcopy document read, in part:
+#
+# Assemble revision 055 of AGC program Comanche by NASA
+# 2021113-051.  10:28 APR. 1, 1969
+#
+# This AGC program shall also be referred to as
+# Colossus 2A
+
+# Page 1063
+# SUBROUTINE TO READ GIMBAL ANGLES AND FORM DIFFERENCES.  GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
+# DIFFERENCES ARE IN 1S COMP.  ENTER AND READ ANGLES EACH .1 SEC.
+#
+# CM/DSTBY = 1 FOR DAP OPERATION
+# CM/DSTBY = 0 TO TERMINATE DAP OPERATION.
+
+#   BANK 15
+
+#   SETLOC ETRYDAP
+#   BANK
+
+#   COUNT 15/DAPEN
+
+#   EBANK= AOG
+
+W('15,2434', 0o34377, 'READGYMB', 'CA', 'TEN', 'KEEP RESTART DT GOING RELATIVE TO', line=49)
+W('15,2435', 0o27725, '', 'ADS', 'CM/GYMDT', 'PIPTIME. (GROUP 6)', line=50)
+
+# IF A RESTART OCCURS, SKIP PRESENT CYCLE. THE
+# PHASCHNG PROTECTION IS IN CM/DAPIC.
+
+W('15,2436', 0o35012, '', 'CA', 'BIT6', 'CHECK FOR FINE ALIGN MODE OF CDU.', line=55)
+W('15,2437', 0o71321, '', 'MASK', 'IMODES33', '( PROTECT AOG/PIP ETC AS WELL AS', line=56)
+W('15,2440', 0o00006, '', 'EXTEND', '', ' GIMBAL DIFFERENCES)', line=57)
+W('15,2441', 0o12447, '', 'BZF', 'READGYM1', 'OK', line=58)
+
+W('15,2442', 0o45017, '', 'CS', 'BIT1', 'NOT IN FINE ALIGN, SO IDLE.', line=60)
+W('15,2443', 0o70102, '', 'MASK', 'CM/FLAGS', 'SET GYMDIFSW = 0', line=61)
+W('15,2444', 0o54102, '', 'TS', 'CM/FLAGS', line=62)
+W('15,2445', 0o06000, '', 'TC', 'FLUSHJET', 'QUENCH JETS, SINCE MAY BE A WHILE.', line=63)
+W('15,2446', 0o02514, '', 'TC', 'CM/GYMIC +2', line=64)
+
+W('15,2447', 0o30032, 'READGYM1', 'CA', 'CDUX', line=66)
+W('15,2450', 0o57661, '', 'XCH', 'AOG', line=67)
+W('15,2451', 0o00006, '', 'EXTEND', line=68)
+W('15,2452', 0o21661, '', 'MSU', 'AOG', '-DELAOG=AOG(N-1) - AOG(N)', line=69)
+W('15,2453', 0o55675, '', 'TS', '-DELAOG', line=70)
+
+W('15,2454', 0o30033, '', 'CA', 'CDUY', line=72)
+W('15,2455', 0o57662, '', 'XCH', 'AIG', line=73)
+W('15,2456', 0o00006, '', 'EXTEND', line=74)
+W('15,2457', 0o21662, '', 'MSU', 'AIG', line=75)
+W('15,2460', 0o55676, '', 'TS', '-DELAIG', line=76)
+
+W('15,2461', 0o30034, '', 'CA', 'CDUZ', line=78)
+W('15,2462', 0o57663, '', 'XCH', 'AMG', line=79)
+W('15,2463', 0o00006, '', 'EXTEND', line=80)
+W('15,2464', 0o21663, '', 'MSU', 'AMG', line=81)
+W('15,2465', 0o55677, '', 'TS', '-DELAMG', line=82)
+
+# Page 1064
+W('15,2466', 0o40102, 'DOBRATE?', 'CS', 'CM/FLAGS', 'CM/DSTBY=103D BIT2  GYMDIFSW=104D BIT1', line=85)
+W('15,2467', 0o76214, '', 'MASK', 'THREE', line=86)
+W('15,2470', 0o50000, '', 'INDEX', 'A', line=87)
+W('15,2471', 0o02472, '', 'TC', '+1', line=88)
+W('15,2472', 0o02501, '', 'TC', 'DOBRATE', 'OK, GO ON', line=89)
+W('15,2473', 0o02512, '', 'TC', 'CM/GYMIC', 'DONT CALC BODYRATE ON FIRST PASS.', line=90)
+W('15,2474', 0o12475, '', 'NOOP', line=91)
+W('15,2475', 0o06000, '', 'TC', 'FLUSHJET', 'TURN OFF ALL JETS', line=92)
+
+W('15,2476', 0o05412, '', 'TC', 'PHASCHNG', line=94)
+W('15,2477', 0o00006, '', 'OCT', '00006', 'DEACTIVATE DAP GROUP 6.', kind='data', line=95)
+
+W('15,2500', 0o05324, '', 'TC', 'TASKOVER', line=97)
+
+W('15,2501', 0o35017, 'DOBRATE', 'CA', 'ONE', 'DO BODYRATE', line=99)
+W('15,2502', 0o55720, 'DOBRATE1', 'TS', 'JETEM', 'SKIP BODYRATE.', line=100)
+
+W('15,2503', 0o34377, '', 'CA', 'TEN', 'KEEP CDU READ GOING.', line=102)
+W('15,2504', 0o05245, '', 'TC', 'WAITLIST', line=103)
+#   EBANK= AOG
+W('15,2505', 0o02434, '', '2CADR', 'READGYMB', kind='data', line=105)
+W('15,2506', 0o32066, kind='data', line=105)
+
+# DOES NOT PROTECT TEMK, SQ IN SPSIN/COS
+
+W('15,2507', 0o11720, '', 'CCS', 'JETEM', line=109)
+W('15,2510', 0o02536, '', 'TC', 'BODYRATE', line=110)
+W('15,2511', 0o05324, '', 'TC', 'TASKOVER', 'SKIP CALC ON INITIAL PASS. (PASSES)', line=111)
+
+W('15,2512', 0o26102, 'CM/GYMIC', 'ADS', 'CM/FLAGS', 'GYMDIFSW: C(A)=1, KNOW BIT IS 0', line=113)
+W('15,2513', 0o35021, '', 'CAF', 'ZERO', line=114)
+W('15,2514', 0o55711, '', 'TS', 'JETAG', line=115)
+W('15,2515', 0o55706, '', 'TS', 'OLDELP', line=116)
+W('15,2516', 0o55707, '', 'TS', 'OLDELQ', line=117)
+W('15,2517', 0o55710, '', 'TS', 'OLDELR', line=118)
+W('15,2520', 0o55723, '', 'TS', 'GAMDOT', 'NO GYM DIF, PROB NO GAM DIF.', line=119)
+W('15,2521', 0o02502, '', 'TC', 'DOBRATE1', line=120)
+
+# Page 1065
+# COME HERE TO CORRECT FOR OVERFLOW IN ANGULAR CALCULATIONS
+
+W('15,2522', 0o54001, 'ANGOVCOR', 'TS', 'L', 'THIS COSTS 2 MCT TO USE.', line=125)
+W('15,2523', 0o00002, '', 'TC', 'Q', 'NO OVFL', line=126)
+W('15,2524', 0o50000, '', 'INDEX', 'A', line=127)
+W('15,2525', 0o35000, '', 'CAF', 'LIMITS', line=128)
+W('15,2526', 0o26001, '', 'ADS', 'L', line=129)
+W('15,2527', 0o00002, '', 'TC', 'Q', line=130)
+
+#   BLOCK 3
+
+#   COUNT 03/DAPEN
+
+W('6000', 0o30007, 'FLUSHJET', 'CA', '7', 'COME HERE TO TURN OFF ALL JETS.', line=136)
+W('6001', 0o00006, '', 'EXTEND', line=137)
+W('6002', 0o01006, '', 'WRITE', 'ROLLJETS', 'ZERO CHANNEL 6', line=138)
+W('6003', 0o00006, '', 'EXTEND', line=139)
+W('6004', 0o01005, '', 'WRITE', 'PYJETS', 'ZERO CHANNEL 5', line=140)
+W('6005', 0o00002, '', 'TC', 'Q', line=141)
+
+#   BANK 15
+
+#   COUNT 15/DAPEN
+
+#   SETLOC ETRYDAP
+#   BANK
+
+W('15,2530', 0o40000, 'RATEAVG', 'COM', '', 'SUBROUTINE TO ESTIMATE RATES IN PRESENCE', line=150)
+W('15,2531', 0o61720, '', 'AD', 'JETEM', 'OF CONSTANT ACCELERATION.', line=151)
+W('15,2532', 0o00006, '', 'EXTEND', line=152)
+W('15,2533', 0o75002, '', 'MP', 'HALF', 'DELV (EST) = DELV +(DELV-OLDELV)/2', line=153)
+W('15,2534', 0o61720, '', 'AD', 'JETEM', line=154)
+W('15,2535', 0o00002, '', 'TC', 'Q', line=155)
+
+# Page 1066
+# THESE ARE CALLED FOR THE VARIOUS INITIALIZATIONS NEEDED.
+
+#   BANK 20
+#   SETLOC DAPS1
+#   BANK
+
+#   COUNT 20/DAPEN
+#   EBANK= AOG
+
+W('20,3612', 0o35057, 'CM/DAPON', 'CA', 'EBAOG', line=167)
+W('20,3613', 0o54003, '', 'TS', 'EBANK', line=168)
+
+W('20,3614', 0o05560, '', 'TC', 'DOWNFLAG', 'RESET DAPBIT1.  T5 RESTART IDENTIFIER.', line=170)
+W('20,3615', 0o00132, '', 'ADRES', 'DAPBIT1', 'BIT 15 FLAG 6         CM FLAGS.', kind='data', line=171)
+W('20,3616', 0o05560, '', 'TC', 'DOWNFLAG', 'RESET DAPBIT2', line=172)
+W('20,3617', 0o00133, '', 'ADRES', 'DAPBIT2', 'BIT 14 FLAG 6', kind='data', line=173)
+W('20,3620', 0o00006, '', 'EXTEND', line=174)
+W('20,3621', 0o33737, '', 'DCA', 'T5IDLER1', 'DISABLE RCS CALCULATION', line=175)
+W('20,3622', 0o53313, '', 'DXCH', 'T5LOC', line=176)
+W('20,3623', 0o00006, '', 'EXTEND', line=177)
+W('20,3624', 0o33737, '', 'DCA', 'T5IDLER1', 'DISABLE RCS JET CALLS', line=178)
+W('20,3625', 0o53311, '', 'DXCH', 'T6LOC', line=179)
+
+W('20,3626', 0o06000, '', 'TC', 'FLUSHJET', 'JETS DEPARTED ON SM. ZERO JET BITS.', line=181)
+
+W('20,3627', 0o47707, '', 'CS', '13,14,15', line=183)
+W('20,3630', 0o71466, '', 'MASK', 'DAPDATR1', 'SET CONFIG BITS =0 FOR ENTRY', line=184)
+W('20,3631', 0o55466, '', 'TS', 'DAPDATR1', line=185)
+W('20,3632', 0o03636, '', 'TC', '+4', line=186)
+
+W('20,3633', 0o35036, 'NOTYET', 'CA', '.5SEC', line=188)
+W('20,3634', 0o04662, '', 'TC', 'BANKCALL', line=189)
+W('20,3635', 0o01732, '', 'CADR', 'DELAYJOB', '(DELAYJOB DOES INHINT)', kind='data', line=190)
+W('20,3636', 0o35005, '', 'CA', 'BIT11', 'GAMDIFSW = 94D BIT11, INITLY=0', line=191)
+W('20,3637', 0o70102, '', 'MASK', 'CM/FLAGS', 'IF ZERO, WAIT UNTIL CM/POSE UPDATE.', line=192)
+W('20,3640', 0o00006, '', 'EXTEND', line=193)
+W('20,3641', 0o13633, '', 'BZF', 'NOTYET', line=194)
+
+W('20,3642', 0o45017, '', 'CS', 'ONE', 'ACTIVATE CM/DAP', line=196)
+W('20,3643', 0o55501, '', 'TS', 'RCSFLAGS', 'USE BIT3 TO INITIALIZE NEEDLER ON', line=197)
+# NEXT PASS.
+W('20,3644', 0o55727, '', 'TS', 'P63FLAG', 'SO WAKEP62 WILL NOT BE INITIATED UNTIL', line=199)
+# HEADSUP IS SET IN P62.
+# FLAG TO PREVENT MULTIPLE CALLS TO WAKEP62.
+
+W('20,3645', 0o30007, '', 'CA', '7', line=203)
+W('20,3646', 0o55711, '', 'TS', 'JETAG', line=204)
+W('20,3647', 0o55713, '', 'TS', 'PAXERR1', 'KEEP NEEDLES ZERO UNTIL DAP UPDATE', line=205)
+# IN CASE CMDAPMOD IS NOT +1.
+# Page 1067
+W('20,3650', 0o00004, '', 'INHINT', line=208)
+W('20,3651', 0o00006, '', 'EXTEND', line=209)
+W('20,3652', 0o31666, '', 'DCA', 'ALFA/180', 'DO ATTITUDE HOLD UNTIL KEYBOARD', line=210)
+W('20,3653', 0o53604, '', 'DXCH', 'ALFACOM', 'ESTABLISHES HEADSUP.', line=211)
+W('20,3654', 0o31664, '', 'CA', 'ROLL/180', line=212)
+W('20,3655', 0o55717, '', 'TS', 'ROLLHOLD', 'FOR ATTITUDE HOLD IN MODE +1.', line=213)
+W('20,3656', 0o00006, '', 'EXTEND', line=214)
+W('20,3657', 0o75002, '', 'MP', 'HALF', line=215)
+W('20,3660', 0o55715, '', 'TS', 'ROLLC', 'NOT INTERESTED IN LO WORD.', line=216)
+
+W('20,3661', 0o40102, '', 'CS', 'CM/FLAGS', line=218)
+W('20,3662', 0o75004, '', 'MASK', 'BIT12', 'CMDAPARM =93D BIT12  INITLY=0', line=219)
+W('20,3663', 0o26102, '', 'ADS', 'CM/FLAGS', 'SET BIT TO 1.', line=220)
+
+W('20,3664', 0o40076, '', 'CS', 'FLAGWRD2', 'SET  NODOFLAG  TO PREVENT FURTHER', line=222)
+W('20,3665', 0o75017, '', 'MASK', 'BIT1', 'V 37 ENTRIES.', line=223)
+W('20,3666', 0o26076, '', 'ADS', 'FLAGWRD2', line=224)
+
+W('20,3667', 0o00003, '', 'RELINT', line=226)
+
+W('20,3670', 0o04701, '', 'TC', 'POSTJUMP', line=228)
+W('20,3671', 0o54342, '', 'CADR', 'P62.1', kind='data', line=229)
+
+# Page 1068
+# INITIALIZE CM/DAP.  WAITLIST CALL FOR READGYMB.  SET SWITCH CM/DSTBY =1
+# SO READACCS WILL ENTER A WTLST CALL FOR  SETJTAG .
+# CMDAPARM  = 0, SO ONLY BODY RATE AND ATTITUDE CALCULATIONS ARE DONE.
+# SET AVEGEXIT TO CONTINUE AT CM/POSE
+
+W('20,3672', 0o35057, 'CM/DAPIC', 'CA', 'EBAOG', line=237)
+W('20,3673', 0o54003, '', 'TS', 'EBANK', line=238)
+
+W('20,3674', 0o00004, '', 'INHINT', line=240)
+W('20,3675', 0o41205, 'CM/DAP2C', 'CS', 'PIPTIME +1', line=241)
+# PRIO OF P62 L PRIO AVG.:PIPTM=PIPTM1
+W('20,3676', 0o55720, '', 'TS', 'JETEM', line=243)
+
+W('20,3677', 0o35002, '', 'CA', 'POS1/2', line=245)
+W('20,3700', 0o65002, '', 'AD', 'POS1/2', line=246)
+W('20,3701', 0o60025, '', 'AD', 'TIME1', 'OVFL GUARANTEED', line=247)
+W('20,3702', 0o27720, '', 'ADS', 'JETEM', 'C(A) = DELTA TIME SINCE PIPUP', line=248)
+
+W('20,3703', 0o45022, '', 'CS', 'FIVE', line=250)
+W('20,3704', 0o61720, '', 'AD', 'JETEM', line=251)
+W('20,3705', 0o10000, '', 'CCS', 'A', line=252)
+W('20,3706', 0o63735, '', 'AD', '-CDUT+1', line=253)
+W('20,3707', 0o13705, '', 'TCF', '-2', line=254)
+W('20,3710', 0o13711, '', 'NOOP', line=255)
+W('20,3711', 0o65017, '', 'AD', 'ONE', 'SEND NO ZERO TO WTLST', line=256)
+W('20,3712', 0o55725, '', 'TS', 'CM/GYMDT', 'FOR RESTART', line=257)
+W('20,3713', 0o05245, '', 'TC', 'WAITLIST', line=258)
+#   EBANK= AOG
+W('20,3714', 0o02434, '', '2CADR', 'READGYMB', kind='data', line=260)
+W('20,3715', 0o32066, kind='data', line=260)
+
+W('20,3716', 0o43734, '', 'CS', 'CM/SWIC1', 'GAMDIFSW, GYMDIFSW, CM/DSTBY', line=262)
+W('20,3717', 0o70102, '', 'MASK', 'CM/FLAGS', 'DAPARM, .05GSW, LATSW, ENTRYDSP', line=263)
+W('20,3720', 0o64377, '', 'AD', 'CM/SWIC2', 'SET CM/DSTBY, LATSW', line=264)
+# DISABLE ENTRY DISPLAY, SINCE DES. GIMB.
+# CALC. (P62.3) GOES TO ENDEXIT.
+W('20,3721', 0o54102, '', 'TS', 'CM/FLAGS', line=267)
+
+W('20,3722', 0o30007, '', 'CA', '7', line=269)
+W('20,3723', 0o55666, '', 'TS', 'BETA/180', 'NECESSARY:  NO OVFL CORRECTION', line=270)
+W('20,3724', 0o35017, '', 'CA', 'ONE', 'INITIALIZE THE TM OF BODY RATES VIA', line=271)
+W('20,3725', 0o54305, '', 'TS', 'SW/NDX', '  UPBUFF.', line=272)
+
+W('20,3726', 0o05372, '', 'TC', '2PHSCHNG', 'DOES INHINT/RELINT', line=274)
+W('20,3727', 0o40116, '', 'OCT', '40116', 'SAVE TBASE6', kind='data', line=275)
+W('20,3730', 0o05024, '', 'OCT', '05024', kind='data', line=276)
+W('20,3731', 0o13000, '', 'OCT', '13000', kind='data', line=277)
+
+W('20,3732', 0o04701, '', 'TC', 'POSTJUMP', line=279)
+# Page 1069
+W('20,3733', 0o54326, '', 'CADR', 'P62.2', kind='data', line=281)
+
+W('20,3734', 0o16017, 'CM/SWIC1', 'OCT', '16017', kind='data', line=283)
+S('CM/SWIC2', 'equals', 0o4377, line=284)  # 00012 : CM/DSTBY, LATSW
+W('20,3735', 0o77766, '-CDUT+1', 'OCT', '77766', kind='data', line=285)
+#   EBANK= T5LOC
+W('20,3736', 0o03153, 'T5IDLER1', '2CADR', 'T5IDLOC', kind='data', line=287)
+W('20,3737', 0o12062, kind='data', line=287)
+
+# Page 1070
+# THIS SECTION CALCULATES THE ANGULAR BODY RATES EACH .1 SEC.  THE ANGULAR RATES ARE THOSE ALONG THE BODY AXES
+# XB, YB, ZB, AND ARE NORMALLY DESIGNATED  P, Q, R.     REQUIREMENT:  TEMPORARY ERASE. JETEM, JETEM +1
+#
+# SINCE RESTARTS ZERO THE JET OUTPUT CHANNELS, NO ATTEMPT IS MADE TO RESTART THE  ENTRY DAPS. THAT IS,
+# THE 0.1 SEC DAPS WILL MISS A CYCLE, AND WILL PICK UP AT THE NEXT 0.1 SEC UPDATE. MOST OF THE TIME THE 2 SEC
+# ROLL SYSTEM WILL MISS ONLY 0.1 SEC OF CONTROL. HOWEVER, IF THE RESTART OCCURS AFTER THE SECTION TIMETST HAS
+# STARTED, THEN THE ROLL SYSTEM WILL MISS ONE CYCLE.
+# THIS IS NECESSARY UNDER THE GROUNDRULE THAT NO JET COMMANDS SHALL BE LESS THAN 14 MS.
+
+#   EBANK= AOG
+#   BANK 15
+#   SETLOC ETRYDAP
+#   BANK
+
+#   COUNT 15/DAPEN
+
+W('15,2536', 0o31663, 'BODYRATE', 'CA', 'AMG', 'THESE ARE 2S COMPL NOS, BUT USE ANYWAY.', line=306)
+W('15,2537', 0o05074, '', 'TC', 'SPCOS', line=307)
+W('15,2540', 0o55511, '', 'TS', 'COSM', line=308)
+
+W('15,2541', 0o31661, '', 'CA', 'AOG', 'C(AOG) = AOG/180', line=310)
+W('15,2542', 0o05075, '', 'TC', 'SPSIN', 'SINO', line=311)
+W('15,2543', 0o55512, '', 'TS', 'SINO', 'SINO = SIN(AOG)', line=312)
+
+W('15,2544', 0o00006, '', 'EXTEND', line=314)
+W('15,2545', 0o71511, '', 'MP', 'COSM', line=315)
+W('15,2546', 0o55514, '', 'TS', 'SINOCOSM', 'SO CM', line=316)
+
+W('15,2547', 0o31661, '', 'CA', 'AOG', line=318)
+W('15,2550', 0o05074, '', 'TC', 'SPCOS', 'COSO', line=319)
+W('15,2551', 0o55513, '', 'TS', 'COSO', line=320)
+
+W('15,2552', 0o00006, '', 'EXTEND', line=322)
+W('15,2553', 0o71511, '', 'MP', 'COSM', line=323)
+W('15,2554', 0o55515, '', 'TS', 'COSOCOSM', 'CO CM', line=324)
+
+# PITCHDOT:  Q TCDU/180 = IDOT TCDU/180 COSO COSM + MDOT TCDU/180 SINO
+
+W('15,2555', 0o41677, '', 'CS', '-DELAMG', line=328)
+W('15,2556', 0o00006, '', 'EXTEND', line=329)
+W('15,2557', 0o71512, '', 'MP', 'SINO', line=330)
+W('15,2560', 0o53721, '', 'DXCH', 'JETEM', '2 LOCS', line=331)
+W('15,2561', 0o41676, '', 'CS', '-DELAIG', line=332)
+W('15,2562', 0o00006, '', 'EXTEND', line=333)
+W('15,2563', 0o71515, '', 'MP', 'COSOCOSM', line=334)
+W('15,2564', 0o21721, '', 'DAS', 'JETEM', line=335)
+W('15,2565', 0o31720, '', 'CA', 'JETEM', line=336)
+W('15,2566', 0o57707, '', 'XCH', 'OLDELQ', line=337)
+W('15,2567', 0o02530, '', 'TC', 'RATEAVG', line=338)
+W('15,2570', 0o55702, '', 'TS', 'QREL', 'PITCHDOT = Q TCDU/180', line=339)
+
+# Page 1071
+# YAWDOT:  R TCDU/180 = -IDOT TCDU/180 COSM SINO + MDOT TCDU/180 COSO
+
+W('15,2571', 0o41677, '', 'CS', '-DELAMG', line=344)
+W('15,2572', 0o00006, '', 'EXTEND', line=345)
+W('15,2573', 0o71513, '', 'MP', 'COSO', line=346)
+W('15,2574', 0o53721, '', 'DXCH', 'JETEM', line=347)
+W('15,2575', 0o31676, '', 'CA', '-DELAIG', line=348)
+W('15,2576', 0o00006, '', 'EXTEND', line=349)
+W('15,2577', 0o71514, '', 'MP', 'SINOCOSM', line=350)
+W('15,2600', 0o21721, '', 'DAS', 'JETEM', line=351)
+W('15,2601', 0o31720, '', 'CA', 'JETEM', line=352)
+W('15,2602', 0o57710, '', 'XCH', 'OLDELR', line=353)
+W('15,2603', 0o02530, '', 'TC', 'RATEAVG', line=354)
+W('15,2604', 0o55703, '', 'TS', 'RREL', 'YAWDOT = R TCDU/180', line=355)
+
+# ROLLDOT:  P TCDU/180 = ODOT TCDU/180 + IDOT TCDU/180 SINM
+
+W('15,2605', 0o31663, '', 'CA', 'AMG', line=359)
+W('15,2606', 0o05075, '', 'TC', 'SPSIN', line=360)
+W('15,2607', 0o55510, '', 'TS', 'SINM', line=361)
+
+W('15,2610', 0o00006, '', 'EXTEND', line=363)
+W('15,2611', 0o71676, '', 'MP', '-DELAIG', line=364)
+W('15,2612', 0o55720, '', 'TS', 'JETEM', line=365)
+W('15,2613', 0o35021, '', 'CA', 'ZERO', line=366)
+W('15,2614', 0o20001, '', 'DDOUBL', '', 'ROUND L INTO A', line=367)
+W('15,2615', 0o61675, '', 'AD', '-DELAOG', line=368)
+W('15,2616', 0o61720, '', 'AD', 'JETEM', line=369)
+W('15,2617', 0o40000, '', 'CS', 'A', line=370)
+W('15,2620', 0o55720, '', 'TS', 'JETEM', line=371)
+W('15,2621', 0o57706, '', 'XCH', 'OLDELP', line=372)
+W('15,2622', 0o02530, '', 'TC', 'RATEAVG', line=373)
+W('15,2623', 0o55701, '', 'TS', 'PREL', 'ROLLDOT = P TCDU/180', line=374)
+
+# IF GAMDOT < 0.5 DEG/SEC, THEN GAMDOT =0
+
+W('15,2624', 0o11723, '', 'CCS', 'GAMDOT', line=378)
+W('15,2625', 0o02627, '', 'TC', '+2', line=379)
+W('15,2626', 0o02651, '', 'TC', 'NOGAMDUT', line=380)
+W('15,2627', 0o41664, '', 'CS', 'ROLL/180', line=381)
+W('15,2630', 0o05075, '', 'TC', 'SPSIN', line=382)
+W('15,2631', 0o00006, '', 'EXTEND', line=383)
+W('15,2632', 0o71723, '', 'MP', 'GAMDOT', line=384)
+W('15,2633', 0o55721, '', 'TS', 'JETEM +1', '-SR GAMDOT', line=385)
+W('15,2634', 0o00006, '', 'EXTEND', line=386)
+W('15,2635', 0o73177, '', 'MP', 'SINTRIM', 'SIN(-20)      (FOR NOMINAL L/D = .3)', line=387)
+W('15,2636', 0o27701, '', 'ADS', 'PREL', 'PREL TCDU/180=(P-SALF SR GAMDOT)TCDU/180', line=388)
+
+W('15,2637', 0o31664, '', 'CA', 'ROLL/180', line=390)
+W('15,2640', 0o05074, '', 'TC', 'SPCOS', line=391)
+# Page 1072
+W('15,2641', 0o40000, '', 'COM', line=393)
+W('15,2642', 0o00006, '', 'EXTEND', line=394)
+W('15,2643', 0o71723, '', 'MP', 'GAMDOT', line=395)
+W('15,2644', 0o27702, '', 'ADS', 'QREL', 'QREL TCDU/180=(Q-CR GAMDOT) TCDU/180', line=396)
+
+W('15,2645', 0o41721, '', 'CS', 'JETEM +1', 'B( ) = -SR GAMDOT', line=398)
+W('15,2646', 0o00006, '', 'EXTEND', line=399)
+W('15,2647', 0o73200, '', 'MP', 'COSTRIM', 'COS(-20)      (FOR NOMINAL L/D = .3)', line=400)
+W('15,2650', 0o27703, '', 'ADS', 'RREL', 'RREL TCDU/180=(R+CALF SR GAMDOT)TCDU/180', line=401)
+
+W('15,2651', 0o35004, 'NOGAMDUT', 'CA', 'BIT12', 'CMDAPARM = 93D BIT 12', line=403)
+W('15,2652', 0o70102, '', 'MASK', 'CM/FLAGS', line=404)
+W('15,2653', 0o00006, '', 'EXTEND', line=405)
+W('15,2654', 0o15324, 'STBYDUMP', 'BZF', 'TASKOVER', 'DAP NOT ARMED.', line=406)
+
+W('15,2655', 0o34777, '', 'CA', 'POSMAX', 'PICK UP AT ATTRATES IN 10 MS OR SO.', line=408)
+W('15,2656', 0o54030, '', 'TS', 'TIME5', line=409)
+
+W('15,2657', 0o00006, '', 'EXTEND', line=411)
+W('15,2660', 0o32664, '', 'DCA', 'ATDOTCAD', line=412)
+W('15,2661', 0o53313, '', 'DXCH', 'T5LOC', line=413)
+# DOES NOT PROTECT TEMK, SQ IN SPSIN/COS
+
+W('15,2662', 0o05324, '', 'TC', 'TASKOVER', line=416)
+
+#   EBANK= AOG
+W('15,2663', 0o02665, 'ATDOTCAD', '2CADR', 'ATTRATES', kind='data', line=419)
+W('15,2664', 0o32066, kind='data', line=419)
+
+# Page 1073
+# CALCULATE BODY ATTITUDE RATES AND INTEGRATE TO OBTAIN ATTITUDE ANGLES.
+#
+# CB PHIDOT TCDU/180 = (CA PREL + SA RREL) TCDU/180
+# BETADOT TCDU/180 = (-SA PREL + CA RREL) TCDU/180
+# ALFADOT TCDU = (QREL + SB PHIDOT) TCDU/180
+
+W('15,2665', 0o22016, 'ATTRATES', 'LXCH', 'BANKRUPT', 'CONTINUE HERE VIA T5', line=428)
+W('15,2666', 0o00006, '', 'EXTEND', '', 'TASK MAY BE SKIPPED AT RESTART.', line=429)
+W('15,2667', 0o22012, '', 'QXCH', 'QRUPT', line=430)
+W('15,2670', 0o30021, '', 'CA', 'SR', line=431)
+W('15,2671', 0o60000, '', 'DOUBLE', line=432)
+W('15,2672', 0o55623, '', 'TS', 'CM/SAVE', line=433)
+# DOES NOT PROTECT TEMK, SQ IN SPSIN/COS
+
+W('15,2673', 0o31702, '', 'CA', 'QREL', line=436)
+W('15,2674', 0o61665, '', 'AD', 'ALFA/180', line=437)
+W('15,2675', 0o02522, '', 'TC', 'ANGOVCOR', line=438)
+W('15,2676', 0o55665, '', 'TS', 'ALFA/180', line=439)
+W('15,2677', 0o05074, '', 'TC', 'SPCOS', line=440)
+W('15,2700', 0o55506, '', 'TS', 'CALFA', 'CALFA', line=441)
+W('15,2701', 0o55705, '', 'TS', 'PHIDOT', line=442)
+
+W('15,2702', 0o00006, '', 'EXTEND', line=444)
+W('15,2703', 0o71701, '', 'MP', 'PREL', line=445)
+W('15,2704', 0o57705, '', 'XCH', 'PHIDOT', 'CA PREL', line=446)
+W('15,2705', 0o00006, '', 'EXTEND', line=447)
+W('15,2706', 0o71703, '', 'MP', 'RREL', 'CA RREL', line=448)
+W('15,2707', 0o55704, '', 'TS', 'BETADOT', line=449)
+
+W('15,2710', 0o31665, '', 'CA', 'ALFA/180', line=451)
+W('15,2711', 0o05075, '', 'TC', 'SPSIN', line=452)
+W('15,2712', 0o55507, '', 'TS', 'SALFA', 'SIN(ALFA)', line=453)
+
+W('15,2713', 0o00006, '', 'EXTEND', line=455)
+W('15,2714', 0o71703, '', 'MP', 'RREL', 'SA RREL', line=456)
+W('15,2715', 0o27705, '', 'ADS', 'PHIDOT', 'CB PHIDOT, SAVED.', line=457)
+
+W('15,2716', 0o41507, '', 'CS', 'SALFA', line=459)
+W('15,2717', 0o00006, '', 'EXTEND', line=460)
+W('15,2720', 0o71701, '', 'MP', 'PREL', line=461)
+W('15,2721', 0o27704, '', 'ADS', 'BETADOT', 'SAVE BETADOT TCDU/180', line=462)
+W('15,2722', 0o27666, '', 'ADS', 'BETA/180', 'BETA DONE.', line=463)
+
+W('15,2723', 0o05075, '', 'TC', 'SPSIN', line=465)
+W('15,2724', 0o00006, '', 'EXTEND', line=466)
+W('15,2725', 0o71705, '', 'MP', 'PHIDOT', 'NEGLECT CB IN CB PHIDOT', line=467)
+W('15,2726', 0o61665, '', 'AD', 'ALFA/180', line=468)
+W('15,2727', 0o02522, '', 'TC', 'ANGOVCOR', line=469)
+W('15,2730', 0o55665, '', 'TS', 'ALFA/180', 'ALFA DONE.', line=470)
+# Page 1074
+W('15,2731', 0o40000, '', 'COM', line=472)
+W('15,2732', 0o61603, '', 'AD', 'ALFACOM', line=473)
+W('15,2733', 0o02522, '', 'TC', 'ANGOVCOR', 'JUST IN CASE ...', line=474)
+W('15,2734', 0o55477, '', 'TS', 'AK1', line=475)
+W('15,2735', 0o55572, '', 'TS', 'QAXERR', 'FOR PITCH FDAI AND EDIT.', line=476)
+
+W('15,2736', 0o31705, '', 'CA', 'PHIDOT', 'PHIDOT TCDU/180, NEGLECTING CB', line=478)
+W('15,2737', 0o61664, '', 'AD', 'ROLL/180', line=479)
+W('15,2740', 0o02522, '', 'TC', 'ANGOVCOR', line=480)
+W('15,2741', 0o55714, '', 'TS', 'ROLLTM', 'ROLL/180 FOR TM.', line=481)
+W('15,2742', 0o55664, '', 'TS', 'ROLL/180', 'ROLL DONE.', line=482)
+
+# START YAW AUTOPILOT HERE.  RATE DAMPING WITH ENFORCED COORDINATED ROLL MANEUVER.
+
+W('15,2743', 0o41666, '', 'CS', 'BETA/180', "IF IN ATM, SAVE 'RAXERR' FOR TM DNLST.", line=486)
+W('15,2744', 0o61604, '', 'AD', 'BETACOM', line=487)
+W('15,2745', 0o55573, '', 'TS', 'RAXERR', "IF OUTSIDE ATM, USE TM REGISTER 'RAXERR'", line=488)
+# AS A TEMPORARY.  (DAP OPERATION IS IN INTERRUPT, SO
+# IS OK.)  FINAL C(RAXERR) AT END OF DAP CYCLE WILL
+# BE R-AXIS ERROR.
+
+W('15,2746', 0o35015, '', 'CA', 'BIT3', '.05GSW = 102D BIT3    SW=0, LESS .05G', line=493)
+W('15,2747', 0o70102, '', 'MASK', 'CM/FLAGS', 'SWITCH =1, GREATER THAN .05 G', line=494)
+W('15,2750', 0o00006, '', 'EXTEND', line=495)
+W('15,2751', 0o13037, '', 'BZF', 'EXDAP', 'IF G LESS THAN .05', line=496)
+W('15,2752', 0o45017, '', 'CS', 'ONE', 'IF G GEQ  THAN .05', line=497)
+W('15,2753', 0o55700, '', 'TS', 'CMDAPMOD', 'SAVE -1 FOR USE IN CM/RCS', line=498)
+
+W('15,2754', 0o55477, '', 'TS', 'AK1', 'TO ZERO PITCH AND YAW FDAI NEEDLES', line=500)
+W('15,2755', 0o55500, '', 'TS', 'AK2', 'IN ATM.  (MODE =-1)', line=501)
+
+W('15,2756', 0o41701, '', 'CS', 'PREL', 'YAW ERROR = RREL - PREL TAN(ALFA)', line=503)
+W('15,2757', 0o00006, '', 'EXTEND', line=504)
+W('15,2760', 0o73177, '', 'MP', 'SINTRIM', 'LET SIN(-20) BE APPROX FOR TAN(-20)', line=505)
+W('15,2761', 0o61703, '', 'AD', 'RREL', line=506)
+W('15,2762', 0o03027, '', 'TC', '2D/SDZ', 'GO TEST DZ.  GET TAG: +0 IF IN DZ', line=507)
+W('15,2763', 0o50000, '', 'INDEX', 'A', '+/- 1 IF NOT', line=508)
+W('15,2764', 0o33202, '', 'CAF', 'YJETCODE', line=509)
+
+W('15,2765', 0o55720, '', 'TS', 'JETEM', line=511)
+
+# START PITCH AUTOPILOT HERE.  RATE DAMPING ONLY.
+
+W('15,2766', 0o31702, '', 'CA', 'QREL', line=515)
+W('15,2767', 0o03027, '', 'TC', '2D/SDZ', line=516)
+W('15,2770', 0o50000, 'EXDAPIN', 'INDEX', 'A', 'COME HERE FROM EX ATM DAP', line=517)
+W('15,2771', 0o33205, '', 'CAF', 'P/RJCODE', line=518)
+W('15,2772', 0o27720, '', 'ADS', 'JETEM', 'COMBINE ALL NEW BITS.', line=519)
+
+W('15,2773', 0o00006, '', 'EXTEND', '', 'DOES NOT REQUIRE SAVING OLD CODES.', line=521)
+# Page 1075
+W('15,2774', 0o01005, '', 'WRITE', 'PYJETS', 'SET PYCHAN TO DESIRED BIT CONFIG.', line=523)
+
+W('15,2775', 0o11711, '', 'CCS', 'JETAG', line=525)
+W('15,2776', 0o03216, '', 'TC', 'CM/RCS', line=526)
+W('15,2777', 0o03677, '', 'TC', 'CM/FDAI', line=527)
+W('15,3000', 0o03704, '', 'TC', 'CM/FDAIR -1', '(JETAG=-1 EQUIVALENT TO CMDAPMOD=+1)', line=528)
+
+# Page 1076
+# DEAD ZONE LOGIC USED BY ENTRY DIGITAL AUTOPILOTS.
+
+W('15,3001', 0o10000, '3DDZ', 'CCS', 'A', 'YAWLIM=1.0-3/180=16384-273=16111', line=533)
+W('15,3002', 0o63175, '', 'AD', 'YAWLIM', line=534)
+W('15,3003', 0o13033, '', 'TCF', 'DZCOM', line=535)
+W('15,3004', 0o63175, '', 'AD', 'YAWLIM', line=536)
+W('15,3005', 0o13034, '', 'TCF', 'DZNOCOM', line=537)
+
+# BIASED DZ FOR EXT ATM DAP.
+W('15,3006', 0o55624, 'BIASEDZ', 'TS', 'JETEM2', 'SAVE RATE/180.  ERROR/180 IS IN L.', line=540)
+W('15,3007', 0o10000, '', 'CCS', 'A', 'START ERROR DZ.', line=541)
+W('15,3010', 0o43174, '', 'CS', 'CM/BIAS', '= .6/180', line=542)
+W('15,3011', 0o13013, '', 'TCF', '+2', line=543)
+W('15,3012', 0o33174, '', 'CA', 'CM/BIAS', line=544)
+W('15,3013', 0o60001, '', 'AD', 'L', 'BIAS THE ERROR.', line=545)
+W('15,3014', 0o22002, '', 'LXCH', 'Q', 'SAVE CALLERS RETURN ADDRESS.', line=546)
+W('15,3015', 0o03001, '', 'TC', '3DDZ', 'GO GENERATE THE ERROR BIT.', line=547)
+W('15,3016', 0o52002, '', 'DXCH', 'L', 'BIT TO L, RESTORE CALLERS Q.', line=548)
+W('15,3017', 0o11624, '4D/SDZ', 'CCS', 'JETEM2', 'CAME HERE IN EXT ATM. C(L) = ERROR BIT', line=549)
+W('15,3020', 0o63172, '', 'AD', '4D/SLIM', 'IF RATE GEQ 4D/S, SET L=0 AND TAKE', line=550)
+W('15,3021', 0o13023, '', 'TCF', '+2', 'JET BITS ACCORDING TO SGN OF RATE.', line=551)
+W('15,3022', 0o63172, '', 'AD', '4D/SLIM', line=552)
+W('15,3023', 0o54000, '', 'TS', 'A', line=553)
+W('15,3024', 0o13026, '', 'TCF', '+2', 'RATE OK. CONTINUE', line=554)
+W('15,3025', 0o22007, '', 'ZL', '', 'RATE GEQ 4 D/S.  OVER RIDE ERROR BIT', line=555)
+W('15,3026', 0o57624, '', 'XCH', 'JETEM2', 'AND CONTINUE TO GET SIGN.', line=556)
+
+W('15,3027', 0o10000, '2D/SDZ', 'CCS', 'A', 'COME HERE TO TEST IF A WITHIN 2DEG/S DZ', line=558)
+W('15,3030', 0o63173, '', 'AD', 'YDOTLIM', '1.0 - YDOT DZ         (OR PDOT)', line=559)
+W('15,3031', 0o13034, '', 'TCF', '+3', line=560)
+W('15,3032', 0o63173, '', 'AD', 'YDOTLIM', 'YDOT DZ = 2 DEG/SEC', line=561)
+W('15,3033', 0o40000, 'DZCOM', 'COM', line=562)
+W('15,3034', 0o55721, 'DZNOCOM', 'TS', 'JETEM +1', 'GENERATE TAG, SET C(A)= -+1 OUTSIDE DZ', line=563)
+W('15,3035', 0o35021, '', 'CA', 'ZERO', 'SET C(A) = +0 INSIDE', line=564)
+W('15,3036', 0o00002, '', 'TC', 'Q', line=565)
+
+# Page 1077
+# EXTRA ATMOSPHERIC DIGITAL AUTOPILOT
+#
+# 1.    IF ABS(CALF) -C(45) POS, USE                    IF CALFA POS, CMDAPMOD= +0
+# BETA:   YAW ERROR = SGN(CALF) (BETACOM -BETA)   IF CALFA NEG, CMDAPMOD= -0
+# RATE = BETADOT                     IF CMDAPMOD = -0, RATE = RREL
+# R-AXIS = CONTROL
+#
+# ROLL:  ROLL ERROR = SGN(CALF) (ROLLC - ROLL)    IF CMDAPMOD = -0, RATE DAMP ONLY.
+# RATE = PREL
+# P-AXIS = CONTROL
+#
+# 2.    IF C(45) GEQ CALFA GEQ -C(45), USE              CMDAPMOD = +1
+# BETA:  ROLL ERROR = SGN(-SALF) (BETACOM -BETA)
+# RATE = BETADOT
+# P-AXIS = CONTROL
+#
+# ROLL:   YAW ERROR = SGN(SALF) (ROLLC - ROLL)    RATE DAMP ONLY.
+# RATE = RREL
+# R-AXIS = CONTROL
+#
+# 3.    FOR ALL CASES, USE
+# ALFA: PITCH ERROR = (ALFACOM - ALFA)
+# RATE = QREL
+# Q-AXIS = CONTROL
+
+W('15,3037', 0o55700, 'EXDAP', 'TS', 'CMDAPMOD', '+0 FOR NOW', line=593)
+W('15,3040', 0o11506, '', 'CCS', 'CALFA', line=594)
+W('15,3041', 0o63176, '', 'AD', 'C45LIM', '=1.0-COS(45)', line=595)
+W('15,3042', 0o13044, '', 'TCF', '+2', line=596)
+W('15,3043', 0o63176, '', 'AD', 'C45LIM', line=597)
+W('15,3044', 0o54000, '', 'TS', 'A', line=598)
+W('15,3045', 0o13126, '', 'TCF', 'EXDAP2', 'HERE IF ABS(CALFA) L COS(45)', line=599)
+
+W('15,3046', 0o11506, '', 'CCS', 'CALFA', '|CALFA| > 0.707', line=601)
+W('15,3047', 0o13050, '', 'TCF', '+1', 'CONTINUE IF POS; GO TO EXDAP4 IF NEG.', line=602)
+
+W('15,3050', 0o11727, '', 'CCS', 'P63FLAG', 'VALID VALUES ARE:  -1, +1, +0.', line=604)
+W('15,3051', 0o03064, '', 'TC', 'EXDAP4', line=605)
+W('15,3052', 0o03054, '', 'TC', '+2', line=606)
+W('15,3053', 0o03064, '', 'TC', 'EXDAP4', line=607)
+W('15,3054', 0o05412, '', 'TC', 'PHASCHNG', 'SINGLE PASS THROUGH HERE.', line=608)
+W('15,3055', 0o40334, '', 'OCT', '40334', kind='data', line=609)
+W('15,3056', 0o45017, '', 'CS', 'ONE', line=610)
+W('15,3057', 0o55727, '', 'TS', 'P63FLAG', 'SET FLAG TO ASSURE SINGLE PASS.', line=611)
+W('15,3060', 0o33171, '', 'CA', 'NSEC', line=612)
+W('15,3061', 0o05245, '', 'TC', 'WAITLIST', line=613)
+#   EBANK= AOG
+W('15,3062', 0o02374, '', '2CADR', 'WAKEP62', 'CALL TO TERMINATE P62 IN N SEC.', kind='data', line=615)
+W('15,3063', 0o54066, kind='data', line=615)
+# Page 1078
+# 65 DEG/ 3DEG/SEC = 21 SEC NOMINAL
+# TRANSIT TIME FROM ALFA=45 TO ALFA TRIM.
+
+W('15,3064', 0o11711, 'EXDAP4', 'CCS', 'JETAG', 'ROLLJET INTERFACE TEST BETWEEN .1 SEC', line=620)
+W('15,3065', 0o13073, '', 'TCF', 'EXDAP3', 'DAP AND THE 2 SEC CM/RCS DAP', line=621)
+W('15,3066', 0o13073, '', 'TCF', 'EXDAP3', line=622)
+W('15,3067', 0o35021, '', 'CA', 'ZERO', line=623)
+W('15,3070', 0o00006, '', 'EXTEND', '', 'TURN OFF ROLL JETS IF ON AND WAIT', line=624)
+W('15,3071', 0o01006, '', 'WRITE', 'ROLLJETS', 'UNTIL START OF 2 SEC CM/RCS CYCLE', line=625)
+W('15,3072', 0o55711, '', 'TS', 'JETAG', 'RESTORE PROPER VALUE +0', line=626)
+
+# ROLL FDAI WILL BE IN ERROR UNTIL NEXT CM/RCS CALL.
+W('15,3073', 0o11506, 'EXDAP3', 'CCS', 'CALFA', 'HERE IF ABS(CALFA) GEQ COS(45)', line=629)
+W('15,3074', 0o31573, '', 'CA', 'RAXERR', 'C()= BETACOM - BETA/180', line=630)
+W('15,3075', 0o13101, '', 'TCF', 'EXDAP1', line=631)
+W('15,3076', 0o45021, '', 'CS', 'ZERO', line=632)
+W('15,3077', 0o55700, '', 'TS', 'CMDAPMOD', 'FOR CM/RCS', line=633)
+W('15,3100', 0o41573, '', 'CS', 'RAXERR', 'COMPLEMENT OF YAW ERROR.', line=634)
+W('15,3101', 0o55573, 'EXDAP1', 'TS', 'RAXERR', 'FOR YAW FDAI', line=635)
+W('15,3102', 0o55500, '', 'TS', 'AK2', 'WANT RAXERR FOR TM.', line=636)
+W('15,3103', 0o54001, '', 'TS', 'L', line=637)
+W('15,3104', 0o11700, '', 'CCS', 'CMDAPMOD', 'COORDINATE BETA CONTROL.', line=638)
+W('15,3105', 0o03110, '', 'TC', '+3', 'C(CMDAPMOD) CAN BE +1, +0, OR -0.', line=639)
+W('15,3106', 0o35017, '', 'CA', 'ONE', 'USE BETADOT TO COORD IN MODE +0', line=640)
+W('15,3107', 0o50000, '', 'INDEX', 'A', 'OTHERWISE USE RREL.', line=641)
+W('15,3110', 0o31703, '', 'CA', 'RREL', line=642)
+W('15,3111', 0o03006, '', 'TC', 'BIASEDZ', 'GO TEST DZ. +0 IF IN DZ, +-1 OTHERWISE', line=643)
+# IF GEQ 4D/S, SET ERROR BIT IN L=0
+W('15,3112', 0o00006, '', 'EXTEND', line=645)
+W('15,3113', 0o04001, '', 'ROR', 'LCHAN', 'L HAS BETA BIT', line=646)
+W('15,3114', 0o50000, '', 'INDEX', 'A', line=647)
+W('15,3115', 0o33202, '', 'CAF', 'YJETCODE', line=648)
+W('15,3116', 0o55720, '', 'TS', 'JETEM', line=649)
+
+W('15,3117', 0o31572, '', 'CA', 'QAXERR', 'ALFA ERROR.', line=651)
+W('15,3120', 0o54001, '', 'TS', 'L', line=652)
+W('15,3121', 0o31702, '', 'CA', 'QREL', 'FOR ALPHADOT USE QREL', line=653)
+W('15,3122', 0o03006, '', 'TC', 'BIASEDZ', line=654)
+W('15,3123', 0o00006, '', 'EXTEND', line=655)
+W('15,3124', 0o04001, '', 'ROR', 'LCHAN', line=656)
+W('15,3125', 0o12770, '', 'TCF', 'EXDAPIN', 'CONTINUE ON IN DAP', line=657)
+
+W('15,3126', 0o25700, 'EXDAP2', 'INCR', 'CMDAPMOD', 'SET CMDAPMOD TO +1', line=659)
+
+W('15,3127', 0o45017, '', 'CS', 'ONE', 'INDICATE CHANGE FROM .1 SEC UPDATE TO', line=661)
+W('15,3130', 0o55711, '', 'TS', 'JETAG', 'TO 2 SEC FOR ROLL JETS. (IF CMDAPMOD', line=662)
+# =0 AND JETAG =-1, QUENCHES JETS IF ON)
+
+W('15,3131', 0o11727, '', 'CCS', 'P63FLAG', 'IF FLAG WAS +1, SET =0.', line=665)
+W('15,3132', 0o55727, '', 'TS', 'P63FLAG', line=666)
+# Page 1079
+W('15,3133', 0o13134, '', 'NOOP', line=668)
+
+W('15,3134', 0o11507, '', 'CCS', 'SALFA', 'BETA CONTROL WITH P JETS', line=670)
+W('15,3135', 0o41573, '', 'CS', 'RAXERR', 'B()= BETACOM - BETA/180', line=671)
+W('15,3136', 0o13140, '', 'TCF', '+2', line=672)
+W('15,3137', 0o31573, '', 'CA', 'RAXERR', line=673)
+W('15,3140', 0o55713, '', 'TS', 'PAXERR1', 'TEMP SAVE.  ERROR/180', line=674)
+W('15,3141', 0o00006, '', 'EXTEND', line=675)
+W('15,3142', 0o75002, '', 'MP', 'HALF', 'CM/FDAI EXPECTS ERROR/360.', line=676)
+W('15,3143', 0o57713, '', 'XCH', 'PAXERR1', 'ERROR/360 FOR FDAI, GET ERROR/180.', line=677)
+W('15,3144', 0o54001, '', 'TS', 'L', line=678)
+W('15,3145', 0o11507, '', 'CCS', 'SALFA', line=679)
+W('15,3146', 0o41704, '', 'CS', 'BETADOT', 'USE BETADOT TO COORD IN MODE +1', line=680)
+W('15,3147', 0o03151, '', 'TC', '+2', line=681)
+W('15,3150', 0o31704, '', 'CA', 'BETADOT', line=682)
+W('15,3151', 0o03006, '', 'TC', 'BIASEDZ', line=683)
+W('15,3152', 0o00006, '', 'EXTEND', line=684)
+W('15,3153', 0o04001, '', 'ROR', 'LCHAN', line=685)
+W('15,3154', 0o50000, '', 'INDEX', 'A', line=686)
+W('15,3155', 0o33205, '', 'CAF', 'P/RJCODE', 'GET ROLL CODE', line=687)
+W('15,3156', 0o00006, '', 'EXTEND', '', 'ROLL CONTROL WITH YAW JETS.', line=688)
+W('15,3157', 0o01006, '', 'WRITE', 'ROLLJETS', 'WE,LL SKIP REGULAR ROLL SYST', line=689)
+
+W('15,3160', 0o31717, '', 'CA', 'ROLLHOLD', 'ROLL/180 AT CM/DAPON TIME.', line=691)
+W('15,3161', 0o00006, '', 'EXTEND', line=692)
+W('15,3162', 0o21664, '', 'MSU', 'ROLL/180', '1,S COMPL, BUT SO WHATS A BIT.?', line=693)
+W('15,3163', 0o54001, '', 'TS', 'L', 'FORCE A LIMIT CYCLE IN YAW RATE.', line=694)
+W('15,3164', 0o11507, '', 'CCS', 'SALFA', line=695)
+W('15,3165', 0o30001, '', 'CA', 'L', 'TO REMOVE ITS BIASING EFFECT ON M DOT.', line=696)
+W('15,3166', 0o03101, '', 'TC', 'EXDAP1', line=697)
+W('15,3167', 0o40001, '', 'CS', 'L', line=698)
+W('15,3170', 0o03101, '', 'TC', 'EXDAP1', line=699)
+
+W('15,3171', 0o04064, 'NSEC', 'DEC', '2100', '65 DEG/ 3 DEG/SEC', kind='data', line=701)
+# IF NSEC IS CHANGED, REMEMBER TO CHANGE 4.33SPOT.
+W('15,3172', 0o37734, '4D/SLIM', 'DEC', '16348', '1.0 -4/180 D/S = 4/1800 EXP 14', kind='data', line=703)
+W('15,3173', 0o37756, 'YDOTLIM', 'DEC', '16366', '=1.0 - YDOT DZ= 16384 -18', kind='data', line=704)
+# YDOT DZ = YDOT TCDU/180 = 2/1800 EXP 14
+
+W('15,3174', 0o00067, 'CM/BIAS', 'DEC', '55', '=.6/180 B14 = 55', kind='data', line=707)
+W('15,3175', 0o37267, 'YAWLIM', 'DEC', '16055', 'YAWLIM=1.0-3.6/180=16384-329=16055', kind='data', line=708)
+W('15,3176', 0o11277, 'C45LIM', 'DEC', '.29289', '=1.0-COS(45)', kind='data', line=709)
+
+W('15,3177', 0o65033, 'SINTRIM', 'DEC', '-.34202', 'SIN(-20)      (FOR NOMINAL L/D = .3)', kind='data', line=711)
+W('15,3200', 0o36044, 'COSTRIM', 'DEC', '.93969', 'COS(-20)      (FOR NOMINAL L/D = .3)', kind='data', line=712)
+
+# TO MAKE DAP INSENSITIVE TO PITCH ERRORS DUE TO ACCUMULATED NAV ERRORS, USE NOMINAL VALUE (-20 DEG) FOR TRIM ALFA
+# USED DURING ATMOSPHERIC COORDINATION. OUTSIDE ATMOSPHERE, NAV ERRORS WILL BE SLIGHT, BUT ALFA CAN DIFFER GREATLY
+# FROM TRIM, SO USE ON-BOARD ESTIMATES.
+
+# Page 1080
+# JET CODE TABLES FOLLOW _
+
+W('15,3201', 0o00120, '', 'OCTAL', '00120', 'POS Y', kind='data', line=721)
+W('15,3202', 0o00000, 'YJETCODE', 'OCTAL', '00000', 'RCS JET BITS', kind='data', line=722)
+W('15,3203', 0o00240, '', 'OCTAL', '00240', 'NEG Y', kind='data', line=723)
+W('15,3204', 0o00005, '', 'OCTAL', '00005', 'POS R JET BITS        ALSO POS P JET BITS', kind='data', line=724)
+W('15,3205', 0o00000, 'P/RJCODE', 'OCTAL', '00000', kind='data', line=725)
+W('15,3206', 0o00012, '', 'OCTAL', '00012', 'NEG R                 ALSO NEG P', kind='data', line=726)
+
+# Page 1081
+# RCS           THIS SECTION IS ENTERED EACH 2 SEC BY WAITLIST CALL FOLLOWING A DELAY OF 1.2 SEC AFTER PIPUP.
+# THE TASK  SETJTAG  SETS A FLAG IN  JETAG  TO SIGNIFY THAT ROLL UPDATE IS DUE.  IN ROUGHLY 5 CS  BPDYRATE  WILL BE
+# EXECUTED AND JETAG WILL CAUSE  CM/RCS  TO ACT ON ROLLC IMMEDIATELY THEREAFTER.  THE
+# TASK SAVES THE CALL TIME SO THAT CM/RCS CAN DETERMINE HOW MUCH OF THE 2 SEC INTERVAL REMAINS BEFORE THE
+# NEXT UPDATE.
+
+W('15,3207', 0o40025, 'SETJTAG', 'CS', 'TIME1', 'SAVE NOMINAL UPDATE TIME FOR SYNCH', line=735)
+W('15,3210', 0o55712, '', 'TS', 'TUSED', line=736)
+# THE 5 CS APPEARS IN TIMETST.
+W('15,3211', 0o35017, '', 'CA', 'ONE', 'RATHER THAN INCR, FOR SAFETY', line=738)
+W('15,3212', 0o55711, '', 'TS', 'JETAG', 'SET JETAG=1 TO CAUSE CM/RCS TO BE', line=739)
+W('15,3213', 0o05412, '', 'TC', 'PHASCHNG', line=740)
+W('15,3214', 0o00001, '', 'OCT', '00001', kind='data', line=741)
+
+W('15,3215', 0o05324, '', 'TC', 'TASKOVER', 'EXECUTED AFTER NEXT BODYRATE UPDATE', line=743)
+
+# PREDICTIVE ROLL SYSTEM        ENTRY STEERING PROVIDES ROLL COMMAND IN LOC ROLLC.  THE FOLLOWING CALCULATES THE
+# TRAJECTORY TO THE ORIGIN IN PHASE PLANE (X,V).  PROGRAM ENTERS JET ON AND OFF CALLS INTO WTLST TO PRODUCE
+# THE DESIRED TRAJECTORY.  ONLY THOSE CALLS WHICH CAN BE EXECUTED WITHIN THE INTERVAL  T  (2 SEC) ARE ENTERED IN
+# WTLST, THE REMAINDER ARE RECONSIDERED AT NEXT UPDATE.
+
+S('HALFPR', 'equals', 0o5001, line=750)
+
+# CLEAR JETAG BEFORE TIMETST.  SET TO +0 TO SHOW
+# ROLL DAP CALLED.  IN EVENT OF RESTART, BODYRATE
+# MAY MISS A CYCLE.  CM/RCS WILL MISS A CYCLE ONLY
+# IF A RESTART OCCURS AFTER TIMETST COMMENCES.
+
+W('15,3216', 0o45017, 'CM/RCS', 'CS', 'ONE', line=757)
+W('15,3217', 0o55617, '', 'TS', 'JNDX', 'SET NDX FOR POS ROLL, AND CHANGE LATER', line=758)
+
+W('15,3220', 0o45033, '', 'CS', '2T/TCDU', 'ROLLDOT = DELAOG + DELAIG SINM =DELR', line=760)
+W('15,3221', 0o00006, '', 'EXTEND', line=761)
+W('15,3222', 0o71701, '', 'MP', 'PREL', 'DELR/180 = RDOT TCDU/180 = RDOT/1800', line=762)
+W('15,3223', 0o60001, '', 'AD', 'L', '-2 RDOT T/180 IN L', line=763)
+W('15,3224', 0o55613, '', 'TS', '-VT/180', 'SAVE -2VT/180 HERE', line=764)
+
+W('15,3225', 0o41664, '', 'CS', 'ROLL/180', line=766)
+W('15,3226', 0o54021, '', 'TS', 'SR', 'SAVE (-R/180) /2', line=767)
+
+W('15,3227', 0o40102, '', 'CS', 'CM/FLAGS', line=769)
+W('15,3230', 0o75014, '', 'MASK', 'BIT4', 'LATSW = 101D BIT4', line=770)
+W('15,3231', 0o00006, '', 'EXTEND', '', 'ROLL OVER TOP $', line=771)
+W('15,3232', 0o13240, '', 'BZF', 'GETLCX', 'NO, TAKE SHORTEST PATH', line=772)
+W('15,3233', 0o26102, '', 'ADS', 'CM/FLAGS', 'YES, ENFORCE ROLL OVER TOP.. (BIT =0)', line=773)
+W('15,3234', 0o31715, '', 'CA', 'ROLLC', '(ROLLC/180) /2', line=774)
+W('15,3235', 0o60021, '', 'AD', 'SR', '-(R/180) /2', line=775)
+W('15,3236', 0o57614, '', 'XCH', 'LCX/360', 'DIFFERENT X REQD HERE.  DISCONT AT 180.', line=776)
+W('15,3237', 0o13300, '', 'TCF', 'COMPAT', 'POSSIBLE OVFL ABOVE.', line=777)
+
+# Page 1082
+W('15,3240', 0o35002, 'GETLCX', 'CA', 'POS1/2', 'FORM RCOM/360', line=780)
+W('15,3241', 0o60000, '', 'DOUBLE', line=781)
+W('15,3242', 0o61715, '', 'AD', 'ROLLC', line=782)
+W('15,3243', 0o57614, '', 'XCH', 'LCX/360', 'IGNORE POSSIBLE OVFL.', line=783)
+
+W('15,3244', 0o30021, '', 'CA', 'SR', 'FORM -R/360', line=785)
+W('15,3245', 0o65000, '', 'AD', 'NEG1/2', line=786)
+W('15,3246', 0o65000, '', 'AD', 'NEG1/2', 'IGNORE OVFL', line=787)
+W('15,3247', 0o57614, '', 'XCH', 'LCX/360', '-R/360', line=788)
+W('15,3250', 0o27614, '', 'ADS', 'LCX/360', 'LCX/360 = RCOM/360 -R/360  RANGE (-1,1)', line=789)
+
+# DOES SGN(-VT) (VT/180) (VT/180) (180/(4 A1 TT COSALFA)) + X/360 + SGN(X) / 2    OVFL ?
+
+W('15,3251', 0o11613, '', 'CCS', '-VT/180', 'TAKE SHORTEST ANGULAR PATH', line=793)
+W('15,3252', 0o65017, '', 'AD', 'ONE', '(BASED ON SINGLE JET ACCELERATION)', line=794)
+W('15,3253', 0o13255, '', 'TCF', '+2', line=795)
+W('15,3254', 0o65017, '', 'AD', 'ONE', line=796)
+W('15,3255', 0o00006, '', 'EXTEND', line=797)
+W('15,3256', 0o71613, '', 'MP', '-VT/180', 'C(-VT/180) = -2 VT/180', line=798)
+W('15,3257', 0o00006, '', 'EXTEND', line=799)
+W('15,3260', 0o73750, '', 'MP', '1/16A1', '= 180/(16 A1 TT)', line=800)
+W('15,3261', 0o00006, '', 'EXTEND', line=801)
+W('15,3262', 0o11506, '', 'DV', 'CALFA', line=802)
+W('15,3263', 0o54001, '', 'TS', 'L', line=803)
+W('15,3264', 0o11614, '', 'CCS', 'LCX/360', line=804)
+W('15,3265', 0o35002, '', 'CAF', 'POS1/2', line=805)
+W('15,3266', 0o13270, '', 'TCF', '+2', line=806)
+W('15,3267', 0o45002, '', 'CS', 'POS1/2', line=807)
+W('15,3270', 0o61614, '', 'AD', 'LCX/360', 'IS LCX/360 LESS THAN 180 DEGS  $', line=808)
+W('15,3271', 0o60001, '', 'AD', 'L', line=809)
+W('15,3272', 0o54001, '', 'TS', 'L', line=810)
+W('15,3273', 0o13300, '', 'TCF', 'COMPAT', 'YES, GO ON.', line=811)
+W('15,3274', 0o50000, 'TRTAGXPI', 'INDEX', 'A', 'NO, SHIFT X BY - SGN(X) 2 PI', line=812)
+W('15,3275', 0o45001, '', 'CS', 'HALFPR', '+A YIELDS -1/2', line=813)
+W('15,3276', 0o60000, '', 'DOUBLE', line=814)
+W('15,3277', 0o27614, '', 'ADS', 'LCX/360', line=815)
+
+W('15,3300', 0o31614, 'COMPAT', 'CA', 'LCX/360', 'CORRECT FOR ASSUMED COORD TURN.', line=817)
+W('15,3301', 0o00006, '', 'EXTEND', line=818)
+W('15,3302', 0o71506, '', 'MP', 'CALFA', 'COS ALFA', line=819)
+W('15,3303', 0o55614, '', 'TS', 'LCX/360', 'SCALED LCX OK HERE.', line=820)
+
+W('15,3304', 0o11700, '', 'CCS', 'CMDAPMOD', 'FOUR POSSIBILITIES HERE', line=822)
+W('15,3305', 0o03675, '', 'TC', 'DZCALL1', 'EXIT, SETTING JETAG=0. (C(A)=0)', line=823)
+# ALL 3 AXES ALREADY DONE.
+W('15,3306', 0o03307, '', 'TC', '+1', 'G LESS THAN .05.  CA POS. CONTINUE', line=825)
+W('15,3307', 0o31614, '', 'CA', 'LCX/360', 'G GEQ .05.  CONTINUE IN CM/RCS', line=826)
+W('15,3310', 0o55614, '', 'TS', 'LCX/360', 'CMDAPMOD=-0.  DAMPING ONLY. SET LCX=0', line=827)
+W('15,3311', 0o55571, '', 'TS', 'ERRORZ', 'INITIAL ROLL ERROR (UNREFLECTED) FOR TM.', line=828)
+W('15,3312', 0o55713, '', 'TS', 'PAXERR1', 'SAVE LCX FOR FDAI AND EDIT.  (/360)', line=829)
+# Page 1083
+W('15,3313', 0o31613, '', 'CA', '-VT/180', 'GET - 2 VT/180', line=831)
+W('15,3314', 0o54021, '', 'TS', 'SR', line=832)
+W('15,3315', 0o30021, '', 'CA', 'SR', 'GET -VT/180, LEAVE -VT/360 IN SR FOR DZ', line=833)
+W('15,3316', 0o55570, '', 'TS', '-VT/180E', '                      DIAGNOSTIC ****', line=834)
+W('15,3317', 0o57613, '', 'XCH', '-VT/180', 'NOW CONTENTS OF -VT/180 AS LABELED', line=835)
+W('15,3320', 0o00006, '', 'EXTEND', line=836)
+W('15,3321', 0o71613, '', 'MP', '-VT/180', 'B(A) = -ZVT/180', line=837)
+W('15,3322', 0o00006, '', 'EXTEND', line=838)
+W('15,3323', 0o73750, '', 'MP', '180/8ATT', line=839)
+W('15,3324', 0o55616, '', 'TS', 'VSQ/4API', line=840)
+
+# IS SGN(VT) ( (180/4A1 TT) VT/180 VT/180 - .5 BUFLIM/360 ) -X/360 - .5 BUFLIM/360  POS?
+
+W('15,3325', 0o60000, 'WHICHALF', 'DOUBLE', '', 'FOR SECOND BURN, A1', line=844)
+W('15,3326', 0o40000, '', 'COM', line=845)
+W('15,3327', 0o63754, '', 'AD', 'BUFLIM', '=BUFLIM/(2 360)', line=846)
+W('15,3330', 0o54001, '', 'TS', 'L', line=847)
+W('15,3331', 0o11613, '', 'CCS', '-VT/180', line=848)
+W('15,3332', 0o40001, '', 'CS', 'L', line=849)
+W('15,3333', 0o13335, '', 'TCF', '+2', line=850)
+W('15,3334', 0o30001, '', 'CA', 'L', line=851)
+W('15,3335', 0o61614, '', 'AD', 'LCX/360', line=852)
+W('15,3336', 0o63754, '', 'AD', 'BUFLIM', line=853)
+W('15,3337', 0o00006, '', 'EXTEND', line=854)
+W('15,3340', 0o63355, '', 'BZMF', 'REFLECT', 'POINT (X,V) IN LHP.', line=855)
+
+# IS SGN(VT) ( (180/4A1 TT) VT/180 VT/180 - .5 BUFLIM/360 ) -X/360 + .5 BUFLIM/360  NEG?
+
+W('15,3341', 0o40000, '', 'COM', line=859)
+W('15,3342', 0o63754, '', 'AD', 'BUFLIM', line=860)
+W('15,3343', 0o63754, '', 'AD', 'BUFLIM', line=861)
+W('15,3344', 0o00006, '', 'EXTEND', line=862)
+W('15,3345', 0o63364, '', 'BZMF', 'DZ1', 'POINT (X,V) IN RHP.', line=863)
+
+# IS POINT WITHIN VELOCITY DZ?
+
+W('15,3346', 0o43747, '', 'CS', 'VSQMIN', 'IS VSQ/4API - (VSQ/4API) MIN NEG?', line=867)
+W('15,3347', 0o61616, '', 'AD', 'VSQ/4API', line=868)
+W('15,3350', 0o00006, '', 'EXTEND', line=869)
+W('15,3351', 0o63657, '', 'BZMF', 'DZCALL', 'YES.', line=870)
+
+# POINT IS IN BUFFER ZONE.  THRUST TO X AXIS.
+
+W('15,3352', 0o41617, '', 'CS', 'JNDX', line=874)
+W('15,3353', 0o55620, '', 'TS', 'JNDX1', line=875)
+W('15,3354', 0o03437, '', 'TC', 'OVRLINE1', line=876)
+
+W('15,3355', 0o41613, 'REFLECT', 'CS', '-VT/180', 'RELFECT LHP INTO RHP REL TO TERM CONTR', line=878)
+W('15,3356', 0o55613, '', 'TS', '-VT/180', line=879)
+W('15,3357', 0o54021, '', 'TS', 'SR', '-VT/360 SAVED FOR DZ.', line=880)
+# Page 1084
+W('15,3360', 0o41614, '', 'CS', 'LCX/360', line=882)
+W('15,3361', 0o55614, '', 'TS', 'LCX/360', line=883)
+W('15,3362', 0o41617, '', 'CS', 'JNDX', line=884)
+W('15,3363', 0o55617, '', 'TS', 'JNDX', line=885)
+
+# IS VSQ/4API - (VSQ/4API) MIN NEG?
+
+W('15,3364', 0o43747, 'DZ1', 'CS', 'VSQMIN', 'IS VSQ/4API - (VSQ/4API) MIN NEG  $', line=889)
+W('15,3365', 0o61616, '', 'AD', 'VSQ/4API', line=890)
+W('15,3366', 0o00006, '', 'EXTEND', line=891)
+W('15,3367', 0o63371, '', 'BZMF', 'DZ2', 'YES, GO TEST FURTHER.', line=892)
+W('15,3370', 0o13376, '', 'TCF', 'MAXVTEST', 'NO', line=893)
+
+# IS X/360 - XMIN/360 -VT/360 NEG?
+
+W('15,3371', 0o43752, 'DZ2', 'CS', 'XMIN/360', 'XMIN/360 = 4/360', line=897)
+W('15,3372', 0o61614, '', 'AD', 'LCX/360', line=898)
+W('15,3373', 0o60021, '', 'AD', 'SR', 'C(SR) = -VT/360', line=899)
+W('15,3374', 0o00006, '', 'EXTEND', '', 'IS X/360 - XMIN/360 -VT/360 NEG  $', line=900)
+W('15,3375', 0o63657, '', 'BZMF', 'DZCALL', 'YES, IN DZ. EXIT SETTING JETAG=0.', line=901)
+
+# IS XD/360 - VM/360K - XS/360 POS?
+
+W('15,3376', 0o41617, 'MAXVTEST', 'CS', 'JNDX', line=905)
+W('15,3377', 0o55620, '', 'TS', 'JNDX1', 'NOW CAN SET JNDX1 FOR TON2 JETS.', line=906)
+W('15,3400', 0o43754, '', 'CS', 'XS/360', 'XS/360 = (XMIN -YMIN/K) /360', line=907)
+W('15,3401', 0o61616, '', 'AD', 'VSQ/4API', line=908)
+W('15,3402', 0o61614, '', 'AD', 'LCX/360', line=909)
+W('15,3403', 0o55615, '', 'TS', 'XD/360', 'XD/360= X/360 +VSQ/4API   X INTERCEPT', line=910)
+# BUT C(XD/360) = (XD - XS) /360
+W('15,3404', 0o63753, '', 'AD', '-VM/360K', 'X INTERCEPT FOR MAX V (VM)', line=912)
+W('15,3405', 0o40000, '', 'COM', line=913)
+W('15,3406', 0o00006, '', 'EXTEND', line=914)
+W('15,3407', 0o63415, '', 'BZMF', 'MAXVTIM1', 'YES, THRUST TO VM', line=915)
+W('15,3410', 0o31615, '', 'CA', 'XD/360', line=916)
+W('15,3411', 0o00006, '', 'EXTEND', line=917)
+W('15,3412', 0o75002, '', 'MP', 'KTRCS', line=918)
+W('15,3413', 0o20001, '', 'DDOUBL', '', 'GO SAVE PREDICTED DRIFTING VELOCITY.', line=919)
+
+W('15,3414', 0o03420, '', 'TC', 'GETON1', 'INSURE THAT Q IS POS AS TAG.', line=921)
+W('15,3415', 0o00006, 'MAXVTIM1', 'EXTEND', line=922)
+W('15,3416', 0o22007, '', 'ZQ', '', 'SET +Q AS TAG', line=923)
+W('15,3417', 0o43753, '', 'CS', '-VMT/180', line=924)
+W('15,3420', 0o55567, 'GETON1', 'TS', 'VDT/180', 'VDT/180 OR VMT/180', line=925)
+W('15,3421', 0o61613, '', 'AD', '-VT/180', line=926)
+W('15,3422', 0o60000, '', 'DOUBLE', line=927)
+W('15,3423', 0o00006, '', 'EXTEND', line=928)
+W('15,3424', 0o73750, '', 'MP', '180/8ATT', line=929)
+W('15,3425', 0o55621, '', 'TS', 'TON1', 'TON1 / 4T', line=930)
+# Page 1085
+W('15,3426', 0o00006, '', 'EXTEND', line=932)
+W('15,3427', 0o63431, '', 'BZMF', 'OVRLINE', line=933)
+W('15,3430', 0o03443, '', 'TC', 'GETON2', 'RESET Q POS IF CAME FROM MAXVTIM1', line=934)
+
+W('15,3431', 0o10002, 'OVRLINE', 'CCS', 'Q', line=936)
+W('15,3432', 0o13437, '', 'TCF', 'OVRLINE1', line=937)
+W('15,3433', 0o31620, 'MAXVTIM2', 'CA', 'JNDX1', 'ABOVE VM, SO THRUST DOWN', line=938)
+W('15,3434', 0o55617, '', 'TS', 'JNDX', line=939)
+W('15,3435', 0o41621, '', 'CS', 'TON1', line=940)
+W('15,3436', 0o13442, '', 'TCF', 'OVRLINE2 +1', line=941)
+
+W('15,3437', 0o41613, 'OVRLINE1', 'CS', '-VT/180', 'DRIFT AT V', line=943)
+W('15,3440', 0o55567, '', 'TS', 'VDT/180', line=944)
+W('15,3441', 0o35021, 'OVRLINE2', 'CA', 'ZERO', line=945)
+W('15,3442', 0o55621, '', 'TS', 'TON1', line=946)
+W('15,3443', 0o31567, 'GETON2', 'CA', 'VDT/180', 'VDT/180, OR VMT/180 OR VT/180', line=947)
+W('15,3444', 0o60000, '', 'DOUBLE', line=948)
+W('15,3445', 0o00006, '', 'EXTEND', line=949)
+W('15,3446', 0o73750, '', 'MP', '180/8ATT', line=950)
+W('15,3447', 0o60000, '', 'DOUBLE', '', 'FOR SECOND BURN, A1', line=951)
+W('15,3450', 0o55607, '', 'TS', 'TON2', '= TON2 / 4T', line=952)
+
+W('15,3451', 0o40000, '', 'COM', line=954)
+W('15,3452', 0o00006, '', 'EXTEND', line=955)
+W('15,3453', 0o63457, '', 'BZMF', 'GETOFF', line=956)
+W('15,3454', 0o55607, '', 'TS', 'TON2', line=957)
+W('15,3455', 0o31617, '', 'CA', 'JNDX', line=958)
+W('15,3456', 0o55620, '', 'TS', 'JNDX1', line=959)
+
+W('15,3457', 0o41607, 'GETOFF', 'CS', 'TON2', 'TON2 / 4T', line=961)
+W('15,3460', 0o00006, '', 'EXTEND', line=962)
+W('15,3461', 0o71567, '', 'MP', 'VDT/180', 'VDT/180, OR VT/180, OR VMT/180.', line=963)
+W('15,3462', 0o55615, '', 'TS', 'XD/360', 'USE AS TEMP', line=964)
+W('15,3463', 0o41567, '', 'CS', 'VDT/180', line=965)
+W('15,3464', 0o00006, '', 'EXTEND', line=966)
+W('15,3465', 0o13501, '', 'BZF', 'TOFFOVFL', 'OMIT THE DIVIDE IF DEN = 0.', line=967)
+W('15,3466', 0o61613, '', 'AD', '-VT/180', line=968)
+W('15,3467', 0o00006, '', 'EXTEND', line=969)
+W('15,3470', 0o71621, '', 'MP', 'TON1', 'TON1 /4T', line=970)
+W('15,3471', 0o61615, '', 'AD', 'XD/360', 'TEMP = -VDT/180 / 2 TON2', line=971)
+W('15,3472', 0o61614, '', 'AD', 'LCX/360', line=972)
+W('15,3473', 0o22007, '', 'ZL', line=973)
+W('15,3474', 0o56001, '', 'XCH', 'L', 'TEST THE DIVIDE', line=974)
+W('15,3475', 0o00006, '', 'EXTEND', line=975)
+W('15,3476', 0o11567, '', 'DV', 'VDT/180', line=976)
+W('15,3477', 0o00006, '', 'EXTEND', line=977)
+W('15,3500', 0o13503, '', 'BZF', 'GETOFF2', 'DIVIDE OK', line=978)
+
+W('15,3501', 0o35045, 'TOFFOVFL', 'CA', '2JETT', 'OVFL, USE  2T  FOR CONVENIENCE.', line=980)
+W('15,3502', 0o13510, '', 'TCF', 'TIMSCAL', line=981)
+
+# Page 1086
+W('15,3503', 0o56001, 'GETOFF2', 'XCH', 'L', 'GET NUMERATOR.', line=984)
+W('15,3504', 0o00006, '', 'EXTEND', line=985)
+W('15,3505', 0o11567, '', 'DV', 'VDT/180', 'C(A) = TOFF / 2T', line=986)
+W('15,3506', 0o00006, '', 'EXTEND', line=987)
+W('15,3507', 0o75045, '', 'MP', '2JETT', line=988)
+W('15,3510', 0o55605, 'TIMSCAL', 'TS', 'TOFF', 'IN CS', line=989)
+
+W('15,3511', 0o33751, '', 'CAF', '4JETT', line=991)
+W('15,3512', 0o00006, '', 'EXTEND', line=992)
+W('15,3513', 0o71621, '', 'MP', 'TON1', 'C(TON1) = TON1 / 4T', line=993)
+W('15,3514', 0o55621, '', 'TS', 'TON1', 'IN CS', line=994)
+
+W('15,3515', 0o33751, '', 'CAF', '4JETT', line=996)
+W('15,3516', 0o00006, '', 'EXTEND', line=997)
+W('15,3517', 0o71607, '', 'MP', 'TON2', 'C(TON2) = TON2 / 4T', line=998)
+W('15,3520', 0o55607, '', 'TS', 'TON2', 'IN CS', line=999)
+
+W('15,3521', 0o35021, '', 'CA', 'ZERO', 'CANNOT REDO AFTER TIMETST.  TUSED GONE', line=1001)
+W('15,3522', 0o55711, '', 'TS', 'JETAG', 'SET +0 TO SHOW ROLL DAP CALLED.', line=1002)
+
+# CAUSE THE TM OF BODY RATES VIA UPBUFF TO BE
+# INITIALIZED. ALSO CAUSE NEEDLES TO BE DONE ON EXIT
+# AND ON ALTERNATE PASSES THROUGH CM/DUMPR.
+
+W('15,3523', 0o35017, '', 'CA', 'ONE', line=1008)
+W('15,3524', 0o54305, '', 'TS', 'SW/NDX', line=1009)
+
+# Page 1087
+# TIMETEST SECTION FOR RCS
+#
+# ENTER WITH THREE TIME INTERVALS AND THE CORRESPONDING JET CODE INDEXES IN ERASABLE LOCS TON1, TOFF, TON2, JNDX
+# JNDX1.  SECTION PROCESSES TIME INTERVALS FOR WTLST CALLS AND ASSURES THAT WTLST CALLS ARE MADE ONLY
+# (1) FOR POS INTERVALS GREATER THAN A SPECIFIED MINIMUM (HERE CHOSEN AS 2 CS) AND
+# (2) FOR THE INTERVALS THAT WILL BE EXECUTED WITHIN THE TIME REMAINING IN THE SAMPLE INTERVAL T (2 SEC).
+# TIMETST ESTABLISHES 6 LOCS CONTAINING JET CODES AND CORRESPONDING TIME INTERVALS.  THUS:  TON1, T1BITS,
+# TOFF, TBITS, TON2, T2BITS.  OF THESE THE FIRST 2 LOCS ARE TEMPORARY, FOR IMMEDIATE ACTION, IN GENERAL.
+# SECTION JETCALL BELOW PROCESSES THIS LIST.
+
+W('15,3525', 0o30025, 'TIMETST', 'CA', 'TIME1', 'CORRECT FOR POSSIBLE TIME1 OVFL.', line=1022)
+W('15,3526', 0o65002, '', 'AD', 'POS1/2', line=1023)
+W('15,3527', 0o65002, '', 'AD', 'POS1/2', 'OVFL GUARANTEED.', line=1024)
+W('15,3530', 0o27712, '', 'ADS', 'TUSED', 'B(TUSED) =-TUSED =-OLTIME1', line=1025)
+
+W('15,3531', 0o33746, '', 'CA', '-T-3', '=-T +2 -5 (SEE SETJTAG)', line=1027)
+# THE +2 REQUIRED FOR PROPER BRANCH.
+W('15,3532', 0o27712, '', 'ADS', 'TUSED', 'TUSED = TIME(K)-TIME(K-1)-T+2', line=1029)
+
+W('15,3533', 0o45016, '', 'CS', 'TWO', 'USE 2 SINCE TIME3 UNCERTAIN TO 1', line=1031)
+W('15,3534', 0o61621, '', 'AD', 'TON1', line=1032)
+W('15,3535', 0o00006, '', 'EXTEND', line=1033)
+W('15,3536', 0o63550, '', 'BZMF', 'TIMETST1', line=1034)
+W('15,3537', 0o51617, '', 'INDEX', 'JNDX', line=1035)
+W('15,3540', 0o33205, '', 'CAF', 'P/RJCODE', line=1036)
+W('15,3541', 0o55622, '', 'TS', 'T1BITS', line=1037)
+
+W('15,3542', 0o31621, '', 'CA', 'TON1', line=1039)
+W('15,3543', 0o27712, '', 'ADS', 'TUSED', line=1040)
+W('15,3544', 0o00006, '', 'EXTEND', line=1041)
+W('15,3545', 0o63552, '', 'BZMF', 'TOFFTEST', line=1042)
+W('15,3546', 0o35021, '', 'CA', 'ZERO', line=1043)
+W('15,3547', 0o13603, '', 'TCF', 'TIMETST3', line=1044)
+W('15,3550', 0o45017, 'TIMETST1', 'CS', 'ONE', line=1045)
+W('15,3551', 0o55621, '', 'TS', 'TON1', line=1046)
+W('15,3552', 0o45016, 'TOFFTEST', 'CS', 'TWO', line=1047)
+W('15,3553', 0o61605, '', 'AD', 'TOFF', line=1048)
+W('15,3554', 0o00006, '', 'EXTEND', line=1049)
+W('15,3555', 0o63564, '', 'BZMF', 'TIMETST2', line=1050)
+W('15,3556', 0o31605, '', 'CA', 'TOFF', line=1051)
+W('15,3557', 0o27712, '', 'ADS', 'TUSED', line=1052)
+W('15,3560', 0o00006, '', 'EXTEND', line=1053)
+W('15,3561', 0o63566, '', 'BZMF', 'TON2TEST', line=1054)
+W('15,3562', 0o35021, '', 'CA', 'ZERO', line=1055)
+W('15,3563', 0o13605, '', 'TCF', 'TIMETST4', line=1056)
+W('15,3564', 0o45017, 'TIMETST2', 'CS', 'ONE', line=1057)
+W('15,3565', 0o55605, '', 'TS', 'TOFF', line=1058)
+W('15,3566', 0o45016, 'TON2TEST', 'CS', 'TWO', line=1059)
+W('15,3567', 0o61607, '', 'AD', 'TON2', line=1060)
+W('15,3570', 0o00006, '', 'EXTEND', line=1061)
+W('15,3571', 0o63606, '', 'BZMF', 'TIMETST5', line=1062)
+# Page 1088
+W('15,3572', 0o51620, '', 'INDEX', 'JNDX1', line=1064)
+W('15,3573', 0o33205, '', 'CAF', 'P/RJCODE', line=1065)
+W('15,3574', 0o55610, '', 'TS', 'T2BITS', line=1066)
+W('15,3575', 0o31607, '', 'CA', 'TON2', line=1067)
+W('15,3576', 0o27712, '', 'ADS', 'TUSED', line=1068)
+W('15,3577', 0o00006, '', 'EXTEND', line=1069)
+W('15,3600', 0o63610, '', 'BZMF', 'JETCALL1', line=1070)
+W('15,3601', 0o35021, '', 'CA', 'ZERO', line=1071)
+W('15,3602', 0o13607, '', 'TCF', 'TIMETST5 +1', line=1072)
+W('15,3603', 0o55621, 'TIMETST3', 'TS', 'TON1', line=1073)
+W('15,3604', 0o45017, '', 'CS', 'ONE', line=1074)
+W('15,3605', 0o55605, 'TIMETST4', 'TS', 'TOFF', line=1075)
+W('15,3606', 0o45017, 'TIMETST5', 'CS', 'ONE', line=1076)
+W('15,3607', 0o55607, '', 'TS', 'TON2', line=1077)
+
+# SECTION  JETCALL  EXAMINES CONTENTS OF JET TIMES IN LIST, ESTABLISHES WTLST ENTRIES, AND EXECUTES CORRESPONDING
+# JET CODES.  A POSITIVE NZ NUMBER IN A TIME REGISTER INDICATES THAT A WTLST CALL IS TO BE MADE, AND ITS JET BITS
+# EXECUTED.  A +0 INDICATES THAT THE TIME INTERVAL DOES NOT APPLY, BUT THE CORRESPONDING JET BITS ARE TO BE
+# EXECUTED.  A NEG NUMBER INDICATES THAT THE TIME INTERVAL HAS BEEN PROCESSED.  IN EVENT OF +0 OR -1, THE
+# SUBSEQUENT TIME REGISTER IS EXAMINED FOR POSSIBLE ACTION.  THUS JET BITS TO BE EXECUTED MAY COME FROM MORE
+# THAN ONE REGISTER.
+
+W('15,3610', 0o35021, 'JETCALL1', 'CA', 'ZERO', line=1086)
+W('15,3611', 0o55611, '', 'TS', 'OUTTAG', line=1087)
+W('15,3612', 0o55612, '', 'TS', 'NUJET', line=1088)
+W('15,3613', 0o55606, '', 'TS', 'TBITS', line=1089)
+W('15,3614', 0o53622, '', 'DXCH', 'TON1', line=1090)
+W('15,3615', 0o10000, '', 'CCS', 'A', line=1091)
+W('15,3616', 0o13633, '', 'TCF', 'JETCALL2', 'CALL WTLST', line=1092)
+W('15,3617', 0o23612, 'JETCALL3', 'LXCH', 'NUJET', 'WTLST ENTRIES COME HERE FROM JETCALL', line=1093)
+W('15,3620', 0o45017, '', 'CS', 'ONE', line=1094)
+W('15,3621', 0o53606, '', 'DXCH', 'TOFF', line=1095)
+W('15,3622', 0o10000, '', 'CCS', 'A', line=1096)
+W('15,3623', 0o13633, '', 'TCF', 'JETCALL2', 'CALL WTLST', line=1097)
+W('15,3624', 0o23612, '', 'LXCH', 'NUJET', line=1098)
+W('15,3625', 0o45017, '', 'CS', 'ONE', line=1099)
+W('15,3626', 0o53610, '', 'DXCH', 'TON2', line=1100)
+W('15,3627', 0o10000, '', 'CCS', 'A', line=1101)
+W('15,3630', 0o13633, '', 'TCF', 'JETCALL2', 'CALL WTLST', line=1102)
+W('15,3631', 0o23612, '', 'LXCH', 'NUJET', line=1103)
+W('15,3632', 0o03642, '', 'TC', 'JETACTN', 'C(A) = +0', line=1104)
+W('15,3633', 0o56001, 'JETCALL2', 'XCH', 'L', 'SAVE JET BITS FOR AFTER WTLST CALL', line=1105)
+W('15,3634', 0o27612, '', 'ADS', 'NUJET', line=1106)
+W('15,3635', 0o56001, '', 'XCH', 'L', line=1107)
+W('15,3636', 0o65017, '', 'AD', 'ONE', 'RESTORE FOR CCS', line=1108)
+W('15,3637', 0o05245, '', 'TC', 'WAITLIST', line=1109)
+#   EBANK= AOG
+W('15,3640', 0o03650, '', '2CADR', 'JETCALL', kind='data', line=1111)
+W('15,3641', 0o32066, kind='data', line=1111)
+
+W('15,3642', 0o31612, 'JETACTN', 'CA', 'NUJET', 'COME HERE WHEN DESIRED JET CODE IS KNOWN', line=1113)
+# Page 1089
+W('15,3643', 0o00006, '', 'EXTEND', '', 'NO NEED TO SAVE OLD CODES', line=1115)
+W('15,3644', 0o01006, '', 'WRITE', 'ROLLJETS', 'SET RCHAN TO NEW BIT CONFIG.', line=1116)
+
+W('15,3645', 0o11611, '', 'CCS', 'OUTTAG', line=1118)
+W('15,3646', 0o05324, '', 'TC', 'TASKOVER', line=1119)
+W('15,3647', 0o03705, 'ROLLDUMP', 'TC', 'CM/FDAIR', line=1120)
+
+# EDIT DUMP AT ABOVE LOCATION.
+
+# WAITLIST ENTRIES COME HERE.
+
+W('15,3650', 0o35016, 'JETCALL', 'CAF', 'BIT2', 'CM/DSTBY =103D BIT2', line=1126)
+W('15,3651', 0o55611, '', 'TS', 'OUTTAG', 'SIGNIFY WTLST ENTRY', line=1127)
+W('15,3652', 0o70102, '', 'MASK', 'CM/FLAGS', 'IS SYSTEM DISABLED  $', line=1128)
+W('15,3653', 0o00006, '', 'EXTEND', line=1129)
+W('15,3654', 0o13643, '', 'BZF', 'JETACTN +1', 'YES, QUENCH ROLL JETS, IF ON AND EXIT.', line=1130)
+W('15,3655', 0o22007, '', 'ZL', '', 'NO, CONTINUE.', line=1131)
+W('15,3656', 0o13617, '', 'TCF', 'JETCALL3', 'C(A) POS, C(L) = +0', line=1132)
+
+# DEAD ZONE ENTRIES COME HERE.
+
+W('15,3657', 0o41700, 'DZCALL', 'CS', 'CMDAPMOD', 'POSSIBLE VALUES OF CMDAPMOD: -1, +0, -0.', line=1136)
+W('15,3660', 0o75017, '', 'MASK', 'BIT1', line=1137)
+W('15,3661', 0o54001, '', 'TS', 'L', 'C(L)=0 FOR -0: C(L)=1 FOR -1 OR +0.', line=1138)
+W('15,3662', 0o50000, '', 'INDEX', 'A', 'ERASABLE ORDER:  ROLLTM, ROLLC, ROLLC +1.', line=1139)
+W('15,3663', 0o31714, '', 'CA', 'ROLLTM', 'GET ROLL/180 OR ROLLC (/360).', line=1140)
+W('15,3664', 0o50001, '', 'INDEX', 'L', line=1141)
+W('15,3665', 0o54000, '', 'TS', 'A', "IF C(L)=1, STORE 'ROLLC' IN 'L'.", line=1142)
+W('15,3666', 0o60001, '', 'AD', 'L', '(BOTH MUST BE SCALED DEG/180)', line=1143)
+W('15,3667', 0o02522, '', 'TC', 'ANGOVCOR', 'C(A)=ROLL/180 OR 2 ROLLC.', line=1144)
+W('15,3670', 0o55717, '', 'TS', 'ROLLHOLD', 'IF CMDAPMOD =-0, SAVE ROLL ANGLE.', line=1145)
+# OTHERWISE, SAVE ROLL COMMAND.
+
+W('15,3671', 0o35021, '', 'CA', 'ZERO', 'COME HERE IF IN DZ, AND CANCEL JETS.', line=1148)
+W('15,3672', 0o00006, '', 'EXTEND', '', 'INHINT NOT NEEDED HERE.', line=1149)
+W('15,3673', 0o01006, '', 'WRITE', 'ROLLJETS', 'TURN OFF ALL ROLL JETS.', line=1150)
+W('15,3674', 0o55567, '', 'TS', 'VDT/180', 'SET =0 TO SHOW IN DEAD ZONE.', line=1151)
+W('15,3675', 0o55711, 'DZCALL1', 'TS', 'JETAG', 'COME HERE WITH C(A)=0.', line=1152)
+W('15,3676', 0o03647, '', 'TC', 'ROLLDUMP', line=1153)
+
+# Page 1090
+# CM ENTRY FDAI DISPLAY
+#
+# CALCULATE BY INTEGRATION THE ROLL ERROR BETWEEN THE 2 SEC CM/RCS UPDATES.  DISPLAY ATTITUDE ERRORS AS FOLLOWS:
+# ATM DAP:        DISPLAY ONLY ROLL ATTITUDE ERROR.
+# EXT ATM DAP:    PRESENT 3 ATTITUDE ERRORS RELATIVE TO THE APPROPRIATE BODY AXES EACH .1 SEC.
+# ROLL    ROLLC-ROLL
+# PITCH   ALFAC-ALFA
+# YAW     BETAC-BETA
+#
+# DURING ENTRY, THE FDAI NEEDLES HAVE FULL SCALE OF 67.5 DEG IN ROLL AND 16.875 DEG IN PITCH AND YAW.
+# THE SUBROUTINE  NEEDLER  EXPECTS (ANGLE/180) AND SCALES TO 16.875 DEG FULL SCALE.
+
+# COME HERE EACH .1 SEC.  (CMDAPMOD=+1 COMES BELOW)
+W('15,3677', 0o41705, 'CM/FDAI', 'CS', 'PHIDOT', "INTEGRATE ROLL ERROR 'TWEEN 2SEC UPDATES", line=1169)
+W('15,3700', 0o00006, '', 'EXTEND', line=1170)
+W('15,3701', 0o71506, '', 'MP', 'CALFA', 'FOR ASSUMED COORDINATION.', line=1171)
+W('15,3702', 0o00006, '', 'EXTEND', line=1172)
+W('15,3703', 0o75002, '', 'MP', 'HALF', line=1173)
+W('15,3704', 0o27713, '', 'ADS', 'PAXERR1', 'ROLL ERROR/360.  OVFL OK.', line=1174)
+
+# EDIT DUMP AT ABOVE LOCATION.
+W('15,3705', 0o35002, 'CM/FDAIR', 'CA', 'HALF', line=1177)
+W('15,3706', 0o00006, '', 'EXTEND', line=1178)
+W('15,3707', 0o71713, '', 'MP', 'PAXERR1', 'FULL SCALE FOR FDAI (ROLL) IS 67.5 D', line=1179)
+W('15,3710', 0o55476, '', 'TS', 'PAXERR', '.25 (ROLL ERROR/180) FOR FDAI NEEDLE.', line=1180)
+
+# PROGRAM TO FILE BODY RATES FOR TM ON ONE PASS AND
+# TO UPDATE THE NEEDLE DISPLAY ON THE NEXT.
+# SYNCHRONIZATION WITH CM/RCS IS USED SO THAT THE TM
+# IS DONE WITH THE ROLL SYSTEM AND NEEDLES START ON
+# THE SUBSEQUENT PASS.
+
+W('15,3711', 0o40305, 'CM/DUMPR', 'CS', 'SW/NDX', 'COMBINED ALTERNATION SWITCH AND FILE', line=1188)
+W('15,3712', 0o54305, '', 'TS', 'SW/NDX', line=1189)
+W('15,3713', 0o00006, '', 'EXTEND', '', 'INDEX.', line=1190)
+W('15,3714', 0o63720, '', 'BZMF', 'CMTMFILE', 'FILE STARTS WITH SW/NDX +1 AND GOES TO', line=1191)
+# ENDBUF.
+# INDEX IS POS FOR NEEDLES.
+
+W('15,3715', 0o04740, '', 'TC', 'IBNKCALL', line=1195)
+W('15,3716', 0o42420, '', 'CADR', 'NEEDLER', kind='data', line=1196)
+
+W('15,3717', 0o03736, '', 'TC', 'CM/END', line=1198)
+
+# INDEX IS NEG FOR TM FILE
+
+W('15,3720', 0o66214, 'CMTMFILE', 'AD', 'THREE', line=1202)
+W('15,3721', 0o00006, '', 'EXTEND', line=1203)
+W('15,3722', 0o63726, '', 'BZMF', 'SAVENDX', line=1204)
+# Page 1091
+W('15,3723', 0o30025, '', 'CA', 'TIME1', 'INITIALIZE THE TM LIST IN UPBUFF.', line=1206)
+W('15,3724', 0o54304, '', 'TS', 'CMTMTIME', line=1207)
+W('15,3725', 0o45025, '', 'CS', 'THIRTEEN', 'INITIALIZE COUNTER', line=1208)
+W('15,3726', 0o54305, 'SAVENDX', 'TS', 'SW/NDX', 'A NEGATIVE NUMBER.', line=1209)
+W('15,3727', 0o00006, '', 'EXTEND', line=1210)
+W('15,3730', 0o31702, '', 'DCA', 'PREL', line=1211)
+W('15,3731', 0o50305, '', 'INDEX', 'SW/NDX', line=1212)
+W('15,3732', 0o52324, '', 'DXCH', 'ENDBUF -1', line=1213)
+W('15,3733', 0o31703, '', 'CA', 'RREL', line=1214)
+W('15,3734', 0o50305, '', 'INDEX', 'SW/NDX', line=1215)
+W('15,3735', 0o54325, '', 'TS', 'ENDBUF +1', line=1216)
+
+W('15,3736', 0o31623, 'CM/END', 'CA', 'CM/SAVE', line=1218)
+W('15,3737', 0o54021, '', 'TS', 'SR', line=1219)
+# DOES NOT PROTECT TEMK, SQ IN SPSIN/COS
+
+W('15,3740', 0o00006, '', 'EXTEND', line=1222)
+W('15,3741', 0o33745, '', 'DCA', 'T5IDLER2', line=1223)
+W('15,3742', 0o53313, '', 'DXCH', 'T5LOC', line=1224)
+W('15,3743', 0o05333, '', 'TC', 'RESUME', line=1225)
+
+#   EBANK= T5LOC
+W('15,3744', 0o03153, 'T5IDLER2', '2CADR', 'T5IDLOC', kind='data', line=1228)
+W('15,3745', 0o12062, kind='data', line=1228)
+
+# DEFINE THE FOLLOWING 17D REGISTERS IN UPBUFF TO BE
+# USED TO TELEMETER CM VEHICLE BODY RATE INFORMATION.
+# THE INFORMATION IS FILED EACH 0.2 SEC, GIVING 15D
+# DATA POINTS EACH 1 SEC.  TM LIST IS READ TWICE
+# EACH 2 SECONDS.
+#
+# THE SEQUENCE IS:      SP TIME         INITIAL TIME
+# SWITCH          ALSO INDEX.
+# P               ROLL RATE
+# Q               PITCH RATE
+# R               YAW RATE
+# ETC.
+
+# CMTMTIME       =       UPBUFF
+# SW/NDX         =       UPBUFF +1
+# ENDBUF         =       UPBUFF +16D
+
+# Page 1092
+# SPACER
+#
+# CONSTANTS USED IN THE ROLL CONTROL SYSTEM:
+# CONSTANTS ARE THE FOLLOWING:  A = 9.1 DEG/SECSQ, VM = 20 DEG/SEC,     T = 2 SEC, TCDU = .1 SEC,
+# XMIN = 4 DEG, VMIN = 2 DEG/SEC, K = .25, A1 = 4.55 DEG/SECSQ,         VI = 1 DEG/SEC, INTERCEPT WITH DZ SIDE
+# XBUF = 4 DEG
+
+W('15,3746', 0o77464, '-T-3', 'DEC', '-203', 'CS', kind='data', line=1255)
+W('15,3747', 0o00012, 'VSQMIN', 'DEC', '.61050061 E-3', 'VSQ MIN/4 A PI = 4/(4 (9.1) 180)', kind='data', line=1256)
+S('2T/TCDU', 'equals', 0o5033, line=1257)  # T/TCDU EXP-14    TCDU = .1SEC
+W('15,3750', 0o23617, '180/8ATT', 'DEC', '.61813187', '180/(8 (9.1) 4)=(180/ATT)     EXP -3', kind='data', line=1258)
+S('-VMT/180', 'equals', 0o43753, line=1259)  # = 20 (2) / 180
+S('2JETT', 'equals', 0o5045, line=1260)  # CS            2 (2) 100       INTEGER
+W('15,3751', 0o01440, '4JETT', 'DEC', '800', 'CS            4 (2) 100       INTEGER', kind='data', line=1261)
+W('15,3752', 0o00266, 'XMIN/360', 'DEC', '182', 'XMIN/360 = 4/ 360  EXP 14  = 182 INTEGER', kind='data', line=1262)
+W('15,3753', 0o70706, '-VM/360K', 'DEC', '-.22222222', '=-20/( 360 (.25))', kind='data', line=1263)
+S('1/16A1', 'equals', 0o43750, line=1264)
+# 1/16A1   = 180/(16 A1 TT)
+# = 180/(16 4.55 4)
+W('15,3754', 0o00133, 'XS/360', 'DEC', '91', '=(XMIN +VI (T-1/K))/360 = 2/360 EXP 14', kind='data', line=1267)
+S('BUFLIM', 'equals', 0o43754, line=1268)  # 4/(2 360)
+
+S('KTRCS', 'equals', 0o5002, line=1270)  # KT = (.25) 2 = .5
+
+# *** END OF TVCDAPS .011 ***
