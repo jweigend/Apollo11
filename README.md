@@ -13,7 +13,9 @@ ignition time, flies the attitude manoeuvre, ignites and throttles the
 descent engine, fires the attitude-control jets, steers through the braking
 and approach phases and sets the vehicle down on Tranquility Base.
 
-![Final approach in P64, 1.5 km above the Sea of Tranquility](docs/approach.png)
+![Simulated Apollo 11 landing with the original source code from 1969: final approach in P64, 1.4 km above the Sea of Tranquility](docs/approach.png)
+
+*Simulated Apollo 11 landing with the original source code from 1969.*
 
 ```
 contact at GET 100:49:47: vertical -2.9 ft/s, horizontal 15.1 ft/s,
