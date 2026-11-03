@@ -4,7 +4,8 @@ This page walks through what actually happens in this repository, with real
 excerpts: a module of the original AGC assembly listing, the Python module
 generated from it, a piece of the interpretive guidance language, the
 emulator instruction that executes it, the hardware interface the landing
-simulation plugs into, and how the result is verified.
+simulation plugs into, how the result is verified, the options and physics
+of the simulation, and the layout of the repository.
 
 ```
  Luminary099/ALARM_AND_ABORT.agc      original listing (MIT Instrumentation Laboratory, 1969)
@@ -253,11 +254,22 @@ The list is empty for both Luminary 099 and Comanche 055, including the
 what turned up the transcription errors in the GitHub copy of the source
 listed in `agc/asm/fixups.py`.
 
-The emulator is verified at the behaviour level: Luminary boots with the
-fresh-start alarm 1107 like the real cold start, runs without hardware
-alarms, answers the DSKY (`V35E` lamp test, `V16N36E` clock, `V37E00E`
-idle), and flies the landing.  `tools/` contains a cycle-by-cycle trace
-harness for differential testing against yaAGC.
+The emulator is a cycle-level model written after yaAGC: every instruction
+takes its documented number of memory cycles, the timers, counters,
+interrupts and hardware alarms follow the same rules.  It is verified at the
+behaviour level: Luminary boots with the fresh-start alarm 1107 like the real
+cold start, runs without hardware alarms, answers the DSKY (`V35E` lamp
+test, `V16N36E` clock, `V37E00E` idle), and flies the landing.  `tools/`
+contains a cycle-by-cycle trace harness for differential testing against
+yaAGC (`ref_trace.c` wraps the Virtual AGC engine, `my_trace.py` prints the
+same trace, `diff` shows the first deviation).  That comparison has not been
+run to completion, so cycle accuracy is the design and the behaviour is the
+evidence.
+
+The landing itself is a third, weaker kind of evidence: it shows that the
+guidance, navigation and control of Luminary are internally consistent and
+bring a plausible vehicle down softly in a consistent physical world.  It
+proves nothing about the real sensors, the real vehicle or the terrain.
 
 ## 6. Things learned while making it land
 
@@ -282,3 +294,84 @@ original system:
   2 ft/s because the AGC integrates its orbit with the lunar J2 and C22 terms
   of the pad load while the simulation uses a point mass; the radar removes
   the difference within a minute.
+
+## 7. Running the landing simulation
+
+`python3 -m agc.sim land` starts eight minutes before powered descent
+initiation in the 60 × 8 nautical mile descent orbit, with the real time of
+landing from the pad load (`TLAND` = 100:50:49 GET in this scenario).
+Before that the computer gets a fresh start: self-check, the 90 s IMU
+turn-on sequence of the flight software, P00 and the pad load, about 110 s
+of AGC time, which the emulator (roughly three times real time) needs some
+40 s for.  The first run shows this as `[setup]` progress lines and then
+saves the machine state to `landing_agc_state.json`; later runs restore it
+and are flying within seconds.  A status line every five simulated seconds
+shows program, DSKY, altitude, rates, range, throttle, mass and attitude; in
+between, the events of the flight appear.  The whole descent takes about
+13 minutes of computing for 20 minutes of flight.
+
+Telemetry goes to `landing.csv` (two samples per second: state, DSKY
+registers, alarms, thrust, jets, gimbal, radar status, attitude vectors)
+and the events to `landing.events.csv`.  `python3 -m agc.sim report
+landing.csv` summarises a run with ASCII plots.
+
+| Option | Effect |
+|--------|--------|
+| `--until 600` | stop after 600 simulated seconds |
+| `--no-lr` | fly without the landing radar (inertial navigation only) |
+| `--realtime` | pace the simulation to wall-clock time |
+| `--view` | open the 3D viewer and follow the flight live |
+| `--dt 0.02` | physics step (the AGC runs in lock-step) |
+| `--probe-cache ''` | do not cache the AGC-computed landing site |
+| `--agc-cache ''` | do not cache the AGC state after its 90 s IMU turn-on sequence (fresh start every time, about 40 s longer) |
+
+**Physics.**  Point-mass lunar gravity with the AGC's μ, six degrees of
+freedom, descent engine with 980–6300 lbf throttle range and fixed throttle
+position above that, exhaust velocity 2956 m/s (Luminary `DPSVEX`), moments
+of inertia chosen to match the one-jet accelerations the digital autopilot
+assumes.  The AGC runs at 85 333 memory cycles per second in lock-step with
+the vehicle: every 20 ms the emulator executes the corresponding number of
+cycles, the vehicle moves, and the CDU and PIPA counters are pulsed.
+
+| Module | Content |
+|--------|---------|
+| `agc/sim/mission.py` | scenario, AGC initialisation, crew procedures, main loop, telemetry |
+| `agc/sim/padload.py` | the Apollo 11 pad load, checked against the symbol table on load |
+| `agc/sim/lm.py` | vehicle: mass, DPS, trim gimbal, RCS jets, rigid-body dynamics |
+| `agc/sim/imu.py` | inertial platform: gimbal angles, CDU counters, PIPA pulses, REFSMMAT |
+| `agc/sim/lr.py` | landing radar: antenna positions, range and velocity beams, discretes |
+| `agc/sim/scaling.py` | AGC fixed-point formats (SP, DP, TP, B-scaling) |
+| `agc/sim/viewer.py` | the 3D viewer (a small HTTP server and one HTML page) |
+| `agc/sim/report.py` | run summary with ASCII plots |
+
+## 8. Project layout
+
+| Path | Content |
+|------|---------|
+| `agc/asm/address.py` | AGC address model (pseudo addresses, banks), number parsing |
+| `agc/asm/tables.py` | opcode tables: machine instructions, pseudo-ops, interpreter instructions |
+| `agc/asm/assembler.py` | multi-pass assembler (port of yaYUL), produces the 36 banks of fixed memory |
+| `agc/asm/fixups.py` | documented transcription errors of the GitHub copy, corrected on reading |
+| `agc/asm/binsource.py` | reader for the octal listings (`*.binsource`) and comparison |
+| `agc/asm/pygen.py` | generates the Python modules from the assembly |
+| `agc/program.py` | run-time representation: `Program`, `Module`, symbols, address lookups |
+| `agc/cpu.py` | the AGC CPU: instructions, timers, interrupts, channels, hardware alarms |
+| `agc/dsky.py` | DSKY: display relay decoding, lamps, key codes |
+| `agc/rope.py` | read/write the Virtual AGC `.bin` rope format |
+| `agc/programs/` | the generated flight software |
+| `agc/sim/` | the landing simulation and the viewer |
+| `agc/tester/tui.py` | the test UI |
+| `tools/` | trace harness for the differential test against yaAGC |
+| `tests/` | pytest suite |
+| `docs/` | this page, the architecture diagram, screenshots |
+
+The generated Python modules of both programs are in the repository.  To
+regenerate them from the original source, fetch the listings and run the
+converter (about 25 s per program):
+
+```bash
+git clone --depth 1 https://github.com/chrislgarry/Apollo-11.git external/Apollo-11
+git clone --depth 1 --filter=blob:none --sparse https://github.com/virtualagc/virtualagc.git external/virtualagc
+(cd external/virtualagc && git sparse-checkout set yaYUL yaAGC Luminary099 Comanche055)
+python3 -m agc convert Luminary099 Comanche055
+```

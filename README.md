@@ -1,17 +1,31 @@
 # Apollo 11 Guidance Computer in Python
 
-The original Apollo 11 flight software, **Luminary 099** (Lunar Module) and
-**Comanche 055** (Command Module), assembled bit-exactly from the 1969
-listings, executed by a cycle-accurate emulator of the Apollo Guidance
-Computer written in pure Python, and flown through a complete automatic
-lunar landing in a six-degree-of-freedom simulation with a 3D viewer.
+**The original Apollo 11 flight software flies a lunar landing again.**
 
-Nothing in the flight software is modified.  The simulation only provides
-what the real hardware provided: the vehicle, the inertial platform, the
-landing radar, the DSKY keyboard and the pad load.  Luminary computes the
-ignition time, flies the attitude manoeuvre, ignites and throttles the
-descent engine, fires the attitude-control jets, steers through the braking
-and approach phases and sets the vehicle down on Tranquility Base.
+Luminary 099, the program that ran in the Lunar Module's computer on
+20 July 1969, is assembled from the 1969 listing, executed instruction by
+instruction in a Python emulator of the Apollo Guidance Computer (AGC), and
+connected to a six-degree-of-freedom simulation of the Lunar Module.  The
+result: the original software flies a complete automatic descent from the
+lunar orbit to a touchdown on Tranquility Base.
+
+Python provides what the hardware provided: the computer, the vehicle, the
+inertial platform, the landing radar, the DSKY keyboard and the pad load.
+It does not compute the trajectory and it does not decide how to land.  The
+ignition time, the attitude manoeuvre, the throttle, the attitude-control
+jets, the navigation with the landing radar and the switch from the braking
+to the approach to the landing phase are decided by the words of the 1969
+program, with its own fixed-point arithmetic, executive, interrupts and
+interpreter.  None of the Apollo guidance algorithms has been rewritten in
+Python.
+
+The flight software is not modified.  The GitHub transcription of the
+listing contains a few typing errors; they are corrected on reading so that
+the assembly matches the octal listing of the original printouts word for
+word (see [Verification](#verification)).  The simulation deliberately
+differs from the historical flight: the sensors are ideal, there is no
+terrain, and the automatic landing program P65 flies to the surface where
+Armstrong took over manually with P66.
 
 ![Simulated Apollo 11 landing with the original source code from 1969: final approach in P64, 1.4 km above the Sea of Tranquility](docs/approach.png)
 
@@ -29,17 +43,16 @@ vehicle is at rest.
 ## Contents
 
 - [What is genuine and what is simulated](#what-is-genuine-and-what-is-simulated)
+- [Verification](#verification)
 - [Quick start](#quick-start)
 - [The landing simulation](#the-landing-simulation)
 - [The 3D viewer](#the-3d-viewer)
 - [How the AGC runs in Python](#how-the-agc-runs-in-python)
-- [Technical details](docs/TECHNICAL.md): a module of the original listing next to its Python form, the interpretive language, the emulator and the hardware interface
-- [Verification](#verification)
 - [Test UI](#test-ui)
-- [Project layout](#project-layout)
 - [Limitations and ideas](#limitations-and-ideas)
 - [The people who wrote this](#the-people-who-wrote-this)
 - [Credits and license](#credits-and-license)
+- [Technical details](docs/TECHNICAL.md): a module of the original listing next to its Python form, the interpretive language, the emulator, the hardware interface, all options and physics of the simulation, the project layout
 
 ## What is genuine and what is simulated
 
@@ -59,7 +72,9 @@ vehicle is at rest.
   the computer use the landing radar once ΔH is plausible.
 - The landing site.  The simulation does not know where Tranquility Base is;
   it lets Luminary compute the inertial site vector and the lunar rotation
-  axis from its own ephemeris routines and uses those.
+  axis from its own ephemeris routines and uses those.  The target the
+  vehicle is measured against at touchdown comes out of the 1969 program,
+  not out of the simulation.
 
 **Simulated**
 
@@ -87,10 +102,26 @@ vehicle is at rest.
   Armstrong used, and the terrain.  Here the automatic landing program P65
   flies to touchdown, which no Apollo commander ever let it do.
 
+## Verification
+
+Three different claims, three different kinds of evidence.
+
+| Claim | Evidence |
+|-------|----------|
+| **The program is the original.** | Both programs assemble bit-exactly against the octal listings reconstructed from the original printouts (`Luminary099.binsource`, `Comanche055.binsource` from Virtual AGC): zero differing words in 36 × 1024, bank checksums included.  That comparison exposed transcription errors in the GitHub copy of the source that change the code (a `1.08-2` for `1.0 B-2`, two misspelled labels, a comment line without `#`, pseudo-labels `+2` after a tab).  They are documented in `agc/asm/fixups.py` and corrected on reading; Luminary needed no word-changing fix. |
+| **The emulator executes it correctly.** | The CPU is a cycle-level model written after yaAGC: instruction timings, interrupts, counters, timers and hardware alarms follow the same rules.  It is verified by behaviour: Luminary boots with the fresh-start alarm 1107 like the real cold start, runs without hardware alarms, answers `V35E` with the lamp test, shows the mission clock on `V16N36E`, switches to P00, and flies the descent.  `tools/` holds a cycle-by-cycle trace harness for a differential test against yaAGC; that comparison has not been run to completion, so cycle accuracy is the design and the behaviour is the evidence. |
+| **The landing is plausible.** | Touchdown 9 m from the AGC's own target at 2.9 ft/s vertical, 11 min 58 s after ignition (Apollo 11: 12 min 35 s), 605 kg of descent propellant left; the AGC's navigation agrees with the simulated truth to 2 ft/s before radar acquisition.  The run is reproducible from the repository.  It shows that Luminary's guidance, navigation and control are internally consistent; it proves nothing about the real sensors, vehicle or terrain (see [Limitations](#limitations-and-ideas)). |
+
+`python3 -m pytest` runs 30 tests: assembler bit-exactness, CPU arithmetic,
+boot and DSKY, emulator state save/restore, fixed-point scaling, pad load
+integrity, gimbal maths, ballistic-impact detection and the viewer's port
+selection.
+
 ## Quick start
 
-Python 3.10 or newer.  The AGC port itself needs only the standard library;
-the landing simulation needs `numpy`.
+Python 3.10 or newer; the AGC port needs only the standard library, the
+landing simulation needs `numpy`, the 3D viewer loads three.js from a CDN
+and therefore needs an internet connection.
 
 ```bash
 git clone https://github.com/jweigend/Apollo11.git
@@ -98,66 +129,39 @@ cd Apollo11
 python3 -m venv .venv && .venv/bin/pip install numpy pytest
 source .venv/bin/activate
 
-# boot the Lunar Module computer and talk to it through the DSKY
-python3 -m agc run luminary099 --keys V35E        # lamp test
-python3 -m agc run luminary099 --keys V16N36E     # mission clock
-python3 -m agc run luminary099 --keys V37E00E     # select program P00
+python3 -m agc.sim land                      # fly the landing (about 13 minutes)
+python3 -m agc.sim land --view --realtime    # fly it in real time and watch in the browser
+python3 -m agc.sim view landing.csv          # replay a recorded flight
 
-# fly the landing (about 13 minutes of computing for 20 minutes of flight)
-python3 -m agc.sim land
-
-# fly it in real time and watch in the browser
-python3 -m agc.sim land --view --realtime
-
-# replay a recorded flight
-python3 -m agc.sim view landing.csv
-
-# interactive test UI with DSKY, registers, code and watches
-python3 -m agc tui luminary099
-
+python3 -m agc run luminary099 --keys V16N36E   # boot the computer, show the mission clock
+python3 -m agc tui luminary099                  # interactive test UI
 python3 -m pytest
 ```
 
-The generated Python modules of both programs are in the repository.  To
-regenerate them from the original source, fetch the listings and run the
-converter (about 25 s per program):
-
-```bash
-git clone --depth 1 https://github.com/chrislgarry/Apollo-11.git external/Apollo-11
-git clone --depth 1 --filter=blob:none --sparse https://github.com/virtualagc/virtualagc.git external/virtualagc
-(cd external/virtualagc && git sparse-checkout set yaYUL yaAGC Luminary099 Comanche055)
-python3 -m agc convert Luminary099 Comanche055
-```
+All options, the physics and how to regenerate the Python modules from the
+listings are in [docs/TECHNICAL.md](docs/TECHNICAL.md#7-running-the-landing-simulation).
 
 ## The landing simulation
 
 `python3 -m agc.sim land` starts eight minutes before powered descent
 initiation in the 60 × 8 nautical mile descent orbit, with the real time of
-landing from the pad load (`TLAND` = 100:50:49 GET in this scenario).  A
-status line every five simulated seconds shows program, DSKY, altitude,
-rates, range, throttle, mass and attitude.  In between, the events of the
-flight appear:
+landing from the pad load.  The first run also gives the computer its fresh
+start with the 90 s IMU turn-on sequence of the flight software (some 40 s
+of computing, shown as `[setup]` lines, cached for later runs).  Then the
+crew script keys `V37E63E` and the events of the flight appear:
 
 ```
 100:30:14.2  crew: V37E63E - select P63 braking phase
 100:30:30.9  AGC computed TIG = 100:37:49.61 (in 438.7 s)
-100:30:31.9  DSKY flashing V06 N61  R1 -   50 R2 -07 18 R3 +000
 100:30:33.5  crew: PRO  (P63 ignition algorithm done: accept N61)
-100:30:34.0  DSKY flashing V50 N25  R1  00014 R2 -   1  R3
-100:30:35.6  crew: ENTR  (checklist 00014: skip the optional fine alignment)
-100:30:37.1  DSKY flashing V50 N18  R1 +17997 R2 +28631 R3 +00002
 100:30:38.7  crew: PRO  (start automatic maneuver to burn attitude (R60))
-100:30:54.0  crew: ENTR  (maneuver complete: leave R60)
 100:36:49.8  crew: DESCENT ENGINE ARM (TIG-60 s)
-100:37:44.9  DSKY flashing V99 N62  R1 +55634 R2 -00 05 R3 +00005
 100:37:46.5  crew: PRO  (V99: permit ignition)
 100:37:49.6  DPS ignition at GET 100:37:49.62
 100:43:55.7  LR range data good, velocity data good
 100:44:03.4  crew: V57E - permit landing radar updates (DELTAH = +51 ft)
 100:46:16.0  LR antenna commanded to position 2
 100:46:16.6  PROG 64
-100:46:17.1  DSKY flashing V06 N64  R1 +99 71 R2 -01422 R3 +07883
-100:46:18.6  crew: PRO  (acknowledge flashing V06 N64)
 100:49:00.9  PROG 65
 100:49:47.5  *** CONTACT - engine stop ***
 100:49:47.5  contact at GET 100:49:47.46: vertical -2.9 ft/s, horizontal 15.1 ft/s,
@@ -171,38 +175,8 @@ landing radar antenna to position 2 and switches to P64, and 12 s before the
 approach target it switches to the automatic landing phase P65, which nulls
 the horizontal velocity and descends at 3 ft/s until the probes touch.
 
-Telemetry goes to `landing.csv` (two samples per second: state, DSKY
-registers, alarms, thrust, jets, gimbal, radar status, attitude vectors)
-and the events to `landing.events.csv`.  `python3 -m agc.sim report
-landing.csv` summarises a run with ASCII plots.
-
-| Option | Effect |
-|--------|--------|
-| `--until 600` | stop after 600 simulated seconds |
-| `--no-lr` | fly without the landing radar (inertial navigation only) |
-| `--realtime` | pace the simulation to wall-clock time |
-| `--view` | open the 3D viewer and follow the flight live |
-| `--dt 0.02` | physics step (the AGC runs in lock-step) |
-| `--probe-cache ''` | do not cache the AGC-computed landing site |
-
-**Physics.**  Point-mass lunar gravity with the AGC's μ, six degrees of
-freedom, descent engine with 980–6300 lbf throttle range and fixed throttle
-position above that, exhaust velocity 2956 m/s (Luminary `DPSVEX`), moments
-of inertia chosen to match the one-jet accelerations the digital autopilot
-assumes.  The AGC runs at 85 333 memory cycles per second in lock-step with
-the vehicle: every 20 ms the emulator executes the corresponding number of
-cycles, the vehicle moves, and the CDU and PIPA counters are pulsed.
-
-| Module | Content |
-|--------|---------|
-| `agc/sim/mission.py` | scenario, AGC initialisation, crew procedures, main loop, telemetry |
-| `agc/sim/padload.py` | the Apollo 11 pad load, checked against the symbol table on load |
-| `agc/sim/lm.py` | vehicle: mass, DPS, trim gimbal, RCS jets, rigid-body dynamics |
-| `agc/sim/imu.py` | inertial platform: gimbal angles, CDU counters, PIPA pulses, REFSMMAT |
-| `agc/sim/lr.py` | landing radar: antenna positions, range and velocity beams, discretes |
-| `agc/sim/scaling.py` | AGC fixed-point formats (SP, DP, TP, B-scaling) |
-| `agc/sim/viewer.py` | the 3D viewer (a small HTTP server and one HTML page) |
-| `agc/sim/report.py` | run summary with ASCII plots |
+Telemetry goes to `landing.csv`, the events to `landing.events.csv`;
+`python3 -m agc.sim report landing.csv` summarises a run with ASCII plots.
 
 ## The 3D viewer
 
@@ -225,29 +199,21 @@ the page is open.
 
 ## How the AGC runs in Python
 
-A worked example with real excerpts of the 1969 listing, the generated Python module, the interpretive guidance language and the emulator is in [docs/TECHNICAL.md](docs/TECHNICAL.md).
+![From the 1969 listing to a closed-loop landing: assembler, Python modules, AGC emulator, simulated Lunar Module](docs/architecture.svg)
 
-```
-   external/Apollo-11/*.agc         original source, 1969
-            │
-            ▼
-   agc/asm/   assembler (a port of yaYUL), verified bit-exact against the
-              octal listings of the original printouts
-            │
-            ▼
-   agc/programs/luminary099/*.py    91 modules, one .py per .agc file
-   agc/programs/comanche055/*.py    86 modules
-            │
-            ▼
-   agc/cpu.py   AGC CPU emulator  ◄──►  agc/dsky.py  DSKY model
-            │
-            ▼
-   agc/sim/    landing simulation       agc/tester/tui.py   test UI
-```
+The flight software talks to the vehicle only through counters and I/O
+channels, and the simulation provides exactly those.  Every 20 ms the
+emulator executes 1707 memory cycles, the vehicle moves, the platform
+gimbals follow the attitude, the accelerometers emit their pulses, the
+radar beams are intersected with the lunar sphere.  Nothing is written into
+the computer's memory once the flight has started.  A worked example with
+real excerpts of the 1969 listing, the generated Python module, the
+interpretive guidance language, the emulator and the full table of the
+hardware interface is in [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
-Each `.agc` file becomes a Python module that follows the listing line by
-line.  The programmers' comments survive as Python comments, every memory
-word is a `W(...)` call and every symbol definition an `S(...)` call:
+Each `.agc` file of the listing becomes a Python module that follows it
+line by line.  The programmers' comments survive as Python comments, every
+memory word is a `W(...)` call and every symbol definition an `S(...)` call:
 
 ```python
 # TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:
@@ -291,29 +257,6 @@ overflow, the editing registers, timers, interrupts, counters and I/O
 channels.  Routines can be watched symbolically, stopped at breakpoints and
 driven through the real DSKY protocol.
 
-## Verification
-
-- Both programs assemble bit-exactly against the octal listings
-  reconstructed from the original printouts (`Luminary099.binsource`,
-  `Comanche055.binsource` from Virtual AGC): zero differing words in
-  36 × 1024, checksums included.
-- That comparison exposed transcription errors in the GitHub copy of the
-  source that change the code (a `1.08-2` for `1.0 B-2`, two misspelled
-  labels, a comment line without `#`, pseudo-labels `+2` after a tab).  They
-  are documented in `agc/asm/fixups.py` and corrected on reading.  Luminary
-  needed no word-changing fix.
-- Luminary boots in the emulator (fresh start with alarm 1107 like the real
-  cold start), runs without hardware alarms, answers `V35E` with the lamp
-  test, shows the running mission clock on `V16N36E`, and switches to P00.
-- The emulator runs at about three times real time on CPython 3.12.
-- `tools/` holds a cycle-by-cycle differential test against the reference
-  emulator yaAGC (`tools/ref_trace.c` wraps the Virtual AGC engine,
-  `tools/my_trace.py` prints the same trace; `diff` shows the first
-  deviation).
-- `python3 -m pytest` runs 29 tests: assembler bit-exactness, CPU
-  arithmetic, boot and DSKY, fixed-point scaling, pad load integrity,
-  gimbal maths, ballistic-impact detection and the viewer's port selection.
-
 ## Test UI
 
 `python3 -m agc tui luminary099`
@@ -326,26 +269,6 @@ driven through the real DSKY protocol.
   shows a routine in the code window, `b` sets a breakpoint there.
 - `:` commands: `:w SYMBOL` watch an erasable, `:b LABEL`, `:g LABEL`,
   `:keys V16N36E`, `:run 5`, `:poke SYMBOL 12345`, `:reset`, `:help`.
-
-## Project layout
-
-| Path | Content |
-|------|---------|
-| `agc/asm/address.py` | AGC address model (pseudo addresses, banks), number parsing |
-| `agc/asm/tables.py` | opcode tables: machine instructions, pseudo-ops, interpreter instructions |
-| `agc/asm/assembler.py` | multi-pass assembler (port of yaYUL), produces the 36 banks of fixed memory |
-| `agc/asm/fixups.py` | documented transcription errors of the GitHub copy, corrected on reading |
-| `agc/asm/binsource.py` | reader for the octal listings (`*.binsource`) and comparison |
-| `agc/asm/pygen.py` | generates the Python modules from the assembly |
-| `agc/program.py` | run-time representation: `Program`, `Module`, symbols, address lookups |
-| `agc/cpu.py` | the AGC CPU: instructions, timers, interrupts, channels, hardware alarms |
-| `agc/dsky.py` | DSKY: display relay decoding, lamps, key codes |
-| `agc/rope.py` | read/write the Virtual AGC `.bin` rope format |
-| `agc/programs/` | the generated flight software |
-| `agc/sim/` | the landing simulation and the viewer |
-| `agc/tester/tui.py` | the test UI |
-| `tests/` | pytest suite |
-| `docs/` | screenshots |
 
 ## Limitations and ideas
 

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+  </defs>
+  <rect width="960" height="600" fill="#ffffff"/>
+
+  <!-- top row: translation chain -->
+  <g stroke="#333" stroke-width="1.5">
+    <rect x="20" y="24" width="280" height="72" rx="6" fill="#f3efe4"/>
+    <rect x="340" y="24" width="280" height="72" rx="6" fill="#f3efe4"/>
+    <rect x="660" y="24" width="280" height="72" rx="6" fill="#f3efe4"/>
+  </g>
+  <g fill="#111" text-anchor="middle">
+    <text x="160" y="48" font-weight="bold">Original Apollo 11 source, 1969</text>
+    <text x="160" y="68">Luminary 099 (LM) · Comanche 055 (CM)</text>
+    <text x="160" y="86" fill="#555">MIT Instrumentation Laboratory</text>
+    <text x="480" y="48" font-weight="bold">Assembler (port of yaYUL)</text>
+    <text x="480" y="68">36 × 1024 words, bit-exact against</text>
+    <text x="480" y="86">the octal listing of the original printouts</text>
+    <text x="800" y="48" font-weight="bold">Python modules</text>
+    <text x="800" y="68">one W(…) call per memory word,</text>
+    <text x="800" y="86">labels and the 1969 comments kept</text>
+  </g>
+  <g stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <path d="M 300 60 L 338 60"/>
+    <path d="M 620 60 L 658 60"/>
+    <path d="M 800 96 L 800 130 L 240 130 L 240 176"/>
+  </g>
+  <text x="520" y="124" fill="#555" text-anchor="middle">the rope image the emulator executes</text>
+
+  <!-- AGC emulator -->
+  <rect x="40" y="180" width="400" height="150" rx="8" fill="#e4ecf7" stroke="#1f4e79" stroke-width="2"/>
+  <g fill="#111" text-anchor="middle">
+    <text x="240" y="206" font-weight="bold" font-size="15">AGC emulator  (agc/cpu.py)</text>
+    <text x="240" y="228">executes the original machine instructions</text>
+    <text x="240" y="246">interrupts · timers · counters · I/O channels · DSKY</text>
+    <text x="240" y="272" font-weight="bold">Luminary 099 runs unmodified:</text>
+    <text x="240" y="290">ignition algorithm, P63 / P64 / P65 guidance,</text>
+    <text x="240" y="308">navigation, digital autopilot, throttle control</text>
+  </g>
+
+  <!-- Lunar Module -->
+  <rect x="520" y="180" width="400" height="150" rx="8" fill="#eaf3e6" stroke="#3a6b35" stroke-width="2"/>
+  <g fill="#111" text-anchor="middle">
+    <text x="720" y="206" font-weight="bold" font-size="15">Simulated Lunar Module  (agc/sim/)</text>
+    <text x="720" y="228">six-degree-of-freedom rigid body, point-mass Moon</text>
+    <text x="720" y="246">descent engine · trim gimbal · sixteen RCS jets</text>
+    <text x="720" y="272" font-weight="bold">Sensors</text>
+    <text x="720" y="290">inertial platform: gimbal angles, PIPA accelerometers</text>
+    <text x="720" y="308">landing radar: range beam, three velocity beams</text>
+  </g>
+
+  <!-- closed loop arrows -->
+  <g stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M 440 215 L 518 215"/>
+    <path d="M 520 295 L 442 295"/>
+  </g>
+  <g fill="#111" text-anchor="middle" font-size="12">
+    <text x="480" y="200">commands</text>
+    <text x="480" y="320">measurements</text>
+  </g>
+
+  <!-- channel detail boxes -->
+  <rect x="40" y="356" width="400" height="86" rx="6" fill="#ffffff" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <g fill="#333" font-size="12">
+    <text x="60" y="376" font-weight="bold">AGC → vehicle (output channels and counters)</text>
+    <text x="60" y="394">channel 11  engine on / off</text>
+    <text x="250" y="394">THRUST counter  throttle pulses</text>
+    <text x="60" y="412">channels 5, 6  the RCS jets</text>
+    <text x="250" y="412">channel 12  trim gimbal, antenna</text>
+    <text x="60" y="430">channel 10  DSKY display</text>
+    <text x="250" y="430">channel 15  DSKY keys</text>
+  </g>
+  <rect x="520" y="356" width="400" height="86" rx="6" fill="#ffffff" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <g fill="#333" font-size="12">
+    <text x="540" y="376" font-weight="bold">vehicle → AGC (input counters and discretes)</text>
+    <text x="540" y="394">CDUX/Y/Z  platform gimbal angles, 2^-15 rev per pulse</text>
+    <text x="540" y="412">PIPAX/Y/Z  integrated acceleration, 1 cm/s per pulse</text>
+    <text x="540" y="430">RNRAD, channels 30–33  radar words, data-good, antenna position</text>
+  </g>
+
+  <!-- lock-step / result -->
+  <rect x="40" y="470" width="880" height="100" rx="8" fill="#fbf4e0" stroke="#8a6d1d" stroke-width="1.5"/>
+  <g fill="#111" text-anchor="middle">
+    <text x="480" y="496" font-weight="bold">Closed loop in lock-step</text>
+    <text x="480" y="516">every 20 ms: 1707 memory cycles of the AGC, one step of the vehicle, the gimbal and accelerometer counters are pulsed</text>
+    <text x="480" y="534">a script keys what the crew keyed (V37E63E, PRO, V99, V57E); nothing is written into the computer's memory once the flight has started</text>
+    <text x="480" y="558" font-weight="bold">Result: automatic touchdown 9 m from Tranquility Base, 2.9 ft/s vertical, 605 kg of descent propellant left</text>
+  </g>
+</svg>
