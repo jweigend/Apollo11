@@ -36,6 +36,7 @@ vehicle is at rest.
 - [Test UI](#test-ui)
 - [Project layout](#project-layout)
 - [Limitations and ideas](#limitations-and-ideas)
+- [The people who wrote this](#the-people-who-wrote-this)
 - [Credits and license](#credits-and-license)
 
 ## What is genuine and what is simulated
@@ -361,6 +362,43 @@ closer to the historical flight, all feasible with the current structure:
 - the rendezvous radar interrupt load to provoke the 1201/1202 alarms,
 - a scripted P66 for comparison with the manual landing,
 - Comanche 055 in the loop for the rendezvous programs.
+
+## The people who wrote this
+
+This project exists out of admiration.  Running the code makes tangible
+what the MIT Instrumentation Laboratory team achieved between 1961 and 1969,
+and it deserves saying plainly.
+
+- **The machine.**  2048 words of erasable memory, 36 864 words of fixed
+  memory woven by hand into core rope, 15-bit words, about 85 000 memory
+  cycles per second, 55 watts, 32 kilograms.  A single wrong word in the
+  rope could not be changed after manufacture.  Luminary shares its 2 KB
+  of erasable memory between programs through overlays; the same cell is
+  `R1S` in the landing and something else in orbit, and nothing ever
+  collides.
+- **The architecture.**  A priority-driven executive, a waitlist of timed
+  tasks, interrupts for counters, radar and the DSKY, an embedded
+  interpreter for vector and double-precision arithmetic with a push-down
+  list, and a restart system that survived the 1201 and 1202 alarms on 20
+  July 1969 without losing the state of the descent.  Much of this became
+  common in embedded systems decades later; some of it still is not.
+- **The mathematics.**  Everything is fixed point, with a scaling such as
+  2^24 metres or 2^7 metres per centisecond that the programmer carried in
+  their head for every variable.  Reading the scaling of a dozen variables
+  took us hours; they controlled a lunar landing with it.
+- **The discipline.**  Checksums at the end of every bank, verification
+  listings, a hardware simulator the crews trained on, configuration
+  control across releases from Sunburst to Luminary.  This was software
+  engineering with review, test and release management, under schedule
+  pressure, before the term existed.
+
+Margaret Hamilton led the software effort; Don Eyles wrote the lunar
+landing programs; Allan Klumpp designed the landing guidance equations
+quoted above; Hal Laning and Charles Muntz created the executive and the
+interpreter.  Behind them were hundreds of engineers, programmers and the
+workers who wove the ropes.  Executing their words on a modern computer and
+watching them bring the vehicle down at 3 ft/s is the best tribute we could
+think of.
 
 ## Credits and license
 
