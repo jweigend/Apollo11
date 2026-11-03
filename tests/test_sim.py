@@ -124,3 +124,28 @@ def test_padload_addresses_match_symbol_table():
         sym = prog.symbol(name)
         assert sym is not None, name
         assert sym.erasable_address() == addr, f"{name}: table {addr:o} != assembled {sym.erasable_address():o}"
+
+
+def test_agc_save_state_round_trip_continues_identically():
+    """A restored snapshot must run on exactly like the original (the setup cache relies on it)."""
+    import json
+    from agc.cpu import AGC, CYCLES_PER_SECOND
+    from agc.program import load_program
+
+    prog = load_program("luminary099")
+    a = AGC(prog.fixed)
+    a.run(int(0.5 * CYCLES_PER_SECOND))
+    a.chan[0o30] &= ~(0o400 | 0o20000)              # IMU operate + ISS turn-on request
+    a.run(int(0.5 * CYCLES_PER_SECOND))
+    state = json.loads(json.dumps(a.save_state()))   # through JSON, as the cache file does
+    assert "fixed" not in state and "on_channel_write" not in state
+    b = AGC(prog.fixed)
+    b.load_state(state)
+    assert b.cycles == a.cycles and b.e == a.e and b.chan == a.chan
+    a.run(int(1.0 * CYCLES_PER_SECOND))
+    b.run(int(1.0 * CYCLES_PER_SECOND))
+    assert b.cycles == a.cycles
+    assert b.e == a.e
+    assert b.chan == a.chan
+    assert b.interrupt_requests == a.interrupt_requests
+    assert b.alarm_log == a.alarm_log

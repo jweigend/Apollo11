@@ -15,6 +15,9 @@ pad load; the landing site RLS is the real Tranquility Base coordinates.
 from __future__ import annotations
 
 import csv
+import hashlib
+import inspect
+import json
 from pathlib import Path
 import math
 import sys
@@ -183,9 +186,11 @@ class Crew:
 
 class LandingSimulation:
     def __init__(self, dt: float = 0.02, verbose: bool = True, log_path: str | None = None,
-                 realtime: bool = False, probe_cache: str | None = None, landing_radar: bool = True):
+                 realtime: bool = False, probe_cache: str | None = None, landing_radar: bool = True,
+                 agc_cache: str | None = None):
         self.dt = dt
         self.probe_cache = probe_cache
+        self.agc_cache = agc_cache             # snapshot of the AGC after basic_setup (saves the 90 s turn-on)
         self.use_lr = landing_radar
         self.lr: LandingRadar | None = None
         self.verbose = verbose
@@ -235,6 +240,11 @@ class LandingSimulation:
             self._events_writer.writerow([f"{self.t:.2f}", f"{self.get:.2f}", msg])
             self._events_file.flush()
 
+    def progress(self, msg: str):
+        """Setup progress for the terminal only (not an event, not replayed by the viewer)."""
+        if self.verbose:
+            print(f"[setup] {msg}", flush=True)
+
     def run_agc(self, seconds: float):
         """Advance only the AGC (used during setup)."""
         self.cpu.run(int(seconds * CYCLES_PER_SECOND))
@@ -283,21 +293,77 @@ class LandingSimulation:
         self.dsky = DSKY(cpu)
         return cpu
 
+    def agc_state_key(self, get_seconds: float) -> str:
+        """Identifies the AGC state basic_setup produces: the rope, the pad load, the
+        setup procedure itself and the clock it sets.  Any change invalidates the cache."""
+        h = hashlib.sha256()
+        h.update(repr(self.prog.fixed).encode())
+        from . import padload
+        h.update(inspect.getsource(padload).encode())
+        h.update(inspect.getsource(LandingSimulation.basic_setup).encode())
+        h.update(f"{get_seconds:.2f}".encode())
+        return h.hexdigest()
+
+    def restore_setup(self, get_seconds: float) -> bool:
+        """Load the AGC state after basic_setup from the cache file, if it matches."""
+        if not self.agc_cache:
+            return False
+        try:
+            with open(self.agc_cache) as f:
+                d = json.load(f)
+        except OSError:
+            return False
+        except ValueError:
+            self.progress(f"{self.agc_cache} is not valid JSON - fresh start")
+            return False
+        if not isinstance(d, dict) or d.get("key") != self.agc_state_key(get_seconds):
+            self.progress(f"{self.agc_cache} is stale (rope, pad load, setup or clock changed) - fresh start")
+            return False
+        try:
+            self.cpu.load_state(d["cpu"])
+            self.dsky.rows = [int(x) for x in d["dsky_rows"]]
+        except (KeyError, ValueError, TypeError, AttributeError):
+            self.cpu.reset()                        # do not continue from a half-restored machine
+            self.dsky.rows = [0] * 16
+            self.progress(f"{self.agc_cache} is unreadable - fresh start")
+            return False
+        self.event(f"AGC state after the IMU turn-on sequence restored from {self.agc_cache} "
+                   f"(AGC clock {fmt_get(get_seconds)}; delete the file for a fresh start)")
+        return True
+
+    def save_setup(self, get_seconds: float):
+        if not self.agc_cache:
+            return
+        with open(self.agc_cache, "w") as f:
+            json.dump({"key": self.agc_state_key(get_seconds), "get": get_seconds,
+                       "cpu": self.cpu.save_state(), "dsky_rows": self.dsky.rows}, f)
+        self.progress(f"AGC state saved to {self.agc_cache}; the next start skips the turn-on sequence")
+
     def basic_setup(self, get_seconds: float):
         """Fresh start, P00, pad load, flags, discretes, clock."""
         cpu, prog = self.cpu, self.prog
         self._setup_get = get_seconds
+        if self.restore_setup(get_seconds):
+            return
+        wall0 = time.monotonic()
+        self.progress("fresh start of the AGC: self-check, 90 s IMU turn-on sequence, ISS settling, V37E00E "
+                      "and the pad load - about 110 s of AGC time, the emulator needs a while for that ...")
         self.run_agc(3.0)
         # IMU turn-on: the AGC runs a 90 s "ISS turn-on delay" when it sees IMU OPERATE
         # together with ISS TURN ON REQUEST; it answers with channel 12 bit 15 and the
         # hardware then drops the request.  (Channels 30-33 are active-low.)
         cpu.chan[0o30] &= ~(0o400 | 0o20000)
-        for _ in range(1200):
+        for i in range(1200):
             self.run_agc(0.1)
             if cpu.chan[0o12] & 0o40000:
                 break
+            if i % 300 == 299:
+                self.progress(f"IMU turn-on sequence {(i + 1) // 10:3d}/90 s of AGC time "
+                              f"({time.monotonic() - wall0:.0f} s elapsed)")
         else:
             raise RuntimeError("IMU turn-on sequence did not complete")
+        self.progress(f"IMU turn-on sequence complete ({time.monotonic() - wall0:.0f} s elapsed); "
+                      "ISS settling, V37E00E, pad load ...")
         cpu.chan[0o30] |= 0o20000
         self.run_agc(12.0)
         self.type_keys("V37E00E")
@@ -314,6 +380,8 @@ class LandingSimulation:
         cpu.chan[0o31] &= ~0o20000                   # mode control switch: AUTO
         cpu.chan[0o33] &= ~0o40                      # LR antenna in position 1
         cpu.chan[0o33] |= 0o200 | 0o20               # LR range/velocity data not good (no radar model yet)
+        self.progress(f"AGC in P00 with the pad load after {time.monotonic() - wall0:.0f} s")
+        self.save_setup(get_seconds)
 
     def load_state_vector(self, r: np.ndarray, v: np.ndarray, get_seconds: float):
         """Permanent LM state vector (Encke form).  Moon-centred vectors are scaled
@@ -348,6 +416,7 @@ class LandingSimulation:
 
     def load_dap_data(self, lm_mass_lb: float):
         """R03 (V48): vehicle configuration, mass, gimbal trim - as the crew did it."""
+        self.progress("loading the DAP data (V48) ...")
         self.type_keys("V48E")
         if not self.wait_display("01", "46"):
             self.event("WARNING: V48 did not show N46")

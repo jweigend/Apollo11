@@ -15,6 +15,7 @@ steps, so wall-clock pacing is a matter of counting steps.
 
 from __future__ import annotations
 
+import copy
 from typing import Callable
 
 # --- register addresses --------------------------------------------------
@@ -264,6 +265,42 @@ class AGC:
         self.radar_gate_counter = 0
         self.alarm_log: list[tuple[int, str]] = []
         self.instructions = 0
+
+    # ------------------------------------------------------------------
+    # Save / restore (like yaAGC's core dump): everything except the rope and the hooks
+    # ------------------------------------------------------------------
+    _NOT_STATE = ("fixed", "on_channel_write", "on_radar_read", "check_alarms")
+
+    def save_state(self) -> dict:
+        """Snapshot of the machine state (erasable, channels, registers, timers) as plain
+        JSON-compatible data.  The rope and the I/O hooks are not part of it."""
+        return {k: copy.deepcopy(v) for k, v in self.__dict__.items() if k not in self._NOT_STATE}
+
+    def load_state(self, state: dict):
+        """Restore a snapshot taken with save_state() on an AGC running the same rope.
+        The snapshot is checked against the live attributes (names, list lengths, scalar
+        types) before anything is changed, so a damaged file raises instead of leaving a
+        half-restored machine."""
+        wanted = {k: v for k, v in self.__dict__.items() if k not in self._NOT_STATE}
+        if set(state) - set(self._NOT_STATE) != set(wanted):
+            raise KeyError(f"snapshot fields differ: {sorted(set(state) ^ set(wanted) - set(self._NOT_STATE))}")
+        checked = {}
+        for k, cur in wanted.items():
+            v = state[k]
+            if k == "alarm_log":
+                v = [(int(c), str(r)) for c, r in v]
+            elif isinstance(cur, list):
+                if not isinstance(v, list) or len(v) != len(cur) or not all(type(x) is int for x in v):
+                    raise TypeError(f"snapshot field {k}: expected a list of {len(cur)} integers")
+            elif isinstance(cur, bool):
+                if not isinstance(v, bool):
+                    raise TypeError(f"snapshot field {k}: expected a bool")
+            elif isinstance(cur, int):
+                if type(v) is not int:
+                    raise TypeError(f"snapshot field {k}: expected an int")
+            checked[k] = copy.deepcopy(v)
+        for k, v in checked.items():
+            setattr(self, k, v)
 
     # ------------------------------------------------------------------
     # Memory access

@@ -21,6 +21,9 @@ def main(argv=None) -> int:
     land.add_argument("--no-lr", action="store_true", help="disable the landing radar model (inertial navigation only)")
     land.add_argument("--probe-cache", default="landing_probe.json",
                       help="cache file for the AGC-computed landing site / lunar pole ('' to disable)")
+    land.add_argument("--agc-cache", default="landing_agc_state.json",
+                      help="cache file for the AGC state after its 90 s IMU turn-on sequence "
+                           "('' to disable; a fresh start takes about 40 s longer)")
     land.add_argument("--view", action="store_true", help="open the 3D viewer in the browser while flying")
     land.add_argument("--port", type=int, default=8765, help="port for the 3D viewer")
     rep = sub.add_parser("report", help="summarise a telemetry CSV written by 'land'")
@@ -42,7 +45,8 @@ def main(argv=None) -> int:
         serve(args.log, port=args.port, open_browser=True, block=False, live=True)
 
     sim = LandingSimulation(dt=args.dt, verbose=not args.quiet, log_path=args.log or None, realtime=args.realtime,
-                            probe_cache=args.probe_cache or None, landing_radar=not args.no_lr)
+                            probe_cache=args.probe_cache or None, landing_radar=not args.no_lr,
+                            agc_cache=args.agc_cache or None)
     result = sim.run(until=args.until, status_every=args.status_every)
     if result:
         print("\nTOUCHDOWN")

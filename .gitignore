@@ -8,6 +8,7 @@ dist/
 external/
 .venv/
 landing_probe.json
+landing_agc_state.json
 landing.csv
 # saved chat transcripts / local run artefacts
 2026-*.txt
