@@ -666,7 +666,7 @@ W('06,3667', 0o04467, kind='data', line=644)
 W('06,3670', 0o00601, 'DVMAX2', '2DEC', '3.014472 B-7', '               989 FPS', kind='data', line=646)
 W('06,3671', 0o33216, kind='data', line=646)
 
-W('06,3672', 0o10000, '1DPB2', '2DEC', '1.0 B-2', kind='data', line=648)
+W('06,3672', 0o10000, '1DPB2', '2DEC', '1.0B-2', kind='data', line=648)
 W('06,3673', 0o00000, kind='data', line=648)
 
 W('06,3674', 0o00000, '1DPB28', '2DEC', '1', kind='data', line=650)
