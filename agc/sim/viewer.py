@@ -111,7 +111,7 @@ HTML = r"""<!doctype html>
   <div class="row"><span class="k">GET</span><span class="v" id="get">-</span></div>
   <div class="row"><span class="k">altitude</span><span class="v" id="alt">-</span></div>
   <div class="row"><span class="k">descent rate</span><span class="v" id="hdot">-</span></div>
-  <div class="row"><span class="k">horizontal speed</span><span class="v" id="vh">-</span></div>
+  <div class="row"><span class="k">ground speed</span><span class="v" id="vh">-</span></div>
   <div class="row"><span class="k">range to site</span><span class="v" id="rng">-</span></div>
   <div class="row"><span class="k">DPS thrust</span><span class="v" id="thr">-</span></div>
   <div class="row"><span class="k">mass</span><span class="v" id="mass">-</span></div>

@@ -33,13 +33,12 @@ Armstrong took over manually with P66.
 *Simulated Apollo 11 landing with the original source code from 1969.*
 
 ```
-contact at GET 100:49:47: vertical -2.9 ft/s, horizontal 15.1 ft/s,
+contact at GET 100:49:47: vertical -2.9 ft/s, horizontal 0.2 ft/s,
 9 m from the target, tilt 0.6 deg, DPS propellant left 605 kg
 ```
 
-The horizontal speed is measured in the inertial frame and equals the
-rotation of the lunar surface at the site; relative to the ground the
-vehicle is at rest.
+Speeds are relative to the lunar surface, which itself moves at 4.6 m/s in
+the inertial frame at the site.
 
 ## Contents
 
@@ -168,7 +167,7 @@ crew script keys `V37E63E` and the events of the flight appear:
 100:46:16.6  PROG 64
 100:49:00.9  PROG 65
 100:49:47.5  *** CONTACT - engine stop ***
-100:49:47.5  contact at GET 100:49:47.46: vertical -2.9 ft/s, horizontal 15.1 ft/s,
+100:49:47.5  contact at GET 100:49:47.46: vertical -2.9 ft/s, horizontal 0.2 ft/s,
              9 m from the target, tilt 0.6 deg, DPS propellant left 605 kg
 ```
 

@@ -90,6 +90,7 @@ class Telemetry:
     lr: str = ""
 
 
+# hdot_mps and vhor_mps are relative to the rotating lunar surface (the ground), not inertial.
 CSV_FIELDS = ["t", "get", "alt_m", "hdot_mps", "vhor_mps", "thrust_n", "mass_kg", "pitch_deg",
               "prog", "verb", "noun", "r1", "r2", "r3", "alarms",
               "east_m", "north_m", "up_m", "bx_e", "bx_n", "bx_u", "bz_e", "bz_n", "bz_u",
@@ -598,9 +599,8 @@ class LandingSimulation:
             self.lr_pos2_cmd_time = self.t
             self.event("LR antenna commanded to position 2")
         if self.lr is not None:
-            v_rel = self.lm.v - np.cross(self.pole * OMEGA_MOON, self.lm.r)
             was_good = (self.lr.range_good, self.lr.vel_good)
-            self.lr.update(self.t, self.lm.r, v_rel, self.lm.c, self.site_radius)
+            self.lr.update(self.t, self.lm.r, self.ground_velocity(), self.lm.c, self.site_radius)
             if (self.lr.range_good, self.lr.vel_good) != was_good:
                 self.event(f"LR range data {'good' if self.lr.range_good else 'lost'}, velocity data "
                            f"{'good' if self.lr.vel_good else 'lost'}")
@@ -619,11 +619,18 @@ class LandingSimulation:
         north = np.cross(up, east)
         return site, np.array([east, north, up])
 
+    def ground_velocity(self) -> np.ndarray:
+        """Velocity relative to the rotating lunar surface.  The inertial velocity still
+        contains the surface speed at the site (about 4.6 m/s eastward), which is what
+        Luminary's landing guidance nulls against, so this is the speed worth showing."""
+        return self.lm.v - np.cross(self.pole * OMEGA_MOON, self.lm.r)
+
     def telemetry(self) -> Telemetry:
         lm = self.lm
         r_hat = unit(lm.r)
-        hdot = float(np.dot(lm.v, r_hat))
-        v_h = lm.v - hdot * r_hat
+        v_g = self.ground_velocity()
+        hdot = float(np.dot(v_g, r_hat))
+        v_h = v_g - hdot * r_hat
         s = self.dsky.state(flash=False)
         site, enu = self.site_frame()
         rel = enu @ (lm.r - site)
@@ -733,8 +740,9 @@ class LandingSimulation:
         lm = self.lm
         powered_at_contact = lm.engine_on
         r_hat = unit(lm.r)
-        hdot = float(np.dot(lm.v, r_hat))
-        v_h = lm.v - hdot * r_hat
+        v_g = self.ground_velocity()
+        hdot = float(np.dot(v_g, r_hat))
+        v_h = v_g - hdot * r_hat
         site = self.landing_site_now()
         miss = lm.r - site
         miss_h = miss - np.dot(miss, r_hat) * r_hat

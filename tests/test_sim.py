@@ -77,6 +77,7 @@ def test_unpowered_surface_contact_is_reported_as_ballistic_impact():
     sim = LandingSimulation.__new__(LandingSimulation)
     sim.get0 = 123.0
     sim.t = 0.0
+    sim.pole = np.array([0.0, 0.0, 1.0])
     sim.lm = SimpleNamespace(
         r=np.array([1000.0, 0.0, 0.0]),
         v=np.array([-8.0, 3.0, 0.0]),

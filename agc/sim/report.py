@@ -62,7 +62,7 @@ def main(argv=None) -> int:
     for line in ascii_plot(t, alt, label="altitude [ft]"):
         print(line)
     print()
-    for line in ascii_plot(t, vh, label="horizontal speed [ft/s]"):
+    for line in ascii_plot(t, vh, label="horizontal speed over the ground [ft/s]"):
         print(line)
     print()
     for line in ascii_plot(t, thr, label="DPS thrust [% of FTP]", height=8):
