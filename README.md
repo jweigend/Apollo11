@@ -5,6 +5,8 @@
 
 https://github.com/user-attachments/assets/3ca810f9-fa6d-4df9-aa34-bb249b017bbe
 
+*Time-lapse, about ten times faster than the flight: the 20 minutes from selecting P63 to touchdown (12 of them under power) in two minutes.  The computer, the display and the log are the real ones.*
+
 
 Luminary 099, the program that ran in the Lunar Module's computer on
 20 July 1969, is assembled from the 1969 listing, executed cycle by cycle
