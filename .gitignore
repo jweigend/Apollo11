@@ -14,3 +14,5 @@ landing.csv
 2026-*.txt
 landing.events.csv
 /docs/*.csv
+# README teaser video: the copy GitHub serves is uploaded through the web editor
+/docs/*.mp4
