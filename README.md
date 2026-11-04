@@ -16,6 +16,12 @@ simulation of the Lunar Module.  The result: the original software flies a
 complete automatic descent from the lunar orbit to a touchdown on
 Tranquility Base.
 
+The source is assembly language for a computer that was built for this one
+purpose and had functions no other computer ever had.  What runs here is not
+the symbolic assembler read as text, but the program assembled from it, word
+for word in 15-bit words, exactly as it was woven into the core rope memory
+in 1969.
+
 Python provides what the hardware provided: the computer, the vehicle, the
 inertial platform, the landing radar, the DSKY keyboard and the pad load.
 It does not compute the trajectory and it does not decide how to land.  The
