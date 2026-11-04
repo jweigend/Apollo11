@@ -2,6 +2,10 @@
 
 **The original Apollo 11 flight software flies a lunar landing again.**
 
+
+https://github.com/user-attachments/assets/3ca810f9-fa6d-4df9-aa34-bb249b017bbe
+
+
 Luminary 099, the program that ran in the Lunar Module's computer on
 20 July 1969, is assembled from the 1969 listing, executed cycle by cycle
 in a Python emulator of the Apollo Guidance Computer (AGC) that is checked
