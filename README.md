@@ -127,6 +127,14 @@ and therefore needs an internet connection.
 ```bash
 git clone https://github.com/jweigend/Apollo11.git
 cd Apollo11
+./start.sh help          # Linux / macOS: the launcher creates .venv, installs numpy and pytest, starts things
+start.bat help           # Windows (same commands: land, view, run, tui, test, ...)
+./start.sh land --view --realtime
+```
+
+Or by hand, without the launcher:
+
+```bash
 python3 -m venv .venv && .venv/bin/pip install numpy pytest
 source .venv/bin/activate
 
