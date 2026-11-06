@@ -22,6 +22,18 @@ the symbolic assembler read as text, but the program assembled from it, word
 for word in 15-bit words, exactly as it was woven into the core rope memory
 in 1969.
 
+That hardware is out of reach today.  Raytheon built the AGC in a small
+series of well under a hundred units, and every program release was woven by
+hand into its own set of rope modules, which could not be rewritten
+afterwards.  Apollo 11 carried two of these computers: one in the Command
+Module running Comanche 055, one in the Lunar Module running Luminary 099.
+The one that flew the landing left the Moon in Eagle's ascent stage, was cast
+off in lunar orbit and never recovered.  The program survives because its
+listing was kept as a printout.  A single original AGC was restored to working
+order in 2019, and it runs from a rope simulator rather than from flight
+ropes.  For everyone else, an emulator is the way to watch these words
+execute again.
+
 Python provides what the hardware provided: the computer, the vehicle, the
 inertial platform, the landing radar, the DSKY keyboard and the pad load.
 It does not compute the trajectory and it does not decide how to land.  The
